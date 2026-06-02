@@ -1,0 +1,202 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --surface: #ffffff;
+    --surfaceLight: #f8fafc;
+    --border: #e2e8f0;
+    
+    --primary: #6366f1;
+    --primaryDark: #4f46e5;
+    --primaryLight: #818cf8;
+    
+    --accent: #22c55e;
+    --accentDark: #16a34a;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    
+    --textPrimary: #0f172a;
+    --textSecondary: #334155;
+    --textMuted: #64748b;
+  }
+
+  .dark {
+    --background: #0a0a0f;
+    --surface: #13131a;
+    --surfaceLight: #1c1c27;
+    --border: #2a2a3d;
+    
+    --primary: #6366f1;
+    --primaryDark: #4f46e5;
+    --primaryLight: #818cf8;
+    
+    --accent: #22c55e;
+    --accentDark: #16a34a;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    
+    --textPrimary: #f1f5f9;
+    --textSecondary: #94a3b8;
+    --textMuted: #64748b;
+  }
+}
+
+/* ============================================
+   GLOBAL BASE STYLES
+   ============================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', 'Noto Sans Thai', sans-serif;
+  background-color: var(--background);
+  color: var(--textPrimary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   CUSTOM SCROLLBAR
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #13131a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2a3d;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6366f1;
+}
+
+/* ============================================
+   SELECTION
+   ============================================ */
+
+::selection {
+  background: rgba(99, 102, 241, 0.3);
+  color: #f1f5f9;
+}
+
+/* ============================================
+   GLASS CARD UTILITY
+   ============================================ */
+
+.glass-card {
+  background: rgba(19, 19, 26, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(42, 42, 61, 0.6);
+}
+
+/* ============================================
+   GRADIENT TEXT UTILITY
+   ============================================ */
+
+.gradient-text {
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 50%, #22c55e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-primary {
+  background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================
+   SHIMMER LOADING UTILITY
+   ============================================ */
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(42, 42, 61, 0) 0%,
+    rgba(99, 102, 241, 0.08) 50%,
+    rgba(42, 42, 61, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+/* ============================================
+   GLOW BUTTON UTILITY
+   ============================================ */
+
+.btn-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ============================================
+   GRID BACKGROUND PATTERN
+   ============================================ */
+
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(42, 42, 61, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(42, 42, 61, 0.3) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+.thai {
+  font-family: 'Noto Sans Thai', sans-serif;
+}
+
+/* ============================================
+   FOCUS VISIBLE
+   ============================================ */
+
+:focus-visible {
+  outline: 2px solid rgba(99, 102, 241, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ============================================
+   ANIMATIONS — RecentPurchases progress bar
+   ============================================ */
+
+@keyframes progress-bar {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes slide-up-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+

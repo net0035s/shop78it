@@ -1,0 +1,158 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ============================================
+// CATEGORY TABLE
+// ============================================
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  slug      String    @unique
+  icon      String    @default("📦")
+  color     String    @default("#6366f1")
+  sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  products  Product[]
+}
+
+// ============================================
+// PRODUCT TABLE
+// ============================================
+model Product {
+  id            String         @id @default(uuid())
+  name          String
+  description   String
+  price         Float
+  originalPrice Float?
+  image         String
+  category      String // slug string kept for compatibility
+  categoryId    String? // FK → Category
+  categoryRef   Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  stock         Int            @default(0)
+  stockStatus   String // 'in-stock' | 'low-stock' | 'out-of-stock'
+  tags          String
+  isNew         Boolean        @default(false)
+  isFeatured    Boolean        @default(false)
+  deliveryInfo  String?
+  deliveryType  String         @default("auto") // 'auto' | 'manual'
+  digitalStocks DigitalStock[]
+  digitalKeys   DigitalKey[]
+  orderItems    OrderItem[]
+}
+
+// ============================================
+// PRE-LOADED DIGITAL GOODS STOCK (คลังสินค้าดิจิทัล)
+// ============================================
+model DigitalStock {
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type      String // 'ai-credit' | 'login-info' | 'login-link' | 'license-key'
+  content   String // JSON string containing keys/passwords/links details
+  isSold    Boolean @default(false)
+  orderId   String?
+  order     Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
+}
+
+// ============================================
+// DIGITAL KEY TABLE (New Table)
+// ============================================
+model DigitalKey {
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  keyData   String
+  status    String  @default("AVAILABLE") // 'AVAILABLE' | 'SOLD'
+  orderId   String?
+  order     Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// ORDER SUMMARY TABLE
+// ============================================
+model Order {
+  id             String         @id @default(uuid())
+  orderNumber    String         @unique
+  customerName   String
+  customerEmail  String
+  customerPhone  String?
+  total          Float
+  subTotal       Float? // ยอดก่อนลด
+  discountCode   String? // โค้ดส่วนลดที่ใช้
+  discountAmount Float? // จำนวนเงินที่ลด
+  status         String         @default("pending") // 'pending' | 'completed' | 'cancelled'
+  slipUrl        String?
+  internalNote   String?        @db.Text
+  deliveredContent String?      @db.Text
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deliveryItems  DeliveryItem[]
+  claimedStocks  DigitalStock[]
+  digitalKeys    DigitalKey[]
+  orderItems     OrderItem[]
+}
+
+// ============================================
+// ORDER ITEMS (Line Items in Cart)
+// ============================================
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(1)
+  price     Float
+}
+
+// ============================================
+// DELIVERED ITEMS ASSIGNED TO ORDERS
+// ============================================
+model DeliveryItem {
+  id           String  @id @default(uuid())
+  orderId      String
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productName  String
+  type         String // 'ai-credit' | 'login-info' | 'login-link' | 'license-key'
+  // Platform / Code info
+  creditCode   String?
+  creditAmount String?
+  platform     String? // e.g. "ChatGPT", "Claude", "Veo3"
+  // Credentials
+  email        String?
+  password     String?
+  loginUrl     String?
+  // Keys
+  licenseKey   String?
+  expiresAt    String?
+  instructions String?
+}
+
+// ============================================
+// DISCOUNT CODES TABLE
+// ============================================
+model DiscountCode {
+  id                   String    @id @default(uuid())
+  code                 String    @unique
+  discountType         String // 'PERCENT' | 'FIXED'
+  discountValue        Float
+  isActive             Boolean   @default(true)
+  minPurchaseAmount    Float     @default(0)
+  applicableType       String? // null = all, 'auto', 'manual'
+  applicableCategoryId String? // null = all categories
+  maxUses              Int? // null = unlimited
+  usedCount            Int       @default(0)
+  expiresAt            DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
