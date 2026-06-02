@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma, { syncProductStock } from '@/lib/db'
+import { decryptText, encryptText } from '@/lib/encryption'
 
 /**
  * POST /api/admin/stock
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
       dataToInsert.push({
         productId,
         type,
-        content: JSON.stringify(contentObj),
+        content: encryptText(JSON.stringify(contentObj)),
         isSold: false
       })
     }
@@ -127,7 +128,12 @@ export async function GET(request: Request) {
       ]
     })
 
-    return NextResponse.json({ success: true, data: stocks })
+    const decryptedStocks = stocks.map((stock) => ({
+      ...stock,
+      content: decryptText(stock.content),
+    }))
+
+    return NextResponse.json({ success: true, data: decryptedStocks })
   } catch (error) {
     console.error('Error fetching stocks:', error)
     return NextResponse.json({ success: false, error: 'ดึงข้อมูลสต็อกล้มเหลว' }, { status: 500 })
@@ -157,10 +163,14 @@ export async function PUT(request: Request) {
 
     const updated = await prisma.digitalStock.update({
       where: { id },
-      data: { content: JSON.stringify(content) }
+      data: { content: encryptText(JSON.stringify(content)) }
     })
 
-    return NextResponse.json({ success: true, message: 'แก้ไขสต็อกสำเร็จ', data: updated })
+    return NextResponse.json({
+      success: true,
+      message: 'แก้ไขสต็อกสำเร็จ',
+      data: { ...updated, content: decryptText(updated.content) },
+    })
   } catch (error) {
     console.error('Error updating stock:', error)
     return NextResponse.json({ success: false, error: 'แก้ไขสต็อกล้มเหลว' }, { status: 500 })

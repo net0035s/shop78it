@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { generateOrderNumber } from '@/lib/utils'
 import prisma from '@/lib/db'
 import { CartItem, DeliveryItem } from '@/types'
+import { decryptDeliveryItemFields, decryptText } from '@/lib/encryption'
+import { moneyToNumber } from '@/lib/money'
 
 /**
  * Fallback Mock Delivery Item Generator
@@ -65,11 +67,11 @@ function generateMockDeliveryItems(cartItems: CartItem[]): DeliveryItem[] {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { items, customer, total, subTotal, discountCode, discountAmount } = body
+    const { items, customer, discountCode } = body
 
-    if (!Array.isArray(items) || items.length === 0 || !customer || total === undefined) {
+    if (!Array.isArray(items) || items.length === 0 || !customer) {
       return NextResponse.json(
-        { success: false, error: 'กรุณากรอกข้อมูลให้ครบถ้วน (items, customer, total)' },
+        { success: false, error: 'กรุณากรอกข้อมูลให้ครบถ้วน (items, customer)' },
         { status: 400 }
       )
     }
@@ -82,11 +84,7 @@ export async function POST(request: Request) {
     }
 
     const normalizedItems = items.map((item: any) => {
-      const productId = typeof item?.product?.id === 'string'
-        ? item.product.id
-        : typeof item?.productId === 'string'
-        ? item.productId
-        : ''
+      const productId = typeof item?.productId === 'string' ? item.productId : ''
       const quantity = Number(item?.quantity)
 
       return { productId, quantity }
@@ -125,12 +123,13 @@ export async function POST(request: Request) {
         )
       }
 
-      verifiedSubTotal += product.price * item.quantity
+      const productPrice = moneyToNumber(product.price)
+      verifiedSubTotal += productPrice * item.quantity
       verifiedProducts.push(product)
       verifiedOrderItems.push({
         productId: product.id,
         quantity: item.quantity,
-        price: product.price,
+        price: productPrice,
       })
 
       if (product.deliveryType === 'manual') {
@@ -192,9 +191,10 @@ export async function POST(request: Request) {
         )
       }
 
-      if (verifiedSubTotal < discount.minPurchaseAmount) {
+      const minPurchaseAmount = moneyToNumber(discount.minPurchaseAmount)
+      if (verifiedSubTotal < minPurchaseAmount) {
         return NextResponse.json(
-          { success: false, error: `ต้องมียอดสั่งซื้อขั้นต่ำ ${discount.minPurchaseAmount.toLocaleString('th-TH')} บาท` },
+          { success: false, error: `ต้องมียอดสั่งซื้อขั้นต่ำ ${minPurchaseAmount.toLocaleString('th-TH')} บาท` },
           { status: 400 }
         )
       }
@@ -221,10 +221,10 @@ export async function POST(request: Request) {
       }
 
       if (discount.discountType === 'PERCENT') {
-        const percent = Math.min(Math.max(discount.discountValue, 0), 100)
+        const percent = Math.min(Math.max(moneyToNumber(discount.discountValue), 0), 100)
         verifiedDiscountAmount = Math.round(verifiedSubTotal * (percent / 100))
       } else if (discount.discountType === 'FIXED') {
-        verifiedDiscountAmount = Math.min(Math.max(discount.discountValue, 0), verifiedSubTotal)
+        verifiedDiscountAmount = Math.min(Math.max(moneyToNumber(discount.discountValue), 0), verifiedSubTotal)
       } else {
         return NextResponse.json(
           { success: false, error: 'รูปแบบโค้ดส่วนลดไม่ถูกต้อง' },
@@ -267,7 +267,7 @@ export async function POST(request: Request) {
       data: {
         orderNumber,
         status: newOrder.status,
-        total: newOrder.total,
+        total: moneyToNumber(newOrder.total),
         createdAt: newOrder.createdAt.toISOString(),
         message: 'ออเดอร์ถูกสร้างในระบบฐานข้อมูลเรียบร้อย กรุณาชำระเงิน',
       },
@@ -330,8 +330,8 @@ export async function GET(request: Request) {
           id: item.product.id,
           name: item.product.name,
           description: item.product.description,
-          price: item.product.price,
-          originalPrice: item.product.originalPrice ?? undefined,
+          price: moneyToNumber(item.product.price),
+          originalPrice: item.product.originalPrice ? moneyToNumber(item.product.originalPrice) : undefined,
           image: item.product.image,
           category: item.product.category,
           stock: item.product.stock,
@@ -349,11 +349,11 @@ export async function GET(request: Request) {
         email: order.customerEmail,
         phone: order.customerPhone ?? undefined,
       },
-      total: order.total,
+      total: moneyToNumber(order.total),
       status: order.status as any,
-      deliveredContent: order.deliveredContent ?? undefined,
+      deliveredContent: order.deliveredContent ? decryptText(order.deliveredContent) : undefined,
       deliveryItems: [
-        ...order.deliveryItems.map((item: any) => ({
+        ...order.deliveryItems.map((item: any) => decryptDeliveryItemFields({
           type: item.type as any,
           productName: item.productName,
           creditCode: item.creditCode ?? undefined,
@@ -368,7 +368,7 @@ export async function GET(request: Request) {
         })),
         ...order.claimedStocks.map((stock: any) => {
           let parsed: any = {}
-          try { parsed = JSON.parse(stock.content) } catch(e) {}
+          try { parsed = JSON.parse(decryptText(stock.content)) } catch(e) {}
           return {
             type: stock.type || 'login-info',
             productName: stock.product?.name || 'Unknown Product',

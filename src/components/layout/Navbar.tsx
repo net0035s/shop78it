@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ShoppingCart, Zap, Menu, X, Moon, Sun, Globe } from 'lucide-react'
+import { ShoppingCart, Store, Menu, X, Moon, Sun, Globe } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 import { useState, useEffect, useRef } from 'react'
 import { useTheme } from 'next-themes'
@@ -31,20 +31,18 @@ export function Navbar() {
   }, [])
 
   const handleLogoClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    logoClickCountRef.current += 1
+    const nextClickCount = logoClickCountRef.current + 1
+    logoClickCountRef.current = nextClickCount
 
-    if (logoClickCountRef.current === 1) {
+    if (nextClickCount === 1) {
       logoTimerRef.current = setTimeout(() => {
         logoClickCountRef.current = 0
         logoTimerRef.current = null
       }, 3000)
     }
 
-    if (logoClickCountRef.current >= 5) {
+    if (nextClickCount >= 5) {
       event.preventDefault()
-      if (logoTimerRef.current) clearTimeout(logoTimerRef.current)
-      logoTimerRef.current = null
-      logoClickCountRef.current = 0
       router.push('/admin11')
     }
   }
@@ -54,14 +52,14 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-primary-gradient flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/50 transition-shadow">
-              <Zap className="w-4 h-4 text-white" />
+          <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-xl bg-primary-gradient flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/50 transition-all group-hover:scale-105">
+              <Store className="h-[18px] w-[18px] text-white" />
             </div>
-            <span className="font-bold text-lg text-textPrimary">
+            <span className="font-black text-xl tracking-normal text-textPrimary">
               Shop
-              <span className="text-primary">Auto</span>
-              <span className="text-textSecondary text-sm ml-1">24/7</span>
+              <span className="text-primary">78</span>
+              <span className="text-accent">it</span>
             </span>
           </Link>
 

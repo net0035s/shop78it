@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { sendOrderReceiptEmail } from '@/lib/mailer'
+import { decryptDeliveryItemFields, decryptText, encryptText } from '@/lib/encryption'
+import { moneyToNumber, normalizeOrderMoney, normalizeProductMoney } from '@/lib/money'
 
 const VALID_ORDER_STATUSES = ['pending', 'completed', 'needs_manual_delivery', 'cancelled']
 
@@ -35,7 +37,9 @@ export async function PUT(
         ...(customerEmail !== undefined && { customerEmail }),
         ...(status !== undefined && { status }),
         ...(internalNote !== undefined && { internalNote }),
-        ...(deliveredContent !== undefined && { deliveredContent }),
+        ...(deliveredContent !== undefined && {
+          deliveredContent: deliveredContent ? encryptText(deliveredContent) : null,
+        }),
       },
       include: {
         deliveryItems: true,
@@ -47,14 +51,19 @@ export async function PUT(
       },
     })
 
+    const decryptedDeliveredContent = updatedOrder.deliveredContent
+      ? decryptText(updatedOrder.deliveredContent)
+      : null
+    const decryptedDeliveryItems = updatedOrder.deliveryItems.map(decryptDeliveryItemFields)
+
     if (status === 'completed' && sendEmailNotification === true) {
       const emailItems = [
-        ...updatedOrder.deliveryItems,
-        ...(updatedOrder.deliveredContent
+        ...decryptedDeliveryItems,
+        ...(decryptedDeliveredContent
           ? [{
               productName: 'ข้อมูลที่แอดมินจัดส่ง',
               type: 'manual',
-              deliveredContent: updatedOrder.deliveredContent,
+              deliveredContent: decryptedDeliveredContent,
             }]
           : []),
       ]
@@ -73,7 +82,19 @@ export async function PUT(
       ).catch((emailErr) => console.error('Order receipt email failed:', emailErr))
     }
 
-    return NextResponse.json({ success: true, data: updatedOrder })
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...normalizeOrderMoney(updatedOrder),
+        deliveredContent: decryptedDeliveredContent,
+        deliveryItems: decryptedDeliveryItems,
+        orderItems: updatedOrder.orderItems.map((item) => ({
+          ...item,
+          price: moneyToNumber(item.price),
+          product: normalizeProductMoney(item.product),
+        })),
+      },
+    })
   } catch (error: any) {
     console.error('Error updating order:', error)
     return NextResponse.json(

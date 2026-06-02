@@ -33,7 +33,7 @@ export async function syncProductStock(productId: string): Promise<void> {
   })
 
   const newStatus =
-    unsoldCount === 0 ? 'out-of-stock' : unsoldCount <= 3 ? 'low-stock' : 'in-stock'
+    unsoldCount === 0 ? 'out-of-stock' : unsoldCount <= 5 ? 'low-stock' : 'in-stock'
 
   await prisma.product.update({
     where: { id: productId },

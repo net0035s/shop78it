@@ -52,7 +52,13 @@ function CheckoutContent() {
       const response = await fetch('/api/discount/apply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: codeToApply, items, subTotal: getSubTotal() }),
+        body: JSON.stringify({
+          code: codeToApply,
+          items: items.map((item) => ({
+            productId: item.product.id,
+            quantity: item.quantity,
+          })),
+        }),
       })
       const result = await response.json()
 
@@ -99,7 +105,7 @@ function CheckoutContent() {
           <CreditCard className="w-8 h-8 text-textMuted opacity-50" />
         </div>
         <h1 className="text-2xl font-extrabold text-textPrimary tracking-tight">{t('checkout.empty')}</h1>
-        <p className="text-textMuted text-sm mt-2">กรุณาเลือกซื้อสินค้าและเพิ่มลงในตะกร้าก่อนดำเนินการชำrateเงิน</p>
+        <p className="text-textMuted text-sm mt-2">กรุณาเลือกซื้อสินค้าและเพิ่มลงในตะกร้าก่อนดำเนินการชำระเงิน</p>
         <div className="mt-8">
           <Link
             href="/#products"
@@ -124,12 +130,12 @@ function CheckoutContent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          items,
+          items: items.map((item) => ({
+            productId: item.product.id,
+            quantity: item.quantity,
+          })),
           customer: formData,
-          total: totalAmount,
-          subTotal: subtotal,
           discountCode: discount?.code || null,
-          discountAmount: discountAmount || 0,
         }),
       })
 
@@ -140,7 +146,7 @@ function CheckoutContent() {
           orderNumber: result.data.orderNumber,
           items,
           customer: formData,
-          total: totalAmount,
+          total: result.data.total,
           status: 'pending',
           createdAt: result.data.createdAt,
         }

@@ -8,6 +8,8 @@ import { formatPrice } from '@/lib/products'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
+const LINE_URL = process.env.NEXT_PUBLIC_LINE_URL || '#'
+
 export default function TrackOrderPage() {
   const router = useRouter()
   const [orderNumber, setOrderNumber] = useState('')
@@ -247,7 +249,7 @@ export default function TrackOrderPage() {
                       <div className="text-sm text-textSecondary leading-relaxed">
                         สินค้าชิ้นนี้ต้องดำเนินการโดยแอดมิน โปรดติดต่อและส่งหมายเลขออเดอร์ไปที่ Line OA เพื่อดำเนินการต่อ
                         <div className="mt-3">
-                          <a href="https://lin.ee/your-line-id" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-[#00B900] text-white text-xs font-bold">
+                          <a href={LINE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-[#00B900] text-white text-xs font-bold">
                             ติดต่อ Line OA
                           </a>
                         </div>

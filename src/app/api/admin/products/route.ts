@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { normalizeProductMoney } from '@/lib/money'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,7 +26,7 @@ export async function GET() {
     })
 
     const products = rawProducts.map(p => ({
-      ...p,
+      ...normalizeProductMoney(p),
       stock: p._count?.digitalStocks || 0
     }))
 
@@ -85,7 +86,7 @@ export async function POST(request: Request) {
       },
     })
 
-    return NextResponse.json({ success: true, data: newProduct })
+    return NextResponse.json({ success: true, data: normalizeProductMoney(newProduct) })
   } catch (error) {
     console.error('Error creating admin product:', error)
     return NextResponse.json(
@@ -141,7 +142,7 @@ export async function PUT(request: Request) {
       },
     })
 
-    return NextResponse.json({ success: true, data: updatedProduct })
+    return NextResponse.json({ success: true, data: normalizeProductMoney(updatedProduct) })
   } catch (error) {
     console.error('Error updating admin product:', error)
     return NextResponse.json(

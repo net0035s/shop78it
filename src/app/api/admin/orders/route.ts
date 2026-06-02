@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { decryptDeliveryItemFields, decryptText } from '@/lib/encryption'
+import { normalizeOrderMoney } from '@/lib/money'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,7 +27,13 @@ export async function GET(request: Request) {
       skip: (page - 1) * limit,
       take: limit,
     })
-    return NextResponse.json({ success: true, data: orders })
+    const decryptedOrders = orders.map((order) => ({
+      ...normalizeOrderMoney(order),
+      deliveredContent: order.deliveredContent ? decryptText(order.deliveredContent) : order.deliveredContent,
+      deliveryItems: order.deliveryItems.map(decryptDeliveryItemFields),
+    }))
+
+    return NextResponse.json({ success: true, data: decryptedOrders })
   } catch (error) {
     console.error('Error fetching admin orders:', error)
     return NextResponse.json(
@@ -63,7 +71,15 @@ export async function PUT(request: Request) {
       data: { status },
     })
 
-    return NextResponse.json({ success: true, data: updatedOrder })
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...normalizeOrderMoney(updatedOrder),
+        deliveredContent: updatedOrder.deliveredContent
+          ? decryptText(updatedOrder.deliveredContent)
+          : updatedOrder.deliveredContent,
+      },
+    })
   } catch (error) {
     console.error('Error updating admin order:', error)
     return NextResponse.json(

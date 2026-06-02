@@ -1,25 +1,22 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { moneyToNumber } from '@/lib/money'
 
 function normalizeCode(code: unknown) {
   return typeof code === 'string' ? code.trim().toUpperCase() : ''
 }
 
-function getCartSubTotal(items: any[]) {
-  return items.reduce((sum, item) => {
-    const price = Number(item?.product?.price ?? 0)
-    const quantity = Number(item?.quantity ?? 0)
-    return sum + (Number.isFinite(price) && Number.isFinite(quantity) ? price * quantity : 0)
-  }, 0)
+function normalizeItems(items: any[]) {
+  return items.map((item) => ({
+    productId: typeof item?.productId === 'string' ? item.productId : '',
+    quantity: Number(item?.quantity),
+  }))
 }
 
-function hasMatchingItem(items: any[], discount: any, categorySlug?: string | null) {
+function hasMatchingProduct(products: any[], discount: any, categorySlug?: string | null) {
   if (!discount.applicableType && !discount.applicableCategoryId) return true
 
-  return items.some((item) => {
-    const product = item?.product
-    if (!product) return false
-
+  return products.some((product) => {
     const typeMatches = !discount.applicableType || product.deliveryType === discount.applicableType
     const categoryMatches =
       !discount.applicableCategoryId ||
@@ -36,7 +33,7 @@ export async function POST(request: Request) {
     const body = await request.json()
     const normalizedCode = normalizeCode(body.code)
     const items = Array.isArray(body.items) ? body.items : []
-    const subTotal = Number.isFinite(Number(body.subTotal)) ? Number(body.subTotal) : getCartSubTotal(items)
+    const normalizedItems = normalizeItems(items)
 
     if (!normalizedCode) {
       return NextResponse.json(
@@ -45,12 +42,32 @@ export async function POST(request: Request) {
       )
     }
 
-    if (!Array.isArray(items) || items.length === 0 || subTotal <= 0) {
+    if (
+      normalizedItems.length === 0 ||
+      normalizedItems.some((item) => !item.productId || !Number.isInteger(item.quantity) || item.quantity <= 0)
+    ) {
       return NextResponse.json(
         { success: false, error: 'ไม่พบสินค้าในตะกร้า' },
         { status: 400 }
       )
     }
+
+    const products = await prisma.product.findMany({
+      where: { id: { in: normalizedItems.map((item) => item.productId) } },
+    })
+
+    if (products.length !== new Set(normalizedItems.map((item) => item.productId)).size) {
+      return NextResponse.json(
+        { success: false, error: 'รายการสินค้าไม่ถูกต้อง' },
+        { status: 400 }
+      )
+    }
+
+    const productById = new Map(products.map((product) => [product.id, product]))
+    const subTotal = normalizedItems.reduce((sum, item) => {
+      const product = productById.get(item.productId)
+      return sum + (product ? moneyToNumber(product.price) * item.quantity : 0)
+    }, 0)
 
     const discountCode = await prisma.discountCode.findUnique({
       where: { code: normalizedCode },
@@ -84,9 +101,10 @@ export async function POST(request: Request) {
       )
     }
 
-    if (subTotal < discountCode.minPurchaseAmount) {
+    const minPurchaseAmount = moneyToNumber(discountCode.minPurchaseAmount)
+    if (subTotal < minPurchaseAmount) {
       return NextResponse.json(
-        { success: false, error: `ต้องมียอดสั่งซื้อขั้นต่ำ ${discountCode.minPurchaseAmount.toLocaleString('th-TH')} บาท` },
+        { success: false, error: `ต้องมียอดสั่งซื้อขั้นต่ำ ${minPurchaseAmount.toLocaleString('th-TH')} บาท` },
         { status: 400 }
       )
     }
@@ -95,7 +113,7 @@ export async function POST(request: Request) {
       ? await prisma.category.findUnique({ where: { id: discountCode.applicableCategoryId } })
       : null
 
-    if (!hasMatchingItem(items, discountCode, category?.slug)) {
+    if (!hasMatchingProduct(products, discountCode, category?.slug)) {
       return NextResponse.json(
         { success: false, error: 'คูปองนี้ใช้ไม่ได้กับสินค้าในตะกร้า' },
         { status: 400 }
@@ -114,8 +132,8 @@ export async function POST(request: Request) {
       data: {
         code: discountCode.code,
         type: discountCode.discountType,
-        value: discountCode.discountValue,
-        minPurchaseAmount: discountCode.minPurchaseAmount,
+        value: moneyToNumber(discountCode.discountValue),
+        minPurchaseAmount,
       },
     })
   } catch (error) {

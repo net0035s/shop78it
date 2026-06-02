@@ -19,17 +19,19 @@ export default function PaymentQR({ amount, orderNumber, onConfirm, isLoading = 
 
   // Timer Countdown Effect
   useEffect(() => {
-    if (timeLeft <= 0) {
-      setTimerExpired(true)
-      return
-    }
-
     const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1)
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          setTimerExpired(true)
+          return 0
+        }
+
+        return prev - 1
+      })
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [timeLeft])
+  }, [])
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)

@@ -1,46 +1,58 @@
-import { clerkClient, clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
 
-// กำหนดว่า path ไหนบ้างที่ต้องโดนล็อก
-const isProtectedRoute = createRouteMatcher(["/admin11(.*)", "/api/admin(.*)"]);
-const isAdminApiRoute = createRouteMatcher(["/api/admin(.*)"]);
+const isAdminRoute = createRouteMatcher(['/admin11(.*)', '/api/admin(.*)'])
+const isAdminApiRoute = createRouteMatcher(['/api/admin(.*)'])
+
+function getAdminEmails() {
+  return (process.env.ADMIN_EMAILS || '')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean)
+}
+
+function getEmailFromClaims(sessionClaims: any) {
+  const possibleEmail =
+    sessionClaims?.email ||
+    sessionClaims?.primary_email ||
+    sessionClaims?.primaryEmail ||
+    sessionClaims?.primaryEmailAddress ||
+    sessionClaims?.publicMetadata?.email ||
+    sessionClaims?.metadata?.email
+
+  return typeof possibleEmail === 'string' ? possibleEmail.trim().toLowerCase() : ''
+}
 
 export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
-    // ดึงข้อมูล User ออกมาเช็ค
-    const { userId } = await auth(); 
-    
-    if (!userId) {
-      if (isAdminApiRoute(req)) {
-        return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-      }
+  if (!isAdminRoute(req)) return
 
-      // ถ้าไม่มี userId (ยังไม่ล็อกอิน) ให้เตะไปหน้า Sign-in
-      const signInUrl = new URL('/sign-in', req.url);
-      return NextResponse.redirect(signInUrl);
-    }
+  const { userId, sessionClaims } = await auth()
 
+  if (!userId) {
     if (isAdminApiRoute(req)) {
-      const client = await clerkClient();
-      const user = await client.users.getUser(userId);
-      const userEmail = user.emailAddresses[0]?.emailAddress?.trim().toLowerCase();
-      const adminEmails = (process.env.ADMIN_EMAILS || "")
-        .split(",")
-        .map((email) => email.trim().toLowerCase())
-        .filter(Boolean);
-
-      if (!userEmail || !adminEmails.includes(userEmail)) {
-        return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
-      }
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
+
+    const signInUrl = new URL('/sign-in', req.url)
+    return NextResponse.redirect(signInUrl)
   }
-});
+
+  const adminEmails = getAdminEmails()
+  const userEmail = getEmailFromClaims(sessionClaims)
+  const isAdmin = Boolean(userEmail && adminEmails.includes(userEmail))
+
+  if (!isAdmin) {
+    if (isAdminApiRoute(req)) {
+      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
+    }
+
+    return NextResponse.redirect(new URL('/', req.url))
+  }
+})
 
 export const config = {
   matcher: [
-    // ข้ามไฟล์ระบบและไฟล์ static ต่างๆ
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // ให้ทำงานเสมอสำหรับ API routes
     '/(api|trpc)(.*)',
   ],
-};
+}

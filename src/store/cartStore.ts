@@ -27,7 +27,7 @@ interface CartStore {
   removeDiscount: () => void
   clearDiscountRemovalReason: () => void
 
-  // Computed
+  // Computed for UI preview only. The real order total is recalculated on the server.
   getSubTotal: () => number
   getDiscountAmount: () => number
   getTotal: () => number

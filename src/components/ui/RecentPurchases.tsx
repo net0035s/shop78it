@@ -10,14 +10,6 @@ interface RecentOrder {
   timeAgo: string
 }
 
-const MOCK_ORDERS: RecentOrder[] = [
-  { id: 'mock-1', maskedName: 'ส***ย', productName: 'ChatGPT Pro', timeAgo: '5 นาทีที่แล้ว' },
-  { id: 'mock-2', maskedName: 'J***n', productName: 'Claude Pro', timeAgo: '12 นาทีที่แล้ว' },
-  { id: 'mock-3', maskedName: 'ม***น', productName: 'Google Veo 3 Pro', timeAgo: '18 นาทีที่แล้ว' },
-  { id: 'mock-4', maskedName: 'A***a', productName: 'Midjourney Pro', timeAgo: '24 นาทีที่แล้ว' },
-  { id: 'mock-5', maskedName: 'ภ***ร', productName: 'Canva Pro', timeAgo: '31 นาทีที่แล้ว' },
-]
-
 function getRandomDelay() {
   return 15000 + Math.floor(Math.random() * 15000)
 }
@@ -61,14 +53,18 @@ export function RecentPurchases() {
       .then((res) => res.json())
       .then((result) => {
         if (!alive) return
-        const realOrders = result.success && result.data?.length > 0 ? result.data : MOCK_ORDERS
+        const realOrders = result.success && Array.isArray(result.data) ? result.data : []
+        if (realOrders.length === 0) {
+          setOrders([])
+          return
+        }
+
         setOrders(realOrders)
         showTimerRef.current = setTimeout(() => showNext(realOrders), 4000)
       })
       .catch(() => {
         if (!alive) return
-        setOrders(MOCK_ORDERS)
-        showTimerRef.current = setTimeout(() => showNext(MOCK_ORDERS), 4000)
+        setOrders([])
       })
 
     return () => {

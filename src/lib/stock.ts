@@ -2,13 +2,13 @@ import { StockStatus } from '@/types'
 
 /**
  * คำนวณสถานะสต็อกจากจำนวนสินค้า
- * - > 10  → 'in-stock'   (พร้อมส่ง)
- * - 1–10  → 'low-stock'  (ใกล้หมด)
+ * - > 5   → 'in-stock'   (พร้อมส่ง)
+ * - 1–5   → 'low-stock'  (ใกล้หมด)
  * - 0     → 'out-of-stock' (หมด)
  */
 export function getStockStatus(stock: number): StockStatus {
   if (stock <= 0) return 'out-of-stock'
-  if (stock <= 10) return 'low-stock'
+  if (stock <= 5) return 'low-stock'
   return 'in-stock'
 }
 

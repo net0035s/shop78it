@@ -3,6 +3,11 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
+  if (process.env.NODE_ENV === 'production') {
+    console.error('Refusing to clear database while NODE_ENV is production.')
+    process.exit(1)
+  }
+
   console.log('Starting database cleanup...')
 
   const deliveryItems = await prisma.deliveryItem.deleteMany({})

@@ -16,7 +16,7 @@ type EmailDeliveryItem = {
   deliveredContent?: string | null
 }
 
-const LINE_OA_TEXT = '[ใส่ลิงก์หรือไอดี LINE OA ของคุณที่นี่]'
+const LINE_OA_TEXT = process.env.NEXT_PUBLIC_LINE_URL || '#'
 
 function escapeHtml(value: unknown): string {
   return String(value ?? '')

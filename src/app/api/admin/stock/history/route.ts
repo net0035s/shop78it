@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { decryptText } from '@/lib/encryption'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,8 +32,13 @@ export async function GET(request: Request) {
       prisma.digitalStock.count(),
     ])
 
+    const decryptedStocks = stocks.map((stock) => ({
+      ...stock,
+      content: decryptText(stock.content),
+    }))
+
     return NextResponse.json({
-      stocks,
+      stocks: decryptedStocks,
       total,
       page,
       limit,

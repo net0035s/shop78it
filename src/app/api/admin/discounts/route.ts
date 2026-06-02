@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { normalizeDiscountMoney } from '@/lib/money'
 
 function normalizeCode(code: unknown) {
   return typeof code === 'string' ? code.trim().toUpperCase() : ''
@@ -45,7 +46,7 @@ export async function GET() {
     const discounts = await prisma.discountCode.findMany({
       orderBy: { createdAt: 'desc' },
     })
-    return NextResponse.json({ success: true, data: discounts })
+    return NextResponse.json({ success: true, data: discounts.map(normalizeDiscountMoney) })
   } catch (error) {
     console.error('Error fetching discounts:', error)
     return NextResponse.json({ success: false, error: 'ไม่สามารถดึงข้อมูลคูปองได้' }, { status: 500 })
@@ -62,7 +63,7 @@ export async function POST(request: Request) {
     }
 
     const created = await prisma.discountCode.create({ data })
-    return NextResponse.json({ success: true, data: created })
+    return NextResponse.json({ success: true, data: normalizeDiscountMoney(created) })
   } catch (error: any) {
     console.error('Error creating discount:', error)
     if (error?.code === 'P2002') {
@@ -86,7 +87,7 @@ export async function PUT(request: Request) {
       where: { id },
       data,
     })
-    return NextResponse.json({ success: true, data: updated })
+    return NextResponse.json({ success: true, data: normalizeDiscountMoney(updated) })
   } catch (error: any) {
     console.error('Error updating discount:', error)
     if (error?.code === 'P2002') {

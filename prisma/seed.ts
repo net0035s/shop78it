@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { encryptText } from '../src/lib/encryption'
 
 const prisma = new PrismaClient()
 
@@ -80,10 +81,11 @@ async function main() {
     const numKeys = Math.floor(Math.random() * 3) + 3 // สุ่ม 3-5 คีย์
     const keys = Array.from({ length: numKeys }).map((_, i) => ({
       productId: createdProduct.id,
-      keyData: JSON.stringify({
-        email: `guest${i + 1}_${Math.floor(Math.random() * 1000)}@shopauto.com`,
-        password: `PASS_${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-      }),
+      keyData: encryptText(JSON.stringify({
+        sampleKey: `sample-key-${i + 1}`,
+        email: `sample-user-${i + 1}@example.com`,
+        password: 'password-hidden',
+      })),
       status: 'AVAILABLE'
     }))
 

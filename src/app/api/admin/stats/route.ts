@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { moneyToNumber, normalizeOrderMoney, normalizeProductMoney } from '@/lib/money'
 
 export const dynamic = 'force-dynamic'
 
-function sumValue(value: number | null | undefined): number {
-  return value ?? 0
+function sumValue(value: unknown): number {
+  return moneyToNumber(value)
 }
 
 /**
@@ -120,10 +121,10 @@ export async function GET() {
 
     const lowStockProducts = allProducts
       .map((product: any) => ({
-        ...product,
+        ...normalizeProductMoney(product),
         unsoldCount: unsoldCountByProductId.get(product.id) ?? 0,
       }))
-      .filter((product: any) => product.unsoldCount <= 3)
+      .filter((product: any) => product.unsoldCount <= 5)
       .sort((a: any, b: any) => a.unsoldCount - b.unsoldCount)
 
     return NextResponse.json({
@@ -137,7 +138,7 @@ export async function GET() {
         completedOrders,
         lowStockProducts,
         last7Days: last7DaysRaw,
-        recentOrders,
+        recentOrders: recentOrders.map(normalizeOrderMoney),
       },
     })
   } catch (error) {

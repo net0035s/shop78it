@@ -3,7 +3,7 @@
 import { MessageCircle } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
-const CHAT_URL = 'https://lin.ee/YOUR_LINK'
+const CHAT_URL = process.env.NEXT_PUBLIC_LINE_URL || '#'
 const BUTTON_SIZE = 56
 const EDGE_PADDING = 8
 const SNAP_PADDING = 24

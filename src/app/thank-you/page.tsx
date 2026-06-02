@@ -2,17 +2,20 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckCircle2, Copy, Check, Download, ShoppingBag, ArrowRight, ExternalLink, Key, Mail, ShieldAlert, Cpu, Clock } from 'lucide-react'
+import { CheckCircle2, Copy, Check, Download, ShoppingBag, ArrowRight, ExternalLink, Key, Mail, ShieldAlert, Cpu, Clock, Eye, EyeOff } from 'lucide-react'
 import { useOrderStore } from '@/store/orderStore'
 import { formatPrice } from '@/lib/products'
 import { formatDateWithTime } from '@/lib/utils'
 import Link from 'next/link'
+
+const LINE_URL = process.env.NEXT_PUBLIC_LINE_URL || '#'
 
 export default function ThankYouPage() {
   const router = useRouter()
   const { currentOrder, clearOrder, setOrder } = useOrderStore()
   const [mounted, setMounted] = useState(false)
   const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>({})
+  const [visiblePasswords, setVisiblePasswords] = useState<{ [key: string]: boolean }>({})
 
   useEffect(() => {
     setMounted(true)
@@ -312,12 +315,28 @@ export default function ThankYouPage() {
                             <label className="block text-[10px] text-textMuted font-bold uppercase tracking-wider mb-1.5">รหัสผ่าน (Password)</label>
                             <div className="flex gap-2">
                               <input
-                                type="text"
+                                type={visiblePasswords[`${itemUniqueId}-pass`] ? 'text' : 'password'}
                                 readOnly
                                 value={item.password}
                                 className="flex-1 px-4 py-2.5 bg-surfaceLight border border-border rounded-xl text-xs sm:text-sm font-mono font-bold text-textPrimary focus:outline-none"
                               />
                               <button
+                                type="button"
+                                onClick={() => setVisiblePasswords(prev => ({
+                                  ...prev,
+                                  [`${itemUniqueId}-pass`]: !prev[`${itemUniqueId}-pass`],
+                                }))}
+                                className="p-2.5 bg-surfaceLight hover:bg-surfaceLight/80 border border-border rounded-xl flex items-center justify-center text-textPrimary transition-all shrink-0 active:scale-95"
+                                aria-label={visiblePasswords[`${itemUniqueId}-pass`] ? 'Hide password' : 'Show password'}
+                              >
+                                {visiblePasswords[`${itemUniqueId}-pass`] ? (
+                                  <EyeOff className="w-4 h-4" />
+                                ) : (
+                                  <Eye className="w-4 h-4" />
+                                )}
+                              </button>
+                              <button
+                                type="button"
                                 onClick={() => handleCopy(item.password || '', `${itemUniqueId}-pass`)}
                                 className="p-2.5 bg-surfaceLight hover:bg-surfaceLight/80 border border-border rounded-xl flex items-center justify-center text-textPrimary transition-all shrink-0 active:scale-95"
                               >
@@ -472,7 +491,7 @@ export default function ThankYouPage() {
               {/* Contact Button */}
               {currentOrder.status !== 'completed' && (
                 <div className="text-center mt-6">
-                  <a href="https://lin.ee/your-line-id" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#00B900] text-white font-bold text-sm tracking-wide shadow-md shadow-[#00B900]/20 hover:opacity-90 active:scale-95 transition-all">
+                  <a href={LINE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#00B900] text-white font-bold text-sm tracking-wide shadow-md shadow-[#00B900]/20 hover:opacity-90 active:scale-95 transition-all">
                     💬 ติดต่อสอบถามแอดมิน (Line OA)
                   </a>
                 </div>

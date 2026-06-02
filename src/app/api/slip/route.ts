@@ -4,6 +4,8 @@ import prisma, { syncProductStock } from '@/lib/db'
 import { CartItem } from '@/types'
 import { sendTelegramNotify } from '@/lib/telegram'
 import { sendOrderReceiptEmail } from '@/lib/mailer'
+import { decryptDeliveryItemFields, decryptText, encryptDeliveryItemFields } from '@/lib/encryption'
+import { moneyToNumber, normalizeProductMoney } from '@/lib/money'
 
 /**
  * POST /api/slip
@@ -61,7 +63,7 @@ export async function POST(request: Request) {
     // ห้ามเชื่อ cartItems จาก client เพราะลูกค้าสามารถแก้ข้อมูลฝั่งตัวเองได้
     const cartItems: CartItem[] = (order as any).orderItems.map((orderItem: any) => ({
       product: {
-        ...orderItem.product,
+        ...normalizeProductMoney(orderItem.product),
         stockStatus: orderItem.product.stockStatus as any,
         category: orderItem.product.category as any,
         deliveryType: orderItem.product.deliveryType === 'manual' ? 'manual' : 'auto',
@@ -127,7 +129,7 @@ export async function POST(request: Request) {
 
         unusedKeys.forEach((stockItem: any) => {
           try {
-            const content = JSON.parse(stockItem.content)
+            const content = JSON.parse(decryptText(stockItem.content))
             deliveryItemsToSave.push({
               productName: item.product.name,
               type: stockItem.type,
@@ -172,7 +174,7 @@ export async function POST(request: Request) {
         status: finalStatus,
         slipUrl: slipFile.name || 'slip_paid.png',
         deliveryItems: {
-          create: deliveryItemsToSave,
+          create: deliveryItemsToSave.map(encryptDeliveryItemFields),
         },
       },
     })
@@ -193,8 +195,9 @@ export async function POST(request: Request) {
     })
 
     if (completedOrder) {
-      const emailItems = (completedOrder as any).deliveryItems.length > 0
-        ? (completedOrder as any).deliveryItems
+      const decryptedDeliveryItems = (completedOrder as any).deliveryItems.map(decryptDeliveryItemFields)
+      const emailItems = decryptedDeliveryItems.length > 0
+        ? decryptedDeliveryItems
         : cartItems.map((item) => ({
             productName: item.product.name,
             type: item.product.deliveryType === 'manual' ? 'manual' : 'order-item',
@@ -217,7 +220,7 @@ export async function POST(request: Request) {
         const orderNo = (completedOrder as any).orderNumber
         const customerName = (completedOrder as any).customerName
         const customerEmail = (completedOrder as any).customerEmail
-        const total = (completedOrder as any).total
+        const total = moneyToNumber((completedOrder as any).total)
         const timeTh = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
 
         const manualList = manualItems.map(i => `  • ${i.product.name} x${i.quantity}`).join('\n')
@@ -248,9 +251,9 @@ export async function POST(request: Request) {
         email: (completedOrder as any).customerEmail,
         phone: (completedOrder as any).customerPhone ?? undefined,
       },
-      total: (completedOrder as any).total,
+      total: moneyToNumber((completedOrder as any).total),
       status: finalStatus,
-      deliveryItems: (completedOrder as any).deliveryItems,
+      deliveryItems: (completedOrder as any).deliveryItems.map(decryptDeliveryItemFields),
       createdAt: (completedOrder as any).createdAt.toISOString(),
     }
 
@@ -262,7 +265,7 @@ export async function POST(request: Request) {
         order: orderSummary,
         slipDetails: {
           senderName: 'นาย สมเกียรติ ยิ่งยืน',
-          amount: (completedOrder as any).total,
+          amount: moneyToNumber((completedOrder as any).total),
           transTime: new Date().toISOString(),
           refCode: `REF-${Math.floor(100000000 + Math.random() * 900000000)}`,
         },

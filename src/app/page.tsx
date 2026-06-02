@@ -1,9 +1,10 @@
 import prisma from '@/lib/db'
 import { ProductGrid } from '@/components/product/ProductGrid'
-import { ArrowRight, Zap, Shield, Clock, Star } from 'lucide-react'
+import { ArrowRight, Zap, ShieldCheck, Clock, Star } from 'lucide-react'
 import Link from 'next/link'
 import { Translate } from '@/components/Translate'
 import type { Product } from '@/types'
+import { moneyToNumber } from '@/lib/money'
 
 // Disable SSR for this component — it reads localStorage and uses browser-only APIs
 export const dynamic = 'force-dynamic'
@@ -25,8 +26,6 @@ export default async function StorefrontPage() {
   })
 
   // Debug: ตรวจสอบค่าที่ดึงมาใน Terminal
-  console.log("Debug Stock:", rawProducts.map(p => ({ name: (p as any).name, count: p._count })))
-
   // คำนวณสต๊อกจากจำนวน DigitalStock ที่ยังพร้อมส่ง (isSold = false)
   const products: Product[] = rawProducts.map(p => {
     const currentStock = p._count?.digitalStocks || 0
@@ -35,7 +34,8 @@ export default async function StorefrontPage() {
 
     return {
       ...p,
-      originalPrice: p.originalPrice ?? undefined,
+      price: moneyToNumber(p.price),
+      originalPrice: p.originalPrice ? moneyToNumber(p.originalPrice) : undefined,
       tags: p.tags ?? undefined,
       deliveryInfo: p.deliveryInfo ?? undefined,
       deliveryType: p.deliveryType === 'manual' ? 'manual' : 'auto',
@@ -44,16 +44,16 @@ export default async function StorefrontPage() {
     }
   })
   
-  const featuredCount = products.filter((p: any) => p.isFeatured).length
-  const inStockCount = products.filter((p: any) => p.stockStatus !== 'out-of-stock').length
-
   // ดึงหมวดหมู่จาก API (จะแสดงเป็น Filter Bar บนหน้าร้านค้า)
   let categories: any[] = []
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-    const catRes = await fetch(`${baseUrl}/api/admin/categories`, { cache: 'no-store' })
-    const catData = await catRes.json()
-    if (catData.success) categories = catData.data
+    categories = await prisma.category.findMany({
+      where: { isActive: true },
+      orderBy: [
+        { sortOrder: 'asc' },
+        { name: 'asc' },
+      ],
+    })
   } catch {
     // Fallback: ใช้หมวดหมู่เริ่มต้น
     categories = [
@@ -121,8 +121,8 @@ export default async function StorefrontPage() {
             {/* Stats */}
             <div className="flex flex-wrap gap-6 mt-14 animate-slide-up" style={{ animationDelay: '0.4s' }}>
               {[
-                { icon: Star, value: `${featuredCount}+`, label: 'hero.feature1', color: 'text-amber-400' },
-                { icon: Zap, value: `${inStockCount}`, label: 'hero.feature2', color: 'text-accent' },
+                { icon: Star, value: '500+', label: 'hero.feature1', color: 'text-amber-400' },
+                { icon: ShieldCheck, value: '100%', label: 'hero.feature2', color: 'text-emerald-400' },
                 { icon: Clock, value: '24/7', label: 'hero.feature3', color: 'text-primary' },
               ].map(({ icon: Icon, value, label, color }) => (
                 <div key={label} className="flex items-center gap-3">
@@ -148,9 +148,9 @@ export default async function StorefrontPage() {
           <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
             {[
               { icon: Zap, text: 'ส่งสินค้าทันที' },
-              { icon: Shield, text: 'ชำระเงินปลอดภัย' },
-              { icon: Clock, text: 'บริการ 24/7' },
-              { icon: Star, text: 'ลูกค้าพึงพอใจ 100%' },
+              { icon: ShieldCheck, text: 'ชำระเงินปลอดภัย' },
+              { icon: Clock, text: 'บริการ 24 ชม.' },
+              { icon: Star, text: 'มีบริการหลังการขาย' },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-2 text-textMuted text-sm">
                 <Icon className="w-4 h-4 text-primary" />

@@ -1,5 +1,7 @@
-import { Zap, Shield, Clock, MessageCircle } from 'lucide-react'
+import { Store, Zap, Shield, Clock, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
+
+const LINE_URL = process.env.NEXT_PUBLIC_LINE_URL || '#'
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -12,11 +14,10 @@ export function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-primary-gradient flex items-center justify-center shadow-lg shadow-primary/25">
-                <Zap className="w-4 h-4 text-white" />
+                <Store className="w-4 h-4 text-white" />
               </div>
-              <span className="font-bold text-lg text-textPrimary">
-                Shop<span className="text-primary">Auto</span>
-                <span className="text-textSecondary text-sm ml-1">24/7</span>
+              <span className="font-black text-lg text-textPrimary">
+                Shop<span className="text-primary">78</span><span className="text-accent">it</span>
               </span>
             </div>
             <p className="text-textMuted text-sm leading-relaxed">
@@ -52,7 +53,7 @@ export function Footer() {
                 { href: '/cart', label: 'ตะกร้าสินค้า' },
                 { href: '/checkout', label: 'ชำระเงิน' },
                 { href: '/slip-verify', label: 'ตรวจสอบสลิป' },
-              ].map((item) => (
+              ].filter((item) => item.href !== '/slip-verify').map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
@@ -72,11 +73,13 @@ export function Footer() {
             </h3>
             <div className="space-y-3">
               <a
-                href="#"
+                href={LINE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-2 text-sm text-textMuted hover:text-primary transition-colors group"
               >
                 <MessageCircle className="w-4 h-4 text-green-400 group-hover:scale-110 transition-transform" />
-                LINE: @shopauto247
+                LINE: @shop78it
               </a>
               <p className="text-xs text-textMuted bg-surfaceLight rounded-lg p-3 border border-border/50">
                 💡 ระบบตอบอัตโนมัติตลอด 24/7
@@ -101,7 +104,7 @@ export function Footer() {
             </Link>
           </div>
           <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
-          <p>© {currentYear} ShopAuto 24/7. All rights reserved.</p>
+          <p>© {currentYear} Shop78it. All rights reserved.</p>
           <p>Made with ❤️ for automated commerce</p>
           </div>
         </div>

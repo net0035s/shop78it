@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "clear-db": "npx tsx scripts/clear-db.ts",
+    "encrypt-existing-secrets": "npx tsx scripts/encrypt-existing-secrets.ts",
     "lint": "next lint",
     "postinstall": "prisma generate"
   },
