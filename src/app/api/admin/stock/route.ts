@@ -4,8 +4,8 @@ import { decryptText, encryptText } from '@/lib/encryption'
 
 /**
  * POST /api/admin/stock
- * เติมสต็อกข้อมูลสินค้าดิจิทัล (Bulk Refill)
- * หลังเพิ่มแล้วจะเรียก syncProductStock() เพื่อคำนวณสต็อกอัตโนมัติ (Single Source of Truth)
+ * เติมสต็อกสินค้าดิจิทัลแบบหลายรายการ
+ * หลังเพิ่มแล้วจะ sync จำนวนสต็อกจาก DigitalStock ที่ยังไม่ขายจริง
  */
 export async function POST(request: Request) {
   try {
@@ -21,30 +21,31 @@ export async function POST(request: Request) {
 
     const product = await prisma.product.findUnique({ where: { id: productId } })
     if (!product) {
-      return NextResponse.json({ success: false, error: 'ไม่พบสินค้าที่จะเติมสต็อก' }, { status: 404 })
+      return NextResponse.json(
+        { success: false, error: 'ไม่พบสินค้าที่จะเติมสต็อก' },
+        { status: 404 }
+      )
     }
 
-    const lines = (bulkData as string)
+    const lines = String(bulkData)
       .split('\n')
-      .map((line: string) => line.trim())
-      .filter((line: string) => line.length > 0)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
 
     if (lines.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'ไม่พบข้อมูลคีย์หรือรหัสที่กรอก (กรุณาป้อนอย่างน้อย 1 บรรทัด)' },
+        { success: false, error: 'ไม่พบข้อมูลคีย์หรือรหัสที่กรอก กรุณาป้อนอย่างน้อย 1 บรรทัด' },
         { status: 400 }
       )
     }
 
-    const dataToInsert = []
-
-    for (const line of lines) {
-      let contentObj: any = {}
+    const dataToInsert = lines.map((line) => {
+      let contentObj: Record<string, string> = {}
 
       if (type === 'license-key') {
         contentObj = {
           licenseKey: line,
-          instructions: instructions || 'เปิดใช้สิทธิ์คีย์ตามคำแนะนำของทางร้าน',
+          instructions: instructions || 'เปิดใช้งานคีย์ตามคำแนะนำของทางร้าน',
           expiresAt: 'ไม่มีวันหมดอายุ',
         }
       } else if (type === 'login-info') {
@@ -53,17 +54,17 @@ export async function POST(request: Request) {
           email: parts[0]?.trim() || line,
           password: parts[1]?.trim() || 'Password123!',
           loginUrl: parts[2]?.trim() || 'https://www.google.com',
-          expiresAt: 'รับประกัน 30 วันนับจากวันซื้อ',
+          expiresAt: 'รับประกัน 30 วันนับจากวันที่ซื้อ',
           instructions: instructions || 'ล็อกอินใช้งานส่วนตัว ห้ามแชร์บัญชีหรือเปลี่ยนรหัสผ่าน',
         }
       } else if (type === 'login-link') {
         contentObj = {
           loginUrl: line,
-          expiresAt: 'ใช้งานได้ภายใน 7 วันนับจากสแกนสลิป',
+          expiresAt: 'ใช้งานได้ภายใน 7 วันนับจากวันที่ซื้อ',
           instructions: instructions || 'คลิกลิงก์เพื่อเข้าใช้งานระบบสมาชิกพรีเมียม',
         }
       } else if (type === 'ai-credit') {
-        const productName = (product as any).name || ''
+        const productName = product.name || ''
         contentObj = {
           creditCode: line,
           creditAmount: '$10 Credits',
@@ -73,30 +74,36 @@ export async function POST(request: Request) {
           expiresAt: 'หมดอายุใน 90 วันหลังกรอกโค้ด',
           instructions: instructions || 'นำโค้ดไปเคลมที่หน้าตั้งค่าการชำระเงินของบริการ AI',
         }
+      } else {
+        contentObj = {
+          value: line,
+          instructions: instructions || '',
+        }
       }
 
-      dataToInsert.push({
+      return {
         productId,
         type,
         content: encryptText(JSON.stringify(contentObj)),
-        isSold: false
-      })
-    }
-
-    await prisma.digitalStock.createMany({
-      data: dataToInsert
+        isSold: false,
+      }
     })
 
-    // ✅ Single Source of Truth: sync stock count จาก DigitalStock จริง
+    await prisma.digitalStock.createMany({
+      data: dataToInsert,
+    })
+
     await syncProductStock(productId)
 
-    const updatedProduct = await prisma.product.findUnique({ where: { id: productId } })
+    const newStock = await prisma.digitalStock.count({
+      where: { productId, isSold: false },
+    })
 
     return NextResponse.json({
       success: true,
       message: `เติมคลังสินค้าสำเร็จ ${lines.length} รายการ`,
       countAdded: lines.length,
-      newStock: (updatedProduct as any)?.stock ?? 0,
+      newStock,
     })
   } catch (error) {
     console.error('Error adding admin stock:', error)
@@ -117,15 +124,15 @@ export async function GET(request: Request) {
     const productId = searchParams.get('productId')
 
     if (!productId) {
-      return NextResponse.json({ success: false, error: 'ระบุ productId' }, { status: 400 })
+      return NextResponse.json({ success: false, error: 'กรุณาระบุ productId' }, { status: 400 })
     }
 
     const stocks = await prisma.digitalStock.findMany({
       where: { productId },
       orderBy: [
-        { isSold: 'asc' }, // 未ขายขึ้นก่อน
-        { id: 'desc' }
-      ]
+        { isSold: 'asc' },
+        { id: 'desc' },
+      ],
     })
 
     const decryptedStocks = stocks.map((stock) => ({
@@ -136,13 +143,16 @@ export async function GET(request: Request) {
     return NextResponse.json({ success: true, data: decryptedStocks })
   } catch (error) {
     console.error('Error fetching stocks:', error)
-    return NextResponse.json({ success: false, error: 'ดึงข้อมูลสต็อกล้มเหลว' }, { status: 500 })
+    return NextResponse.json(
+      { success: false, error: 'ดึงข้อมูลสต็อกล้มเหลว' },
+      { status: 500 }
+    )
   }
 }
 
 /**
  * PUT /api/admin/stock?id=xxx
- * แก้ไข content ของสต็อก
+ * แก้ไขข้อมูล content ของสต็อก
  */
 export async function PUT(request: Request) {
   try {
@@ -152,18 +162,23 @@ export async function PUT(request: Request) {
     const { content } = body
 
     if (!id || !content) {
-      return NextResponse.json({ success: false, error: 'ข้อมูลไม่ครบถ้วน' }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: 'ข้อมูลไม่ครบถ้วน' },
+        { status: 400 }
+      )
     }
 
-    // ตรวจสอบว่าถูกขายไปหรือยัง
     const existing = await prisma.digitalStock.findUnique({ where: { id } })
     if (!existing) {
-      return NextResponse.json({ success: false, error: 'ไม่พบรายการสต็อก' }, { status: 404 })
+      return NextResponse.json(
+        { success: false, error: 'ไม่พบรายการสต็อก' },
+        { status: 404 }
+      )
     }
 
     const updated = await prisma.digitalStock.update({
       where: { id },
-      data: { content: encryptText(JSON.stringify(content)) }
+      data: { content: encryptText(JSON.stringify(content)) },
     })
 
     return NextResponse.json({
@@ -173,13 +188,16 @@ export async function PUT(request: Request) {
     })
   } catch (error) {
     console.error('Error updating stock:', error)
-    return NextResponse.json({ success: false, error: 'แก้ไขสต็อกล้มเหลว' }, { status: 500 })
+    return NextResponse.json(
+      { success: false, error: 'แก้ไขสต็อกล้มเหลว' },
+      { status: 500 }
+    )
   }
 }
 
 /**
  * DELETE /api/admin/stock?id=xxx
- * ลบสต็อก (เฉพาะที่ยังไม่ได้ขาย)
+ * ลบสต็อก เฉพาะรายการที่ยังไม่ขาย
  */
 export async function DELETE(request: Request) {
   try {
@@ -187,26 +205,36 @@ export async function DELETE(request: Request) {
     const id = searchParams.get('id')
 
     if (!id) {
-      return NextResponse.json({ success: false, error: 'ระบุ ID ของสต็อก' }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: 'กรุณาระบุ ID ของสต็อก' },
+        { status: 400 }
+      )
     }
 
     const existing = await prisma.digitalStock.findUnique({ where: { id } })
     if (!existing) {
-      return NextResponse.json({ success: false, error: 'ไม่พบรายการสต็อก' }, { status: 404 })
+      return NextResponse.json(
+        { success: false, error: 'ไม่พบรายการสต็อก' },
+        { status: 404 }
+      )
     }
 
     if (existing.isSold) {
-      return NextResponse.json({ success: false, error: 'ไม่สามารถลบสต็อกที่ขายไปแล้วได้' }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: 'ไม่สามารถลบสต็อกที่ขายไปแล้วได้' },
+        { status: 400 }
+      )
     }
 
     await prisma.digitalStock.delete({ where: { id } })
-
-    // Sync stock
     await syncProductStock(existing.productId)
 
     return NextResponse.json({ success: true, message: 'ลบสต็อกสำเร็จ' })
   } catch (error) {
     console.error('Error deleting stock:', error)
-    return NextResponse.json({ success: false, error: 'ลบสต็อกล้มเหลว' }, { status: 500 })
+    return NextResponse.json(
+      { success: false, error: 'ลบสต็อกล้มเหลว' },
+      { status: 500 }
+    )
   }
 }

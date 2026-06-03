@@ -246,16 +246,22 @@ export default function AdminDashboardPage() {
     e.preventDefault()
     setIsStockSubmitting(true)
     setStockMsg('')
-    const res = await fetch('/api/admin/stock', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(stockForm) })
-    const result = await res.json()
-    setIsStockSubmitting(false)
-    if (result.success) { 
-      setStockMsg(`สำเร็จ: ${result.message} (สต็อกรวม: ${result.newStock})`)
-      setStockForm(f => ({ ...f, bulkData: '' }))
-      fetchAll()
-      if (stockForm.productId) fetchDigitalStocks(stockForm.productId)
+    try {
+      const res = await fetch('/api/admin/stock', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(stockForm) })
+      const result = await res.json()
+      if (result.success) { 
+        setStockMsg(`สำเร็จ: ${result.message} (สต็อกรวม: ${result.newStock})`)
+        setStockForm(f => ({ ...f, bulkData: '' }))
+        await fetchAll()
+        if (stockForm.productId) await fetchDigitalStocks(stockForm.productId)
+      }
+      else setStockMsg(`ผิดพลาด: ${result.error}`)
+    } catch (error) {
+      console.error('Stock submit failed:', error)
+      setStockMsg('ผิดพลาด: ไม่สามารถเติมสต็อกได้ กรุณาลองใหม่อีกครั้ง')
+    } finally {
+      setIsStockSubmitting(false)
     }
-    else setStockMsg(`ผิดพลาด: ${result.error}`)
   }
 
   const handleDeleteStockItem = async (id: string) => {
