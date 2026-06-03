@@ -1,12 +1,13 @@
 'use client'
 
 import { Edit, Plus, Trash2 } from 'lucide-react'
+import type { AdminCategory, AdminProduct } from './AdminTypes'
 
 type Props = {
-  categories: any[]
-  products: any[]
+  categories: AdminCategory[]
+  products: AdminProduct[]
   onAddCategory: () => void
-  onEditCategory: (category: any) => void
+  onEditCategory: (category: AdminCategory) => void
   onDeleteCategory: (id: string) => void
 }
 

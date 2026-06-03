@@ -1,10 +1,28 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Script from 'next/script'
+import { getCookieConsent } from '@/components/ui/CookieConsent'
 
 export function TrackingScripts() {
+  const [canTrack, setCanTrack] = useState(false)
   const gaId = process.env.NEXT_PUBLIC_GA_ID
   const fbPixelId = process.env.NEXT_PUBLIC_FB_PIXEL_ID
 
-  if (!gaId && !fbPixelId) return null
+  useEffect(() => {
+    const updateConsent = () => setCanTrack(getCookieConsent() === 'accepted')
+
+    updateConsent()
+    window.addEventListener('storage', updateConsent)
+    window.addEventListener('cookie-consent-change', updateConsent)
+
+    return () => {
+      window.removeEventListener('storage', updateConsent)
+      window.removeEventListener('cookie-consent-change', updateConsent)
+    }
+  }, [])
+
+  if (!canTrack || (!gaId && !fbPixelId)) return null
 
   return (
     <>

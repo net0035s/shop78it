@@ -28,15 +28,26 @@ export function ProductCard({ product }: ProductCardProps) {
     product.originalPrice
       ? getDiscountPercent(product.price, product.originalPrice)
       : 0
+  const openProductModal = () => setIsModalOpen(true)
+  const handleCardKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      openProductModal()
+    }
+  }
 
   return (
     <>
       <div
-        onClick={() => setIsModalOpen(true)}
+        onClick={openProductModal}
+        onKeyDown={handleCardKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-label={`ดูรายละเอียดสินค้า ${product.name}`}
         className={cn(
           'group relative flex flex-col rounded-2xl border overflow-hidden transition-all duration-300 cursor-pointer',
           'bg-card-gradient border-border hover:border-primary/40',
-          'hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1',
+          'hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           !isOrderable && 'opacity-70'
         )}
         id={`product-card-${product.id}`}
@@ -167,7 +178,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <button
             onClick={(e) => {
               e.stopPropagation()
-              setIsModalOpen(true)
+              openProductModal()
             }}
             className={cn(
               'mt-2 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200',

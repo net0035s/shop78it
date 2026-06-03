@@ -3,19 +3,23 @@
 import { AlertTriangle, ChevronRight, Clock, DollarSign, ShieldCheck, TrendingUp, Zap } from 'lucide-react'
 import { formatPrice } from '@/lib/products'
 import { LineChart, STATUS_CONFIG } from './AdminShared'
+import type { AdminOrder, AdminProduct, AdminStats } from './AdminTypes'
 
 type Props = {
-  stats: any
+  stats: AdminStats | null
   manualDeliveryCount: number
   onShowOrders: () => void
 }
 
 export function DashboardOverview({ stats, manualDeliveryCount, onShowOrders }: Props) {
+  const last7Days = stats?.last7Days ?? []
+  const lowStockProducts = stats?.lowStockProducts ?? []
+  const recentOrders = stats?.recentOrders ?? []
   const cards = [
     { label: 'รายได้วันนี้', value: formatPrice(stats?.todayRevenue ?? 0), icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
     { label: 'รายได้เดือนนี้', value: formatPrice(stats?.monthRevenue ?? 0), icon: TrendingUp, color: 'text-primary', bg: 'bg-primary/10' },
     { label: 'รอดำเนินการ', value: `${stats?.pendingOrders ?? 0} รายการ`, icon: Clock, color: 'text-amber-400', bg: 'bg-amber-500/10' },
-    { label: 'สต็อกใกล้หมด', value: `${stats?.lowStockProducts?.length ?? 0} สินค้า`, icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-500/10' },
+    { label: 'สต็อกใกล้หมด', value: `${lowStockProducts.length} สินค้า`, icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-500/10' },
   ]
 
   return (
@@ -61,8 +65,8 @@ export function DashboardOverview({ stats, manualDeliveryCount, onShowOrders }: 
               <Zap className="w-3 h-3" /><span>Live</span>
             </div>
           </div>
-          {stats?.last7Days?.length > 0 ? (
-            <LineChart data={stats.last7Days} />
+          {last7Days.length > 0 ? (
+            <LineChart data={last7Days} />
           ) : (
             <div className="h-[120px] flex items-center justify-center text-textMuted text-sm">ยังไม่มีข้อมูลออเดอร์</div>
           )}
@@ -71,14 +75,14 @@ export function DashboardOverview({ stats, manualDeliveryCount, onShowOrders }: 
         <div className="glass-card p-5 rounded-2xl border border-border/50">
           <h3 className="text-sm font-bold text-textPrimary mb-1">สต็อกใกล้หมด</h3>
           <p className="text-xs text-textMuted mb-4">สินค้าที่มีสต็อกไม่เกิน 5 ชิ้น</p>
-          {(stats?.lowStockProducts ?? []).length === 0 ? (
+          {lowStockProducts.length === 0 ? (
             <div className="text-center py-6">
               <ShieldCheck className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
               <p className="text-xs text-textMuted">สต็อกสินค้าปกติ</p>
             </div>
           ) : (
             <div className="space-y-2">
-              {(stats.lowStockProducts as any[]).map((p) => (
+              {lowStockProducts.map((p: AdminProduct & { unsoldCount: number }) => (
                 <div key={p.id} className="flex items-center gap-2 p-2 rounded-xl bg-surfaceLight/30">
                   <div className={`w-2 h-2 rounded-full shrink-0 ${p.unsoldCount === 0 ? 'bg-red-400' : 'bg-amber-400'}`} />
                   <p className="flex-1 min-w-0 text-xs font-medium text-textPrimary truncate">{p.name}</p>
@@ -98,7 +102,7 @@ export function DashboardOverview({ stats, manualDeliveryCount, onShowOrders }: 
           <button onClick={onShowOrders} className="text-xs text-primary hover:underline">ดูทั้งหมด</button>
         </div>
         <div className="divide-y divide-border/30">
-          {(stats?.recentOrders ?? []).slice(0, 5).map((o: any) => {
+          {recentOrders.slice(0, 5).map((o: AdminOrder) => {
             const cfg = STATUS_CONFIG[o.status] ?? STATUS_CONFIG.pending
             return (
               <div key={o.id} className="px-5 py-3 flex items-center gap-3">
@@ -116,7 +120,7 @@ export function DashboardOverview({ stats, manualDeliveryCount, onShowOrders }: 
               </div>
             )
           })}
-          {(stats?.recentOrders ?? []).length === 0 && (
+          {recentOrders.length === 0 && (
             <div className="px-5 py-8 text-center text-sm text-textMuted">ยังไม่มีออเดอร์</div>
           )}
         </div>

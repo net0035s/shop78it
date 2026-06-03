@@ -4,6 +4,7 @@ import React from 'react'
 import { Edit, Trash2, Upload } from 'lucide-react'
 import { formatDateWithTime } from '@/lib/utils'
 import { EmptyState, StockContentParser } from './AdminShared'
+import type { AdminDigitalStock, AdminProduct, AdminStockContent } from './AdminTypes'
 
 type StockForm = {
   productId: string
@@ -14,23 +15,23 @@ type StockForm = {
 
 type Props = {
   mode: 'manage' | 'history'
-  products: any[]
+  products: AdminProduct[]
   stockForm: StockForm
   setStockForm: React.Dispatch<React.SetStateAction<StockForm>>
   isStockSubmitting: boolean
   stockMsg: string
-  digitalStocks: any[]
+  digitalStocks: AdminDigitalStock[]
   isFetchingStocks: boolean
-  editingStockItem: any
-  setEditingStockItem: React.Dispatch<React.SetStateAction<any>>
-  editingStockContent: any
-  setEditingStockContent: React.Dispatch<React.SetStateAction<any>>
+  editingStockItem: AdminDigitalStock | null
+  setEditingStockItem: React.Dispatch<React.SetStateAction<AdminDigitalStock | null>>
+  editingStockContent: AdminStockContent
+  setEditingStockContent: React.Dispatch<React.SetStateAction<AdminStockContent>>
   fileInputRef: React.RefObject<HTMLInputElement>
   onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void
   onSubmitStock: (event: React.FormEvent) => void
   onDeleteStockItem: (id: string) => void
   onUpdateStockItem: (id: string) => void
-  stockHistory: any[]
+  stockHistory: AdminDigitalStock[]
   historyPage: number
   historyTotalPages: number
   setHistoryPage: React.Dispatch<React.SetStateAction<number>>

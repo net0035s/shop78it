@@ -1,6 +1,7 @@
 'use client'
 
 import { formatPrice } from '@/lib/products'
+import type { AdminDigitalStock } from './AdminTypes'
 
 export const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   pending: { label: 'รอชำระ', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/30', dot: 'bg-amber-400' },
@@ -9,8 +10,13 @@ export const STATUS_CONFIG: Record<string, { label: string; color: string; bg: s
   cancelled: { label: 'ยกเลิก', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/30', dot: 'bg-red-400' },
 }
 
-export function StockContentParser({ stock }: { stock: any }) {
-  let parsed: any = {}
+function stringValue(record: Record<string, unknown>, key: string): string {
+  const value = record[key]
+  return typeof value === 'string' ? value : ''
+}
+
+export function StockContentParser({ stock }: { stock: AdminDigitalStock }) {
+  let parsed: Record<string, unknown> = {}
   try {
     parsed = JSON.parse(stock.content)
   } catch {
@@ -18,28 +24,28 @@ export function StockContentParser({ stock }: { stock: any }) {
   }
 
   if (stock.type === 'license-key') {
-    return <div className="font-mono text-xs text-primary font-semibold">{parsed.licenseKey || stock.content}</div>
+    return <div className="font-mono text-xs text-primary font-semibold">{stringValue(parsed, 'licenseKey') || stock.content}</div>
   }
 
   if (stock.type === 'login-info') {
     return (
       <div className="space-y-0.5">
-        <div className="text-xs text-textPrimary">{parsed.email || '-'}</div>
-        <div className="font-mono text-[11px] text-textMuted">{parsed.password || '-'}</div>
-        {parsed.loginUrl && <div className="text-[10px] text-blue-400 truncate max-w-xs">{parsed.loginUrl}</div>}
+        <div className="text-xs text-textPrimary">{stringValue(parsed, 'email') || '-'}</div>
+        <div className="font-mono text-[11px] text-textMuted">{stringValue(parsed, 'password') || '-'}</div>
+        {stringValue(parsed, 'loginUrl') && <div className="text-[10px] text-blue-400 truncate max-w-xs">{stringValue(parsed, 'loginUrl')}</div>}
       </div>
     )
   }
 
   if (stock.type === 'login-link') {
-    return <div className="text-xs text-blue-400 truncate max-w-xs">{parsed.loginUrl || parsed.url || parsed.link || stock.content}</div>
+    return <div className="text-xs text-blue-400 truncate max-w-xs">{stringValue(parsed, 'loginUrl') || stringValue(parsed, 'url') || stringValue(parsed, 'link') || stock.content}</div>
   }
 
   if (stock.type === 'ai-credit' || stock.type === 'ai-credit-code' || stock.type === 'credit-code') {
     return (
       <div className="font-mono text-xs text-primary font-semibold">
-        {parsed.creditCode || parsed.code || stock.content}
-        {parsed.creditAmount && <span className="text-textMuted ml-1">({parsed.creditAmount})</span>}
+        {stringValue(parsed, 'creditCode') || stringValue(parsed, 'code') || stock.content}
+        {stringValue(parsed, 'creditAmount') && <span className="text-textMuted ml-1">({stringValue(parsed, 'creditAmount')})</span>}
       </div>
     )
   }

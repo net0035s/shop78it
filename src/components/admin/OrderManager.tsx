@@ -4,9 +4,10 @@ import { AlertTriangle, Edit } from 'lucide-react'
 import { formatPrice } from '@/lib/products'
 import { formatDateWithTime } from '@/lib/utils'
 import { EmptyState, STATUS_CONFIG } from './AdminShared'
+import type { AdminOrder } from './AdminTypes'
 
 type Props = {
-  orders: any[]
+  orders: AdminOrder[]
   manualDeliveryCount: number
   orderFilter: string
   setOrderFilter: (value: string) => void
@@ -16,7 +17,7 @@ type Props = {
   setOrderPage: React.Dispatch<React.SetStateAction<number>>
   orderPerPage: number
   setOrderPerPage: (value: number) => void
-  onEditOrder: (order: any) => void
+  onEditOrder: (order: AdminOrder) => void
 }
 
 export function OrderManager({

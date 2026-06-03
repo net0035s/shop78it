@@ -11,6 +11,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { RecentPurchases } from '@/components/ui/RecentPurchases'
 import { FloatingChat } from '@/components/ui/FloatingChat'
 import { TrackingScripts } from '@/components/TrackingScripts'
+import { CookieConsent } from '@/components/ui/CookieConsent'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -81,6 +82,7 @@ export default function RootLayout({
               <FloatingCartButton />
               <RecentPurchases />
               <FloatingChat />
+              <CookieConsent />
               <Toaster position="bottom-right" />
               <TrackingScripts />
             </LanguageProvider>

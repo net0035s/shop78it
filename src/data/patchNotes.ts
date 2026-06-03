@@ -8,6 +8,15 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: 'v1.10',
+    date: '2026-06-03',
+    title: 'ยกระดับมาตรฐาน PDPA, Accessibility และ TypeScript',
+    tags: ['Compliance', 'Accessibility', 'TypeScript'],
+    changes: [
+      'อัปเกรดมาตรฐานเว็บไซต์: เพิ่มระบบ Cookie Consent รองรับ PDPA, ปรับปรุงการเข้าถึงด้วยคีย์บอร์ด (Accessibility) สำหรับการ์ดสินค้า, และแก้ไข TypeScript Types ในหน้า Admin ให้รัดกุมขึ้น',
+    ],
+  },
+  {
     version: 'v1.9',
     date: '2026-06-02',
     title: 'Phase 2 Optimization และ Privacy Quick Wins',

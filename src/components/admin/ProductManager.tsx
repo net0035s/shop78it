@@ -3,12 +3,13 @@
 import { Edit, Plus, Trash2 } from 'lucide-react'
 import { formatPrice } from '@/lib/products'
 import { EmptyState } from './AdminShared'
+import type { AdminCategory, AdminProduct } from './AdminTypes'
 
 type Props = {
-  products: any[]
-  categories: any[]
+  products: AdminProduct[]
+  categories: AdminCategory[]
   onAddProduct: () => void
-  onEditProduct: (product: any) => void
+  onEditProduct: (product: AdminProduct) => void
   onDeleteProduct: (id: string) => void
 }
 
