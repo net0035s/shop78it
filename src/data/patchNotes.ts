@@ -8,6 +8,15 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: 'v2.2-update',
+    date: '2026-06-03',
+    title: 'Telegram Sold-out Alert',
+    tags: ['Enhancement', 'Telegram', 'Stock'],
+    changes: [
+      'Enhancement: เพิ่มระบบแจ้งเตือน Telegram ฉุกเฉิน เมื่อสต็อกสินค้า (DigitalStock) ถูกสั่งซื้อจนหมดเกลี้ยง (เหลือ 0 ชิ้น)',
+    ],
+  },
+  {
     version: 'v2.0-beta',
     date: '2026-06-03',
     title: 'Beam Payment Gateway Beta',

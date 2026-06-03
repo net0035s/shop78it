@@ -140,6 +140,24 @@ export async function fulfillPaidOrder(orderIdOrNumber: string): Promise<Fulfill
   const autoProductIds = Array.from(new Set(autoItems.map((item) => item.product.id)))
   for (const productId of autoProductIds) {
     await syncProductStock(productId)
+
+    const remainingStock = await prisma.digitalStock.count({
+      where: { productId, isSold: false },
+    })
+
+    if (remainingStock === 0) {
+      const soldOutProduct = autoItems.find((item) => item.product.id === productId)?.product
+      const productName = soldOutProduct?.name || productId
+
+      void sendTelegramNotify([
+        '🚨 [เตือนด่วน] สต็อกสินค้าหมดเกลี้ยง!',
+        `สินค้า: ${productName}`,
+        'สถานะ: คงเหลือ 0 ชิ้น',
+        'ระบบส่งอัตโนมัติจะหยุดทำงานสำหรับสินค้านี้ จนกว่าจะเติมสต็อก',
+      ].join('\n')).catch((error) => {
+        console.error('Sold-out Telegram Notify failed (non-critical):', error)
+      })
+    }
   }
 
   const completedOrder = await prisma.order.update({

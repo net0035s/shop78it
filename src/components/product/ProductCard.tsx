@@ -92,8 +92,8 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {/* Out of stock overlay */}
           {!isOrderable && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10">
-              <span className="text-textSecondary font-semibold text-sm bg-surface/80 px-4 py-2 rounded-full border border-border">
+            <div className="absolute inset-0 flex items-center justify-center bg-black/45 backdrop-blur-[1px] z-20">
+              <span className="px-5 py-2.5 rounded-full bg-red-500/90 border border-white/20 text-white text-lg font-extrabold tracking-wide shadow-2xl shadow-red-950/40 backdrop-blur-sm">
                 สินค้าหมด
               </span>
             </div>
