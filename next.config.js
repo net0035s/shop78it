@@ -12,6 +12,10 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'i.postimg.cc',
+      },
+      {
+        protocol: 'https',
         hostname: '**.supabase.co',
       },
       {
@@ -23,4 +27,3 @@ const nextConfig = {
 }
 
 module.exports = nextConfig
-
