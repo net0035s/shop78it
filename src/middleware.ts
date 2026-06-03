@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { clerkClient, clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
 const isAdminRoute = createRouteMatcher(['/admin11(.*)', '/api/admin(.*)'])
@@ -11,16 +11,39 @@ function getAdminEmails() {
     .filter(Boolean)
 }
 
-function getEmailFromClaims(sessionClaims: any) {
+function getEmailFromClaims(sessionClaims: unknown) {
+  const claims = sessionClaims as {
+    email?: unknown
+    primary_email?: unknown
+    primaryEmail?: unknown
+    primaryEmailAddress?: unknown
+    publicMetadata?: { email?: unknown }
+    metadata?: { email?: unknown }
+  } | null
+
   const possibleEmail =
-    sessionClaims?.email ||
-    sessionClaims?.primary_email ||
-    sessionClaims?.primaryEmail ||
-    sessionClaims?.primaryEmailAddress ||
-    sessionClaims?.publicMetadata?.email ||
-    sessionClaims?.metadata?.email
+    claims?.email ||
+    claims?.primary_email ||
+    claims?.primaryEmail ||
+    claims?.primaryEmailAddress ||
+    claims?.publicMetadata?.email ||
+    claims?.metadata?.email
 
   return typeof possibleEmail === 'string' ? possibleEmail.trim().toLowerCase() : ''
+}
+
+async function getEmailFromClerkUser(userId: string) {
+  try {
+    const client = await clerkClient()
+    const user = await client.users.getUser(userId)
+    const primaryEmail = user.emailAddresses.find((email) => email.id === user.primaryEmailAddressId)
+    const email = primaryEmail?.emailAddress || user.emailAddresses[0]?.emailAddress || ''
+
+    return email.trim().toLowerCase()
+  } catch (error) {
+    console.error('Failed to fetch Clerk user email in middleware:', error)
+    return ''
+  }
 }
 
 export default clerkMiddleware(async (auth, req) => {
@@ -38,7 +61,7 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   const adminEmails = getAdminEmails()
-  const userEmail = getEmailFromClaims(sessionClaims)
+  const userEmail = getEmailFromClaims(sessionClaims) || await getEmailFromClerkUser(userId)
   const isAdmin = Boolean(userEmail && adminEmails.includes(userEmail))
 
   if (!isAdmin) {

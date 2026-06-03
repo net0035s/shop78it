@@ -7,10 +7,14 @@ import { useState, useEffect, useRef } from 'react'
 import { useTheme } from 'next-themes'
 import { useLanguage } from '@/lib/i18n'
 import { UserButton, useUser } from '@clerk/nextjs'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+
+const SECRET_CLICK_KEY = 'shop78it-secret-clicks'
+const SECRET_CLICK_STARTED_KEY = 'shop78it-secret-click-started'
 
 export function Navbar() {
   const router = useRouter()
+  const pathname = usePathname()
   const itemCount = useCartStore((s) => s.getItemCount())
   const openCart = useCartStore((s) => s.openCart)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -31,19 +35,44 @@ export function Navbar() {
   }, [])
 
   const handleLogoClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    const now = Date.now()
+    const storedStartedAt = Number(sessionStorage.getItem(SECRET_CLICK_STARTED_KEY) || 0)
+    const isExpired = !storedStartedAt || now - storedStartedAt > 3000
+
+    if (isExpired) {
+      logoClickCountRef.current = 0
+      sessionStorage.setItem(SECRET_CLICK_STARTED_KEY, String(now))
+    } else {
+      logoClickCountRef.current = Number(sessionStorage.getItem(SECRET_CLICK_KEY) || logoClickCountRef.current)
+    }
+
     const nextClickCount = logoClickCountRef.current + 1
     logoClickCountRef.current = nextClickCount
+    sessionStorage.setItem(SECRET_CLICK_KEY, String(nextClickCount))
 
-    if (nextClickCount === 1) {
+    if (nextClickCount === 1 || isExpired) {
+      if (logoTimerRef.current) clearTimeout(logoTimerRef.current)
       logoTimerRef.current = setTimeout(() => {
         logoClickCountRef.current = 0
         logoTimerRef.current = null
+        sessionStorage.removeItem(SECRET_CLICK_KEY)
+        sessionStorage.removeItem(SECRET_CLICK_STARTED_KEY)
       }, 3000)
     }
 
     if (nextClickCount >= 5) {
       event.preventDefault()
+      if (logoTimerRef.current) clearTimeout(logoTimerRef.current)
+      logoClickCountRef.current = 0
+      logoTimerRef.current = null
+      sessionStorage.removeItem(SECRET_CLICK_KEY)
+      sessionStorage.removeItem(SECRET_CLICK_STARTED_KEY)
       router.push('/admin11')
+      return
+    }
+
+    if (pathname === '/') {
+      event.preventDefault()
     }
   }
 

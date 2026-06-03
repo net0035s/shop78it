@@ -9,6 +9,7 @@ const EDGE_PADDING = 8
 const SNAP_PADDING = 24
 const INITIAL_RIGHT = 24
 const INITIAL_BOTTOM = 96
+const SNAP_DURATION_MS = 520
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
@@ -95,7 +96,7 @@ export function FloatingChat() {
       })
 
       setIsSnapping(true)
-      snapTimerRef.current = setTimeout(() => setIsSnapping(false), 320)
+      snapTimerRef.current = setTimeout(() => setIsSnapping(false), SNAP_DURATION_MS)
     }
   }
 
@@ -127,8 +128,10 @@ export function FloatingChat() {
       className={[
         'fixed z-40 flex h-14 w-14 touch-none select-none items-center justify-center',
         'rounded-full bg-[#06C755] text-white shadow-xl shadow-[#06C755]/30',
-        'hover:scale-105 hover:shadow-2xl hover:shadow-[#06C755]/40 active:scale-95',
-        isSnapping ? 'transition-[left,top,box-shadow,transform] duration-300 ease-out' : 'transition-shadow duration-200',
+        'will-change-[left,top,transform] hover:scale-105 hover:shadow-2xl hover:shadow-[#06C755]/40 active:scale-95',
+        isSnapping
+          ? 'transition-[left,top,box-shadow,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]'
+          : 'transition-[box-shadow,transform] duration-200 ease-out',
         position ? '' : 'bottom-24 right-6',
       ].join(' ')}
     >

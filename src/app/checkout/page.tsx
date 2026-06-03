@@ -287,8 +287,6 @@ function CheckoutContent() {
               <PaymentQR
                 amount={createdOrder.total}
                 orderNumber={createdOrder.orderNumber}
-                onConfirm={handlePaymentConfirm}
-                isLoading={isVerifying}
               />
             )
           )}

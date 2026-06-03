@@ -48,7 +48,7 @@ export default function AdminDashboardPage() {
   const [productForm, setProductForm] = useState({
     name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png',
     category: 'subscription', categoryId: '', tags: '', isNew: false, isFeatured: false,
-    deliveryInfo: 'à¸ªà¹ˆà¸‡à¸”à¹ˆà¸§à¸™à¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´ âš¡', deliveryType: 'auto'
+    deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto'
   })
 
   // Stock form
@@ -69,7 +69,7 @@ export default function AdminDashboardPage() {
       }
     }
     reader.onerror = () => {
-      alert('à¹€à¸à¸´à¸”à¸‚à¹‰à¸­à¸œà¸´à¸”à¸žà¸¥à¸²à¸”à¹ƒà¸™à¸à¸²à¸£à¸­à¹ˆà¸²à¸™à¹„à¸Ÿà¸¥à¹Œ')
+      alert('เกิดข้อผิดพลาดในการอ่านไฟล์')
     }
     reader.readAsText(file)
     e.target.value = '' // Clear input so the same file can be selected again
@@ -133,7 +133,7 @@ export default function AdminDashboardPage() {
   // Category form
   const [isCatModalOpen, setIsCatModalOpen] = useState(false)
   const [editingCat, setEditingCat] = useState<any>(null)
-  const [catForm, setCatForm] = useState({ name: '', slug: '', icon: 'ðŸ“¦', color: '#6366f1', sortOrder: 99 })
+  const [catForm, setCatForm] = useState({ name: '', slug: '', icon: '📦', color: '#6366f1', sortOrder: 99 })
 
   // Order detail
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
@@ -163,7 +163,7 @@ export default function AdminDashboardPage() {
       })
       const result = await res.json()
       if (result.success) {
-        alert('à¸šà¸±à¸™à¸—à¸¶à¸à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸­à¸­à¹€à¸”à¸­à¸£à¹Œà¹€à¸£à¸µà¸¢à¸šà¸£à¹‰à¸­à¸¢à¹à¸¥à¹‰à¸§')
+        alert('บันทึกข้อมูลออเดอร์เรียบร้อยแล้ว')
         setSelectedOrder(null)
         fetchAll()
       } else {
@@ -171,7 +171,7 @@ export default function AdminDashboardPage() {
       }
     } catch (err) {
       console.error(err)
-      alert('à¹€à¸à¸´à¸”à¸‚à¹‰à¸­à¸œà¸´à¸”à¸žà¸¥à¸²à¸”à¹ƒà¸™à¸à¸²à¸£à¸šà¸±à¸™à¸—à¸¶à¸')
+      alert('เกิดข้อผิดพลาดในการบันทึก')
     } finally {
       setIsSavingOrder(false)
     }
@@ -212,13 +212,13 @@ export default function AdminDashboardPage() {
   // ---- Product Handlers ----
   const openAddProduct = () => {
     setEditingProduct(null)
-    setProductForm({ name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png', category: categories[0]?.slug || 'subscription', categoryId: categories[0]?.id || '', tags: '', isNew: false, isFeatured: false, deliveryInfo: 'à¸ªà¹ˆà¸‡à¸”à¹ˆà¸§à¸™à¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´ âš¡', deliveryType: 'auto' })
+    setProductForm({ name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png', category: categories[0]?.slug || 'subscription', categoryId: categories[0]?.id || '', tags: '', isNew: false, isFeatured: false, deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto' })
     setIsProductModalOpen(true)
   }
 
   const openEditProduct = (p: any) => {
     setEditingProduct(p)
-    setProductForm({ name: p.name, description: p.description, price: p.price.toString(), originalPrice: p.originalPrice?.toString() || '', image: p.image, category: p.category, categoryId: p.categoryId || '', tags: p.tags || '', isNew: p.isNew, isFeatured: p.isFeatured, deliveryInfo: p.deliveryInfo || 'à¸ªà¹ˆà¸‡à¸”à¹ˆà¸§à¸™à¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´ âš¡', deliveryType: p.deliveryType || 'auto' })
+    setProductForm({ name: p.name, description: p.description, price: p.price.toString(), originalPrice: p.originalPrice?.toString() || '', image: p.image, category: p.category, categoryId: p.categoryId || '', tags: p.tags || '', isNew: p.isNew, isFeatured: p.isFeatured, deliveryInfo: p.deliveryInfo || 'ส่งด่วนอัตโนมัติ', deliveryType: p.deliveryType || 'auto' })
     setIsProductModalOpen(true)
   }
 
@@ -230,11 +230,11 @@ export default function AdminDashboardPage() {
     const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     const result = await res.json()
     if (result.success) { setIsProductModalOpen(false); fetchAll() }
-    else alert(result.error || 'à¹€à¸à¸´à¸”à¸‚à¹‰à¸­à¸œà¸´à¸”à¸žà¸¥à¸²à¸”')
+    else alert(result.error || 'เกิดข้อผิดพลาด')
   }
 
   const handleDeleteProduct = async (id: string) => {
-    if (!confirm('à¸¢à¸·à¸™à¸¢à¸±à¸™à¸à¸²à¸£à¸¥à¸šà¸ªà¸´à¸™à¸„à¹‰à¸²?')) return
+    if (!confirm('ยืนยันการลบสินค้า?')) return
     const res = await fetch(`/api/admin/products?id=${id}`, { method: 'DELETE' })
     const result = await res.json()
     if (result.success) fetchAll()
@@ -250,16 +250,16 @@ export default function AdminDashboardPage() {
     const result = await res.json()
     setIsStockSubmitting(false)
     if (result.success) { 
-      setStockMsg(`âœ… ${result.message} (à¸ªà¸•à¹‡à¸­à¸à¸£à¸§à¸¡: ${result.newStock})`)
+      setStockMsg(`สำเร็จ: ${result.message} (สต็อกรวม: ${result.newStock})`)
       setStockForm(f => ({ ...f, bulkData: '' }))
       fetchAll()
       if (stockForm.productId) fetchDigitalStocks(stockForm.productId)
     }
-    else setStockMsg(`âŒ ${result.error}`)
+    else setStockMsg(`ผิดพลาด: ${result.error}`)
   }
 
   const handleDeleteStockItem = async (id: string) => {
-    if (!confirm('à¸¢à¸·à¸™à¸¢à¸±à¸™à¸à¸²à¸£à¸¥à¸šà¸£à¸²à¸¢à¸à¸²à¸£à¸ªà¸•à¹‡à¸­à¸à¸™à¸µà¹‰?')) return
+    if (!confirm('ยืนยันการลบรายการสต็อกนี้?')) return
     const res = await fetch(`/api/admin/stock?id=${id}`, { method: 'DELETE' })
     const result = await res.json()
     if (result.success) {
@@ -294,7 +294,7 @@ export default function AdminDashboardPage() {
   }
 
   // ---- Category Handlers ----
-  const openAddCat = () => { setEditingCat(null); setCatForm({ name: '', slug: '', icon: 'ðŸ“¦', color: '#6366f1', sortOrder: 99 }); setIsCatModalOpen(true) }
+  const openAddCat = () => { setEditingCat(null); setCatForm({ name: '', slug: '', icon: '📦', color: '#6366f1', sortOrder: 99 }); setIsCatModalOpen(true) }
   const openEditCat = (c: any) => { setEditingCat(c); setCatForm({ name: c.name, slug: c.slug, icon: c.icon, color: c.color, sortOrder: c.sortOrder }); setIsCatModalOpen(true) }
 
   const handleCatSubmit = async (e: React.FormEvent) => {
@@ -309,7 +309,7 @@ export default function AdminDashboardPage() {
   }
 
   const handleDeleteCat = async (id: string) => {
-    if (!confirm('à¸¢à¸·à¸™à¸¢à¸±à¸™à¸à¸²à¸£à¸¥à¸šà¸«à¸¡à¸§à¸”à¸«à¸¡à¸¹à¹ˆ?')) return
+    if (!confirm('ยืนยันการลบหมวดหมู่?')) return
     const res = await fetch(`/api/admin/categories?id=${id}`, { method: 'DELETE' })
     const result = await res.json()
     if (result.success) fetchAll()
@@ -318,12 +318,12 @@ export default function AdminDashboardPage() {
 
   // ---- Sidebar config ----
   const tabs = [
-    { id: 'overview' as AdminTab, label: 'à¸ à¸²à¸žà¸£à¸§à¸¡', icon: BarChart3 },
-    { id: 'products' as AdminTab, label: 'à¸ªà¸´à¸™à¸„à¹‰à¸²', icon: Box },
-    { id: 'stock' as AdminTab, label: 'à¹€à¸•à¸´à¸¡à¸ªà¸•à¹‡à¸­à¸', icon: Layers },
-    { id: 'stock-history' as AdminTab, label: 'à¸›à¸£à¸°à¸§à¸±à¸•à¸´à¸ªà¸•à¹‡à¸­à¸', icon: Clock },
-    { id: 'orders' as AdminTab, label: 'à¸­à¸­à¹€à¸”à¸­à¸£à¹Œ', icon: Receipt },
-    { id: 'categories' as AdminTab, label: 'à¸«à¸¡à¸§à¸”à¸«à¸¡à¸¹à¹ˆ', icon: Tag },
+    { id: 'overview' as AdminTab, label: 'ภาพรวม', icon: BarChart3 },
+    { id: 'products' as AdminTab, label: 'สินค้า', icon: Box },
+    { id: 'stock' as AdminTab, label: 'สต็อกสินค้า', icon: Layers },
+    { id: 'stock-history' as AdminTab, label: 'ประวัติสต็อก', icon: Clock },
+    { id: 'orders' as AdminTab, label: 'ออเดอร์', icon: Receipt },
+    { id: 'categories' as AdminTab, label: 'หมวดหมู่', icon: Tag },
   ]
 
   const manualDeliveryCount = orders.filter(o => o.status === 'needs_manual_delivery').length
@@ -354,17 +354,17 @@ export default function AdminDashboardPage() {
           <button onClick={() => router.push('/admin11/discounts')}
             className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-textMuted hover:text-textPrimary hover:bg-surfaceLight/40">
             <Tag className="w-4 h-4 shrink-0" />
-            <span>à¸„à¸¹à¸›à¸­à¸‡à¸ªà¹ˆà¸§à¸™à¸¥à¸”</span>
+            <span>คูปองส่วนลด</span>
           </button>
           <button onClick={() => router.push('/admin11/patch-notes')}
             className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-textMuted hover:text-textPrimary hover:bg-surfaceLight/40">
             <Sparkles className="w-4 h-4 shrink-0" />
-            <span>à¸­à¸±à¸›à¹€à¸”à¸•à¸£à¸°à¸šà¸š</span>
+            <span>อัปเดตระบบ</span>
           </button>
         </nav>
         <div className="p-3 border-t border-border/40">
           <button onClick={handleLogout} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-textMuted hover:text-red-400 hover:bg-red-500/10 transition-all">
-            <LogOut className="w-4 h-4" /><span>à¸­à¸­à¸à¸ˆà¸²à¸à¸£à¸°à¸šà¸š</span>
+            <LogOut className="w-4 h-4" /><span>ออกจากระบบ</span>
           </button>
         </div>
       </aside>
@@ -375,10 +375,10 @@ export default function AdminDashboardPage() {
         <div className="sticky top-0 z-10 bg-[#060609]/90 backdrop-blur border-b border-border/40 px-6 py-3 flex items-center justify-between">
           <div>
             <h1 className="font-bold text-textPrimary text-base capitalize">{tabs.find(t => t.id === activeTab)?.label}</h1>
-            <p className="text-[11px] text-textMuted">à¹à¸œà¸‡à¸„à¸§à¸šà¸„à¸¸à¸¡à¸£à¸°à¸šà¸šà¸ˆà¸±à¸”à¸à¸²à¸£à¸£à¹‰à¸²à¸™à¸„à¹‰à¸² ShopAuto 24/7</p>
+            <p className="text-[11px] text-textMuted">ระบบจัดการร้านค้า ShopAuto 24/7</p>
           </div>
           <button onClick={fetchAll} className="flex items-center gap-1.5 text-xs text-textMuted hover:text-primary transition-colors px-3 py-1.5 rounded-lg hover:bg-primary/10">
-            <RefreshCw className="w-3.5 h-3.5" /><span>à¸£à¸µà¹€à¸Ÿà¸£à¸Š</span>
+            <RefreshCw className="w-3.5 h-3.5" /><span>รีเฟรชข้อมูล</span>
           </button>
         </div>
 
@@ -387,7 +387,7 @@ export default function AdminDashboardPage() {
             <div className="flex items-center justify-center min-h-[40vh]">
               <div className="text-center space-y-4">
                 <Loader2 className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto text-primary" />
-                <p className="text-sm text-textMuted">à¸à¸³à¸¥à¸±à¸‡à¸”à¸¶à¸‡à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸à¸²à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥...</p>
+                <p className="text-sm text-textMuted">กำลังดึงข้อมูลฐานข้อมูล...</p>
               </div>
             </div>
           ) : (
@@ -498,19 +498,19 @@ export default function AdminDashboardPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setIsProductModalOpen(false)}>
           <div className="w-full max-w-lg glass-card border border-border/80 rounded-3xl p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-base font-bold text-textPrimary">{editingProduct ? 'à¹à¸à¹‰à¹„à¸‚à¸ªà¸´à¸™à¸„à¹‰à¸²' : 'à¹€à¸žà¸´à¹ˆà¸¡à¸ªà¸´à¸™à¸„à¹‰à¸²à¹ƒà¸«à¸¡à¹ˆ'}</h3>
+              <h3 className="text-base font-bold text-textPrimary">{editingProduct ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่'}</h3>
               <button onClick={() => setIsProductModalOpen(false)} className="p-1.5 text-textMuted hover:text-textPrimary rounded-lg hover:bg-surfaceLight/40">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleProductSubmit} className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
               {[
-                { label: 'à¸Šà¸·à¹ˆà¸­à¸ªà¸´à¸™à¸„à¹‰à¸²', key: 'name', type: 'text', required: true },
-                { label: 'URL à¸£à¸¹à¸›à¸ à¸²à¸ž', key: 'image', type: 'text' },
-                { label: 'à¸£à¸²à¸„à¸²à¸›à¸±à¸ˆà¸ˆà¸¸à¸šà¸±à¸™ (à¸¿)', key: 'price', type: 'number', required: true },
-                { label: 'à¸£à¸²à¸„à¸²à¸à¹ˆà¸­à¸™à¸¥à¸” (à¸¿)', key: 'originalPrice', type: 'number' },
-                { label: 'à¹à¸—à¹‡à¸ (à¸„à¸±à¹ˆà¸™à¸”à¹‰à¸§à¸¢ ,)', key: 'tags', type: 'text' },
-                { label: 'à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸à¸²à¸£à¸ªà¹ˆà¸‡', key: 'deliveryInfo', type: 'text' },
+                { label: 'ชื่อสินค้า', key: 'name', type: 'text', required: true },
+                { label: 'URL รูปภาพ', key: 'image', type: 'text' },
+                { label: 'ราคาปัจจุบัน (฿)', key: 'price', type: 'number', required: true },
+                { label: 'ราคาก่อนลด (฿)', key: 'originalPrice', type: 'number' },
+                { label: 'แท็ก (คั่นด้วย ,)', key: 'tags', type: 'text' },
+                { label: 'ข้อมูลการส่ง', key: 'deliveryInfo', type: 'text' },
               ].map(field => (
                 <div key={field.key}>
                   <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">{field.label}</label>
@@ -521,7 +521,7 @@ export default function AdminDashboardPage() {
                 </div>
               ))}
               <div>
-                <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">à¸«à¸¡à¸§à¸”à¸«à¸¡à¸¹à¹ˆ</label>
+                <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">หมวดหมู่</label>
                 <select
                   value={productForm.categoryId}
                   onChange={e => {
@@ -529,27 +529,27 @@ export default function AdminDashboardPage() {
                     setProductForm(f => ({ ...f, categoryId: e.target.value, category: cat?.slug || 'subscription' }))
                   }}
                   className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-sm text-textPrimary focus:outline-none focus:border-primary/60">
-                  <option value="">â€” à¹„à¸¡à¹ˆà¸£à¸°à¸šà¸¸ â€”</option>
+                  <option value="">- ไม่ระบุ -</option>
                   {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">à¸£à¸¹à¸›à¹à¸šà¸šà¸à¸²à¸£à¸ˆà¸±à¸”à¸ªà¹ˆà¸‡ (Delivery Type)</label>
+                <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">รูปแบบการจัดส่ง (Delivery Type)</label>
                 <select
                   value={(productForm as any).deliveryType || 'auto'}
                   onChange={e => setProductForm(f => ({ ...f, deliveryType: e.target.value }))}
                   className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-sm text-textPrimary focus:outline-none focus:border-primary/60">
-                  <option value="auto">âš¡ à¸ˆà¸±à¸”à¸ªà¹ˆà¸‡à¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´ 24/7 (à¹€à¸Šà¹‡à¸„à¸„à¸¥à¸±à¸‡ DigitalStock)</option>
-                  <option value="manual">ðŸ§‘â€ðŸ’» à¹à¸­à¸”à¸¡à¸´à¸™à¸ˆà¸±à¸”à¸ªà¹ˆà¸‡à¹€à¸­à¸‡ (à¹„à¸¡à¹ˆà¹€à¸Šà¹‡à¸„à¸„à¸¥à¸±à¸‡, à¹‚à¸­à¸™à¹à¸¥à¹‰à¸§à¸£à¸­à¸”à¸³à¹€à¸™à¸´à¸™à¸à¸²à¸£)</option>
+                  <option value="auto">จัดส่งอัตโนมัติ 24/7 (เช็กคลัง DigitalStock)</option>
+                  <option value="manual">แอดมินจัดส่งเอง (ไม่เช็กคลัง, โอนแล้วรอดำเนินการ)</option>
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">à¸£à¸²à¸¢à¸¥à¸°à¹€à¸­à¸µà¸¢à¸”</label>
+                <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">รายละเอียด</label>
                 <textarea rows={3} value={productForm.description} onChange={e => setProductForm(f => ({ ...f, description: e.target.value }))} required
                   className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-sm text-textPrimary focus:outline-none focus:border-primary/60 resize-none" />
               </div>
               <div className="flex gap-4">
-                {[{ label: 'à¸ªà¸´à¸™à¸„à¹‰à¸²à¹ƒà¸«à¸¡à¹ˆ', key: 'isNew' }, { label: 'à¸ªà¸´à¸™à¸„à¹‰à¸²à¹à¸™à¸°à¸™à¸³', key: 'isFeatured' }].map(cb => (
+                {[{ label: 'สินค้าใหม่', key: 'isNew' }, { label: 'สินค้าแนะนำ', key: 'isFeatured' }].map(cb => (
                   <label key={cb.key} className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={(productForm as any)[cb.key]}
                       onChange={e => setProductForm(f => ({ ...f, [cb.key]: e.target.checked }))}
@@ -559,10 +559,10 @@ export default function AdminDashboardPage() {
                 ))}
               </div>
               <div className="pt-2 bg-primary/5 border border-primary/20 rounded-xl p-3 text-xs text-textMuted">
-                ðŸ’¡ à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸à¸£à¸­à¸à¸ˆà¸³à¸™à¸§à¸™à¸ªà¸•à¹‡à¸­à¸ â€” à¸£à¸°à¸šà¸šà¸„à¸³à¸™à¸§à¸“à¸ˆà¸²à¸ DigitalStock à¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´
+                ไม่ต้องกรอกจำนวนสต็อก ระบบคำนวณจาก DigitalStock อัตโนมัติ
               </div>
               <button type="submit" className="w-full py-2.5 bg-primary-gradient rounded-xl text-white font-bold text-sm btn-glow">
-                {editingProduct ? 'à¸šà¸±à¸™à¸—à¸¶à¸à¸à¸²à¸£à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¹à¸›à¸¥à¸‡' : 'à¹€à¸žà¸´à¹ˆà¸¡à¸ªà¸´à¸™à¸„à¹‰à¸²'}
+                {editingProduct ? 'บันทึกการเปลี่ยนแปลง' : 'เพิ่มสินค้า'}
               </button>
             </form>
           </div>
@@ -574,31 +574,31 @@ export default function AdminDashboardPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setIsCatModalOpen(false)}>
           <div className="w-full max-w-md glass-card border border-border/80 rounded-3xl p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-base font-bold text-textPrimary">{editingCat ? 'à¹à¸à¹‰à¹„à¸‚à¸«à¸¡à¸§à¸”à¸«à¸¡à¸¹à¹ˆ' : 'à¹€à¸žà¸´à¹ˆà¸¡à¸«à¸¡à¸§à¸”à¸«à¸¡à¸¹à¹ˆà¹ƒà¸«à¸¡à¹ˆ'}</h3>
+              <h3 className="text-base font-bold text-textPrimary">{editingCat ? 'แก้ไขหมวดหมู่' : 'เพิ่มหมวดหมู่ใหม่'}</h3>
               <button onClick={() => setIsCatModalOpen(false)} className="p-1.5 text-textMuted hover:text-textPrimary rounded-lg hover:bg-surfaceLight/40"><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={handleCatSubmit} className="space-y-3">
               <div>
-                <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">à¸Šà¸·à¹ˆà¸­à¸«à¸¡à¸§à¸”à¸«à¸¡à¸¹à¹ˆ *</label>
+                <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">ชื่อหมวดหมู่ *</label>
                 <input required value={catForm.name} onChange={e => setCatForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="à¹€à¸Šà¹ˆà¸™ à¹à¸žà¹‡à¸à¹€à¸à¸ˆà¸£à¸²à¸¢à¹€à¸”à¸·à¸­à¸™"
+                  placeholder="เช่น แพ็กเกจรายเดือน"
                   className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-sm text-textPrimary focus:outline-none focus:border-primary/60" />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">Slug (à¹ƒà¸Šà¹‰à¸ªà¸³à¸«à¸£à¸±à¸š filter) *</label>
+                <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">Slug (ใช้สำหรับ filter) *</label>
                 <input required value={catForm.slug} onChange={e => setCatForm(f => ({ ...f, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') }))}
-                  placeholder="à¹€à¸Šà¹ˆà¸™ monthly-package"
+                  placeholder="เช่น monthly-package"
                   className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-sm text-textPrimary font-mono focus:outline-none focus:border-primary/60" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">à¹„à¸­à¸„à¸­à¸™ (Emoji)</label>
+                  <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">ไอคอน (Emoji)</label>
                   <input value={catForm.icon} onChange={e => setCatForm(f => ({ ...f, icon: e.target.value }))}
-                    placeholder="ðŸ¤–"
+                    placeholder="🤖"
                     className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-sm text-textPrimary focus:outline-none focus:border-primary/60" />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">à¸ªà¸µ Badge</label>
+                  <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">สี Badge</label>
                   <div className="flex items-center gap-2">
                     <input type="color" value={catForm.color} onChange={e => setCatForm(f => ({ ...f, color: e.target.value }))}
                       className="w-10 h-10 rounded-xl border border-border cursor-pointer bg-transparent" />
@@ -608,20 +608,20 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">à¸¥à¸³à¸”à¸±à¸šà¸à¸²à¸£à¹à¸ªà¸”à¸‡à¸œà¸¥</label>
+                <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">ลำดับการแสดงผล</label>
                 <input type="number" value={catForm.sortOrder} onChange={e => setCatForm(f => ({ ...f, sortOrder: parseInt(e.target.value) || 99 }))}
                   className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-sm text-textPrimary focus:outline-none focus:border-primary/60" />
               </div>
               {/* Preview */}
               <div className="p-3 bg-surfaceLight/20 rounded-xl border border-border/40">
-                <p className="text-[10px] text-textMuted mb-2">à¸•à¸±à¸§à¸­à¸¢à¹ˆà¸²à¸‡ Badge:</p>
+                <p className="text-[10px] text-textMuted mb-2">ตัวอย่าง Badge:</p>
                 <span className="inline-flex items-center gap-1.5 text-sm px-3 py-1 rounded-lg border font-medium"
                   style={{ color: catForm.color, borderColor: catForm.color + '50', background: catForm.color + '20' }}>
-                  {catForm.icon || 'ðŸ“¦'} {catForm.name || 'à¸Šà¸·à¹ˆà¸­à¸«à¸¡à¸§à¸”à¸«à¸¡à¸¹à¹ˆ'}
+                  {catForm.icon || '📦'} {catForm.name || 'ชื่อหมวดหมู่'}
                 </span>
               </div>
               <button type="submit" className="w-full py-2.5 bg-primary-gradient rounded-xl text-white font-bold text-sm btn-glow">
-                {editingCat ? 'à¸šà¸±à¸™à¸—à¸¶à¸à¸à¸²à¸£à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¹à¸›à¸¥à¸‡' : 'à¸ªà¸£à¹‰à¸²à¸‡à¸«à¸¡à¸§à¸”à¸«à¸¡à¸¹à¹ˆ'}
+                {editingCat ? 'บันทึกการเปลี่ยนแปลง' : 'สร้างหมวดหมู่'}
               </button>
             </form>
           </div>
@@ -634,7 +634,7 @@ export default function AdminDashboardPage() {
           <div className="w-full max-w-2xl glass-card border border-border/80 rounded-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h3 className="text-base font-bold text-textPrimary">à¸­à¸­à¹€à¸”à¸­à¸£à¹Œ {selectedOrder.orderNumber}</h3>
+                <h3 className="text-base font-bold text-textPrimary">ออเดอร์ {selectedOrder.orderNumber}</h3>
                 <p className="text-xs text-textMuted">{formatDateWithTime(selectedOrder.createdAt)}</p>
               </div>
               <button onClick={() => setSelectedOrder(null)} className="p-1.5 text-textMuted hover:text-textPrimary rounded-lg hover:bg-surfaceLight/40"><X className="w-5 h-5" /></button>
@@ -644,14 +644,14 @@ export default function AdminDashboardPage() {
               
               {/* 1. Read-only Section */}
               <div className="p-4 bg-surfaceLight/10 border border-border/50 rounded-xl space-y-3">
-                <h4 className="font-bold text-textPrimary mb-2 border-b border-border/50 pb-2">à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸«à¸¥à¸±à¸ (Read-only)</h4>
+                <h4 className="font-bold text-textPrimary mb-2 border-b border-border/50 pb-2">ข้อมูลหลัก (Read-only)</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-textMuted mb-1">à¸Šà¸·à¹ˆà¸­à¸¥à¸¹à¸à¸„à¹‰à¸²</p>
+                    <p className="text-textMuted mb-1">ชื่อลูกค้า</p>
                     <p className="font-bold text-textPrimary">{selectedOrder.customerName}</p>
                   </div>
                   <div>
-                    <p className="text-textMuted mb-1">à¸¢à¸­à¸”à¸Šà¸³à¸£à¸°à¸ªà¸¸à¸—à¸˜à¸´</p>
+                    <p className="text-textMuted mb-1">ยอดชำระสุทธิ</p>
                     <p className="font-bold text-primary text-base">{formatPrice(selectedOrder.total)}</p>
                   </div>
                 </div>
@@ -659,13 +659,13 @@ export default function AdminDashboardPage() {
                 {/* Delivery Items */}
                 {selectedOrder.deliveryItems?.length > 0 && (
                   <div className="mt-2">
-                    <p className="text-textMuted mb-1">à¸ªà¸´à¸™à¸„à¹‰à¸²à¸—à¸µà¹ˆà¸ªà¸±à¹ˆà¸‡à¸‹à¸·à¹‰à¸­ / à¸ªà¹ˆà¸‡à¸¡à¸­à¸š:</p>
+                    <p className="text-textMuted mb-1">สินค้าที่สั่งซื้อ / ส่งมอบ:</p>
                     <div className="space-y-2">
                       {selectedOrder.deliveryItems.map((item: any, i: number) => (
                         <div key={i} className="p-2 bg-surfaceLight/30 rounded-lg">
                           <p className="font-bold text-textPrimary">{item.productName}</p>
-                          {item.licenseKey && <p className="text-[10px] text-textMuted">ðŸ”‘ {item.licenseKey}</p>}
-                          {item.email && <p className="text-[10px] text-textMuted">ðŸ“§ {item.email} | ðŸ”’ {item.password}</p>}
+                          {item.licenseKey && <p className="text-[10px] text-textMuted">ข้อมูลสินค้า: {item.licenseKey}</p>}
+                          {item.email && <p className="text-[10px] text-textMuted">อีเมล: {item.email} | รหัสผ่าน: {item.password}</p>}
                         </div>
                       ))}
                     </div>
@@ -675,7 +675,7 @@ export default function AdminDashboardPage() {
                 {/* Slip Image */}
                 {selectedOrder.slipUrl && (
                   <div className="mt-2">
-                    <p className="text-textMuted mb-1">à¸ªà¸¥à¸´à¸›à¹‚à¸­à¸™à¹€à¸‡à¸´à¸™:</p>
+                    <p className="text-textMuted mb-1">สลิปโอนเงิน:</p>
                     <a href={selectedOrder.slipUrl} target="_blank" rel="noreferrer" className="block w-24 h-32 bg-surfaceLight/50 rounded-lg border border-border overflow-hidden hover:opacity-80 transition-opacity">
                       <img src={selectedOrder.slipUrl} alt="Slip" className="w-full h-full object-cover" />
                     </a>
@@ -685,11 +685,11 @@ export default function AdminDashboardPage() {
 
               {/* 2. Safe Edit Section */}
               <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl space-y-4">
-                <h4 className="font-bold text-primary mb-2 border-b border-primary/20 pb-2">à¹à¸à¹‰à¹„à¸‚à¸‚à¹‰à¸­à¸¡à¸¹à¸¥ (Safe Edit)</h4>
+                <h4 className="font-bold text-primary mb-2 border-b border-primary/20 pb-2">แก้ไขข้อมูล (Safe Edit)</h4>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block font-bold text-textMuted uppercase tracking-wider mb-1.5">à¸­à¸µà¹€à¸¡à¸¥à¸¥à¸¹à¸à¸„à¹‰à¸²</label>
+                    <label className="block font-bold text-textMuted uppercase tracking-wider mb-1.5">อีเมลลูกค้า</label>
                     <input 
                       type="email" 
                       value={editOrderForm.customerEmail} 
@@ -698,43 +698,43 @@ export default function AdminDashboardPage() {
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-textMuted uppercase tracking-wider mb-1.5">à¸ªà¸–à¸²à¸™à¸°à¸­à¸­à¹€à¸”à¸­à¸£à¹Œ</label>
+                    <label className="block font-bold text-textMuted uppercase tracking-wider mb-1.5">สถานะออเดอร์</label>
                     <select 
                       value={editOrderForm.status} 
                       onChange={e => setEditOrderForm({ ...editOrderForm, status: e.target.value })}
                       className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-textPrimary focus:outline-none focus:border-primary/60"
                     >
-                      <option value="pending">à¸£à¸­à¸Šà¸³à¸£à¸°à¹€à¸‡à¸´à¸™ (Pending)</option>
-                      <option value="completed">à¸ªà¸³à¹€à¸£à¹‡à¸ˆ (Completed)</option>
-                      <option value="needs_manual_delivery">à¸£à¸­à¸”à¸³à¹€à¸™à¸´à¸™à¸à¸²à¸£à¹‚à¸”à¸¢à¹à¸­à¸”à¸¡à¸´à¸™ (Manual)</option>
-                      <option value="cancelled">à¸¢à¸à¹€à¸¥à¸´à¸ (Cancelled)</option>
+                      <option value="pending">รอชำระเงิน (Pending)</option>
+                      <option value="completed">สำเร็จ (Completed)</option>
+                      <option value="needs_manual_delivery">รอดำเนินการโดยแอดมิน (Manual)</option>
+                      <option value="cancelled">ยกเลิก (Cancelled)</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-textMuted uppercase tracking-wider mb-1.5">à¸šà¸±à¸™à¸—à¸¶à¸à¸ à¸²à¸¢à¹ƒà¸™ (Internal Note)</label>
+                  <label className="block font-bold text-textMuted uppercase tracking-wider mb-1.5">บันทึกภายใน (Internal Note)</label>
                   <textarea 
                     rows={2}
                     value={editOrderForm.internalNote} 
                     onChange={e => setEditOrderForm({ ...editOrderForm, internalNote: e.target.value })}
-                    placeholder="à¹€à¸Šà¹ˆà¸™ à¹‚à¸­à¸™à¹€à¸‡à¸´à¸™à¸„à¸·à¸™à¹à¸¥à¹‰à¸§ 150 à¸šà¸²à¸—..."
+                    placeholder="เช่น โอนเงินคืนแล้ว 150 บาท..."
                     className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-textPrimary focus:outline-none focus:border-primary/60 resize-none" 
                   />
-                  <p className="text-[10px] text-textMuted mt-1">à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ªà¹ˆà¸§à¸™à¸™à¸µà¹‰à¸¥à¸¹à¸à¸„à¹‰à¸²à¸ˆà¸°à¹„à¸¡à¹ˆà¹€à¸«à¹‡à¸™</p>
+                  <p className="text-[10px] text-textMuted mt-1">ข้อมูลส่วนนี้ลูกค้าจะไม่เห็น</p>
                 </div>
               </div>
 
               {/* 3. Manual Fulfillment */}
               {(editOrderForm.status === 'needs_manual_delivery' || selectedOrder.status === 'needs_manual_delivery') && (
                 <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl space-y-3">
-                  <h4 className="font-bold text-orange-400 mb-1">à¸ˆà¸±à¸”à¸ªà¹ˆà¸‡ Manual</h4>
-                  <p className="text-[10px] text-textMuted mb-2">à¸à¸£à¸­à¸à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ªà¸´à¸™à¸„à¹‰à¸²à¸«à¸£à¸·à¸­à¸„à¸µà¸¢à¹Œà¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸à¸²à¸£à¸ªà¹ˆà¸‡à¹ƒà¸«à¹‰à¸¥à¸¹à¸à¸„à¹‰à¸²à¸œà¹ˆà¸²à¸™à¸£à¸°à¸šà¸šà¸•à¸£à¸‡à¸™à¸µà¹‰ à¹€à¸¡à¸·à¹ˆà¸­à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¸ªà¸–à¸²à¸™à¸°à¹€à¸›à¹‡à¸™ "à¸ªà¸³à¹€à¸£à¹‡à¸ˆ" à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸™à¸µà¹‰à¸ˆà¸°à¹„à¸›à¹à¸ªà¸”à¸‡à¹ƒà¸™à¸«à¸™à¹‰à¸²à¸•à¸£à¸§à¸ˆà¸­à¸­à¹€à¸”à¸­à¸£à¹Œà¸‚à¸­à¸‡à¸¥à¸¹à¸à¸„à¹‰à¸²</p>
+                  <h4 className="font-bold text-orange-400 mb-1">จัดส่ง Manual</h4>
+                  <p className="text-[10px] text-textMuted mb-2">กรอกข้อมูลสินค้าหรือรายละเอียดที่ต้องการส่งให้ลูกค้าผ่านระบบตรงนี้ เมื่อเปลี่ยนสถานะเป็น "สำเร็จ" ข้อมูลนี้จะแสดงในหน้าตรวจออเดอร์ของลูกค้า</p>
                   <textarea 
                     rows={3}
                     value={editOrderForm.deliveredContent} 
                     onChange={e => setEditOrderForm({ ...editOrderForm, deliveredContent: e.target.value })}
-                    placeholder="à¹€à¸Šà¹ˆà¸™ à¹„à¸­à¸”à¸µ: test@test.com à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™: 12345"
+                    placeholder="เช่น ไอดี: test@test.com รหัสผ่าน: 12345"
                     className="w-full px-3 py-2 bg-surface border border-orange-500/30 rounded-xl text-textPrimary focus:outline-none focus:border-orange-500/60 font-mono text-xs" 
                   />
                   <label className="flex items-start gap-2.5 rounded-xl border border-orange-500/20 bg-surface/50 px-3 py-2.5 cursor-pointer">
@@ -745,7 +745,7 @@ export default function AdminDashboardPage() {
                       className="mt-0.5 w-4 h-4 rounded accent-primary"
                     />
                     <span className="text-xs text-textSecondary leading-relaxed">
-                      à¸ªà¹ˆà¸‡à¸­à¸µà¹€à¸¡à¸¥à¹à¸ˆà¹‰à¸‡à¹€à¸•à¸·à¸­à¸™à¸¥à¸¹à¸à¸„à¹‰à¸²à¸–à¸¶à¸‡à¸à¸²à¸£à¸­à¸±à¸›à¹€à¸”à¸•à¸™à¸µà¹‰
+                      ส่งอีเมลแจ้งเตือนลูกค้าถึงการอัปเดตนี้
                     </span>
                   </label>
                 </div>
@@ -755,10 +755,10 @@ export default function AdminDashboardPage() {
               <div className="flex gap-3 pt-2">
                 <button type="submit" disabled={isSavingOrder} className="flex-1 py-2.5 bg-primary-gradient rounded-xl text-white font-bold text-sm btn-glow disabled:opacity-50 flex items-center justify-center gap-2">
                   {isSavingOrder ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                  à¸šà¸±à¸™à¸—à¸¶à¸à¹à¸¥à¸°à¸­à¸±à¸›à¹€à¸”à¸•à¸­à¸­à¹€à¸”à¸­à¸£à¹Œ
+                  บันทึกและอัปเดตออเดอร์
                 </button>
                 <button type="button" onClick={() => setSelectedOrder(null)} className="px-6 py-2.5 bg-surfaceLight hover:bg-surfaceLight/80 border border-border rounded-xl text-textPrimary font-bold text-sm transition-all">
-                  à¸›à¸´à¸”à¸«à¸™à¹‰à¸²à¸•à¹ˆà¸²à¸‡
+                  ปิดหน้าต่าง
                 </button>
               </div>
 
