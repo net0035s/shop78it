@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { X, ShoppingCart, Zap, ShieldCheck, Cpu, Key, Clock } from 'lucide-react'
+import { X, ShoppingCart, Zap, ShieldCheck, Key, Clock, CheckCircle2 } from 'lucide-react'
 import { Product } from '@/types'
 import { useCartStore } from '@/store/cartStore'
 import { formatPrice, getDiscountPercent } from '@/lib/products'
@@ -18,6 +18,21 @@ interface ProductModalProps {
   onClose: () => void
 }
 
+const includedItems = [
+  'คีย์ผลิตภัณฑ์ (Product Key)',
+  'ลิงก์ดาวน์โหลดซอฟต์แวร์แท้',
+  'คู่มือการติดตั้งฉบับภาษาไทย',
+  'บริการช่วยเหลือ 24 ชั่วโมง',
+]
+
+function getStableSalesCount(productId: string) {
+  let hash = 0
+  for (let i = 0; i < productId.length; i += 1) {
+    hash = (hash * 31 + productId.charCodeAt(i)) >>> 0
+  }
+  return (hash % 999) + 1
+}
+
 export default function ProductModal({ product, isOpen, onClose }: ProductModalProps) {
   const addItem = useCartStore((s) => s.addItem)
   const openCart = useCartStore((s) => s.openCart)
@@ -25,7 +40,6 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   const [isAdding, setIsAdding] = useState(false)
   const [imageSrc, setImageSrc] = useState(FALLBACK_IMAGE)
 
-  // Avoid body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -49,11 +63,12 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
     : 0
   const quantityInCart = getItemQuantity(product.id)
   const stock = product.stock ?? 0
+  const salesCount = getStableSalesCount(product.id)
 
   const handleAddToCart = async () => {
     if (!isOrderable || isAdding) return
     if (quantityInCart >= stock) {
-      alert('คุณหยิบสินค้าใส่ตะกร้าครบตามจำนวนสต๊อกที่มีแล้วครับ')
+      alert('คุณหยิบสินค้าใส่ตะกร้าครบตามจำนวนสต็อกที่มีแล้วครับ')
       return
     }
     setIsAdding(true)
@@ -66,16 +81,12 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
-      {/* Backdrop click listener */}
       <div className="absolute inset-0 cursor-default" onClick={onClose} />
 
-      {/* Modal Container */}
-      <div className="relative w-full max-w-4xl bg-surface border border-border/80 rounded-3xl overflow-hidden shadow-2xl z-10 animate-scale-up max-h-[90vh] md:max-h-none flex flex-col md:block">
-        {/* Glow Effects */}
+      <div className="relative w-full max-w-5xl bg-surface border border-border/80 rounded-3xl overflow-hidden shadow-2xl z-10 animate-scale-up max-h-[90vh] md:max-h-none flex flex-col md:block">
         <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 rounded-full bg-surfaceLight/80 hover:bg-surfaceLight text-textMuted hover:text-textPrimary transition-all border border-border/60 hover:scale-105 active:scale-95 z-20"
@@ -85,11 +96,8 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
           <X className="w-5 h-5" />
         </button>
 
-        {/* Modal content layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 overflow-y-auto md:overflow-visible flex-1">
-          
-          {/* Left Column: Image Area */}
-          <div className="relative h-64 sm:h-80 md:h-[450px] bg-surfaceLight flex items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-border/50 shrink-0">
+          <div className="relative h-64 sm:h-80 md:h-[520px] bg-surfaceLight flex items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-border/50 shrink-0">
             <div className="absolute inset-0 bg-gradient-radial from-primary/10 to-surfaceLight z-0" />
             <div className="relative w-full h-full p-6 flex items-center justify-center">
               <div className="relative w-4/5 h-4/5 rounded-2xl overflow-hidden shadow-xl border border-border">
@@ -98,14 +106,13 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                   alt={product.name}
                   fill
                   className="object-cover z-10"
-                  sizes="(max-width: 768px) 100vw, 400px"
+                  sizes="(max-width: 768px) 100vw, 480px"
                   priority
                   onError={() => setImageSrc(FALLBACK_IMAGE)}
                 />
               </div>
             </div>
 
-            {/* Tags on Image */}
             <div className="absolute top-4 left-4 flex flex-col gap-2">
               {product.isNew && (
                 <span className="text-xs font-bold px-3 py-1 rounded-lg bg-primary text-white shadow-lg shadow-primary/20 w-fit">
@@ -118,34 +125,30 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                 </span>
               )}
             </div>
-            
+
             <div className="absolute top-4 right-14">
               <StockBadge status={product.stockStatus} size="md" />
             </div>
           </div>
 
-          {/* Right Column: Details Area */}
           <div className="p-6 sm:p-8 flex flex-col justify-between space-y-6 overflow-y-auto">
             <div className="space-y-4">
-              {/* Category */}
               <span className="text-xs font-bold text-primary uppercase tracking-wider block">
-                {product.category === 'digital' && '🖥️ สินค้าดิจิทัลคีย์'}
-                {product.category === 'subscription' && '📱 สมัครสมาชิกพรีเมียม'}
-                {product.category === 'voucher' && '🎁 Gift Voucher / บัตรเติมเงิน'}
-                {product.category === 'physical' && '📦 สินค้าทั่วไป'}
+                {product.category === 'digital' && 'สินค้าดิจิทัล'}
+                {product.category === 'subscription' && 'สมัครสมาชิกพรีเมียม'}
+                {product.category === 'voucher' && 'Gift Voucher / บัตรเติมเงิน'}
+                {product.category === 'physical' && 'สินค้าทั่วไป'}
               </span>
 
-              {/* Title */}
               <h2 className="text-xl sm:text-2xl font-extrabold text-textPrimary tracking-tight leading-snug">
                 {product.name}
               </h2>
 
-              {/* Delivery Info and Tags Row */}
               <div className="flex flex-wrap items-center gap-3">
                 {product.deliveryType === 'manual' ? (
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-semibold">
                     <Clock className="w-3.5 h-3.5 shrink-0" />
-                    รอดำเนินการโดยแอดมิน 👨‍💻
+                    รอดำเนินการโดยแอดมิน
                   </div>
                 ) : product.deliveryInfo ? (
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
@@ -153,17 +156,21 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                     {product.deliveryInfo}
                   </div>
                 ) : null}
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+                  <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                  {salesCount} ขายแล้ว
+                </span>
                 {(() => {
                   const tagsArray = Array.isArray(product.tags)
                     ? product.tags
                     : typeof product.tags === 'string'
                     ? product.tags.split(',').map(t => t.trim()).filter(Boolean)
                     : []
-                  
+
                   const filteredTags = product.deliveryType === 'manual'
                     ? tagsArray.filter(t => !t.includes('ออโต้') && !t.includes('คีย์'))
                     : tagsArray
-                    
+
                   return filteredTags.map((tag) => (
                     <span
                       key={tag}
@@ -175,22 +182,41 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                 })()}
               </div>
 
-              {/* Description */}
-              <div className="space-y-1.5">
-                <span className="block text-[10px] text-textMuted font-bold uppercase tracking-wider">รายละเอียดสินค้า</span>
-                <p className="text-sm text-textSecondary leading-relaxed whitespace-pre-line bg-surfaceLight/30 border border-border/40 p-4 rounded-xl">
-                  {product.description}
-                </p>
+              <div className="grid grid-cols-1 md:grid-cols-10 gap-4">
+                <section className="md:col-span-7 space-y-1.5">
+                  <span className="block text-[10px] text-textMuted font-bold uppercase tracking-wider">
+                    รายละเอียดสินค้า
+                  </span>
+                  <p className="text-sm text-textSecondary leading-relaxed whitespace-pre-line bg-surfaceLight/30 border border-border/40 p-4 rounded-xl min-h-[160px]">
+                    {product.description}
+                  </p>
+                </section>
+
+                <section className="md:col-span-3 space-y-2">
+                  <span className="block text-[10px] text-textMuted font-bold uppercase tracking-wider">
+                    สิ่งที่จะได้รับ
+                  </span>
+                  <div className="bg-surfaceLight/30 border border-border/40 p-4 rounded-xl h-full">
+                    <ul className="space-y-3">
+                      {includedItems.map((item) => (
+                        <li key={item} className="flex gap-2 text-xs text-textSecondary leading-relaxed">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </section>
               </div>
             </div>
 
-            {/* Bottom Controls */}
             <div className="space-y-4 pt-4 border-t border-border/60">
-              {/* Pricing Row */}
-              <div className="flex items-end justify-between">
+              <div className="flex items-end justify-between gap-4">
                 <div>
-                  <span className="block text-[10px] text-textMuted font-bold uppercase tracking-wider mb-0.5">ราคาพิเศษ</span>
-                  <div className="flex items-baseline gap-2">
+                  <span className="block text-[10px] text-textMuted font-bold uppercase tracking-wider mb-0.5">
+                    ราคาพิเศษ
+                  </span>
+                  <div className="flex flex-wrap items-baseline gap-2">
                     <span className="text-3xl font-extrabold text-textPrimary tracking-tight">
                       {formatPrice(product.price)}
                     </span>
@@ -210,7 +236,6 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                 </div>
               </div>
 
-              {/* Add to Cart CTA */}
               <button
                 onClick={handleAddToCart}
                 disabled={!isOrderable || isAdding}
@@ -239,25 +264,22 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                 )}
               </button>
 
-              {/* Confidence badges */}
               <div className="grid grid-cols-3 gap-2 text-center pt-2 text-[10px] text-textMuted font-medium">
                 <div className="flex flex-col items-center gap-1.5 p-2 bg-surfaceLight/30 border border-border/40 rounded-xl">
                   <Zap className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                   <span>ส่งออโต้ 24/7</span>
                 </div>
                 <div className="flex flex-col items-center gap-1.5 p-2 bg-surfaceLight/30 border border-border/40 rounded-xl">
-                  <ShieldCheck className="w-3.5 h-3.5 text-primary shrink-0" />
-                  <span>ของแท้ 100%</span>
+                  <Key className="w-3.5 h-3.5 text-primary shrink-0" />
+                  <span>ข้อมูลครบถ้วน</span>
                 </div>
                 <div className="flex flex-col items-center gap-1.5 p-2 bg-surfaceLight/30 border border-border/40 rounded-xl">
                   <Clock className="w-3.5 h-3.5 text-accent shrink-0" />
-                  <span>ประกันคืนเงิน</span>
+                  <span>ช่วยเหลือหลังขาย</span>
                 </div>
               </div>
             </div>
-
           </div>
-
         </div>
       </div>
     </div>

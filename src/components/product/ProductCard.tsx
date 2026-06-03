@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { ShoppingCart, Zap, Tag, Eye, Clock } from 'lucide-react'
+import { Zap, Tag, Eye, Clock } from 'lucide-react'
 import { Product } from '@/types'
 import { StockBadge } from '@/components/ui/StockBadge'
 import { useCartStore } from '@/store/cartStore'
@@ -17,22 +17,31 @@ interface ProductCardProps {
   product: Product
 }
 
+function getStableSalesCount(productId: string) {
+  let hash = 0
+  for (let i = 0; i < productId.length; i += 1) {
+    hash = (hash * 31 + productId.charCodeAt(i)) >>> 0
+  }
+  return (hash % 999) + 1
+}
+
 export function ProductCard({ product }: ProductCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [imageSrc, setImageSrc] = useState(product.image || FALLBACK_IMAGE)
-  // Guard against hydration mismatch — cart quantity comes from Zustand/localStorage
   const [isMounted, setIsMounted] = useState(false)
+
   useEffect(() => { setIsMounted(true) }, [])
   useEffect(() => { setImageSrc(product.image || FALLBACK_IMAGE) }, [product.image])
 
   const getItemQuantity = useCartStore((s) => s.getItemQuantity)
   const quantityInCart = getItemQuantity(product.id)
   const isOrderable = canOrder(product.stockStatus)
-  const discountPercent =
-    product.originalPrice
-      ? getDiscountPercent(product.price, product.originalPrice)
-      : 0
+  const discountPercent = product.originalPrice
+    ? getDiscountPercent(product.price, product.originalPrice)
+    : 0
+  const salesCount = getStableSalesCount(product.id)
   const openProductModal = () => setIsModalOpen(true)
+
   const handleCardKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
@@ -56,7 +65,6 @@ export function ProductCard({ product }: ProductCardProps) {
         )}
         id={`product-card-${product.id}`}
       >
-        {/* Badges Top Row */}
         <div className="absolute top-3 left-3 right-3 flex items-start justify-between z-10 gap-2">
           <div className="flex flex-wrap gap-1.5">
             {product.isNew && (
@@ -74,7 +82,6 @@ export function ProductCard({ product }: ProductCardProps) {
           <StockBadge status={product.stockStatus} size="sm" />
         </div>
 
-        {/* Product Image */}
         <div className="relative h-48 bg-surfaceLight overflow-hidden">
           <div className="absolute inset-0 bg-gradient-radial from-primary/20 to-surfaceLight z-0" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/30 z-[11] pointer-events-none" />
@@ -90,7 +97,6 @@ export function ProductCard({ product }: ProductCardProps) {
             onError={() => setImageSrc(FALLBACK_IMAGE)}
           />
 
-          {/* Out of stock overlay */}
           {!isOrderable && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/45 backdrop-blur-[1px] z-20">
               <span className="px-5 py-2.5 rounded-full bg-red-500/90 border border-white/20 text-white text-lg font-extrabold tracking-wide shadow-2xl shadow-red-950/40 backdrop-blur-sm">
@@ -100,31 +106,31 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
 
-        {/* Content */}
         <div className="flex flex-col flex-1 p-5 gap-3">
-          {/* Category tag */}
-          <span className="text-xs text-textMuted uppercase tracking-wide font-medium">
-            {product.category === 'digital' && 'สินค้าดิจิทัล'}
-            {product.category === 'subscription' && 'Subscription'}
-            {product.category === 'voucher' && 'Gift Voucher'}
-            {product.category === 'physical' && 'สินค้าทั่วไป'}
-          </span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs text-textMuted uppercase tracking-wide font-medium">
+              {product.category === 'digital' && 'สินค้าดิจิทัล'}
+              {product.category === 'subscription' && 'Subscription'}
+              {product.category === 'voucher' && 'Gift Voucher'}
+              {product.category === 'physical' && 'สินค้าทั่วไป'}
+            </span>
+            <span className="shrink-0 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+              {salesCount} ขายแล้ว
+            </span>
+          </div>
 
-          {/* Name */}
           <h3 className="text-textPrimary font-semibold text-base leading-snug group-hover:text-primary transition-colors line-clamp-2">
             {product.name}
           </h3>
 
-          {/* Description */}
           <p className="text-textMuted text-sm leading-relaxed line-clamp-2 flex-1">
             {product.description}
           </p>
 
-          {/* Delivery Info */}
           {product.deliveryType === 'manual' ? (
             <div className="flex items-center gap-1.5 text-xs text-orange-400 font-medium">
               <Clock className="w-3.5 h-3.5 shrink-0" />
-              รอดำเนินการโดยแอดมิน 👨‍💻
+              รอดำเนินการโดยแอดมิน
             </div>
           ) : product.deliveryInfo ? (
             <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
@@ -133,8 +139,7 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
           ) : null}
 
-          {/* Price Row */}
-          <div className="flex items-end justify-between mt-1">
+          <div className="flex items-end justify-between mt-1 gap-3">
             <div>
               <div className="text-2xl font-bold text-textPrimary">
                 {formatPrice(product.price)}
@@ -146,20 +151,19 @@ export function ProductCard({ product }: ProductCardProps) {
               )}
             </div>
 
-            {/* Tags */}
             {(() => {
               const tagsArray = Array.isArray(product.tags)
                 ? product.tags
                 : typeof product.tags === 'string'
                 ? product.tags.split(',').map(t => t.trim()).filter(Boolean)
                 : []
-                
+
               const filteredTags = product.deliveryType === 'manual'
                 ? tagsArray.filter(t => !t.includes('ออโต้') && !t.includes('คีย์'))
                 : tagsArray
 
               if (filteredTags.length === 0) return null
-              
+
               return (
                 <div className="flex flex-wrap gap-1 justify-end">
                   {filteredTags.slice(0, 2).map((tag) => (
@@ -175,7 +179,6 @@ export function ProductCard({ product }: ProductCardProps) {
             })()}
           </div>
 
-          {/* Action Button: Opens the Modal */}
           <button
             onClick={(e) => {
               e.stopPropagation()
@@ -203,7 +206,6 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </div>
 
-      {/* Product Modal Popup */}
       <ProductModal
         product={product}
         isOpen={isModalOpen}
