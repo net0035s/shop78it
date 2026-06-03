@@ -14,6 +14,30 @@ import { CheckoutFormData, OrderSummary } from '@/types'
 import Image from 'next/image'
 import { useLanguage } from '@/lib/i18n'
 
+const FALLBACK_IMAGE = '/images/products/placeholder.png'
+
+function CheckoutItemImage({ src, alt }: { src: string; alt: string }) {
+  const [imageSrc, setImageSrc] = useState(src || FALLBACK_IMAGE)
+
+  useEffect(() => {
+    setImageSrc(src || FALLBACK_IMAGE)
+  }, [src])
+
+  return (
+    <div className="relative w-12 h-12 bg-surfaceLight rounded-lg overflow-hidden shrink-0 border border-border">
+      <div className="absolute inset-0 bg-gradient-radial from-primary/20 to-surfaceLight z-0" />
+      <Image
+        src={imageSrc}
+        alt={alt}
+        fill
+        sizes="48px"
+        className="object-cover z-10"
+        onError={() => setImageSrc(FALLBACK_IMAGE)}
+      />
+    </div>
+  )
+}
+
 function CheckoutContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -304,15 +328,7 @@ function CheckoutContent() {
             <div className="max-h-56 overflow-y-auto divide-y divide-border/40 pr-1 space-y-3.5">
               {items.map((item) => (
                 <div key={item.product.id} className="flex gap-3 pt-3 first:pt-0 items-start">
-                  <div className="relative w-12 h-12 bg-surfaceLight rounded-lg overflow-hidden shrink-0 border border-border">
-                    <Image
-                      src={item.product.image}
-                      alt={item.product.name}
-                      fill
-                      sizes="48px"
-                      className="object-cover"
-                    />
-                  </div>
+                  <CheckoutItemImage src={item.product.image} alt={item.product.name} />
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-textPrimary truncate" title={item.product.name}>
                       {item.product.name}

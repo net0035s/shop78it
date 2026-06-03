@@ -11,15 +11,19 @@ import { cn } from '@/lib/utils'
 import { useState, useEffect } from 'react'
 import ProductModal from './ProductModal'
 
+const FALLBACK_IMAGE = '/images/products/placeholder.png'
+
 interface ProductCardProps {
   product: Product
 }
 
 export function ProductCard({ product }: ProductCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [imageSrc, setImageSrc] = useState(product.image || FALLBACK_IMAGE)
   // Guard against hydration mismatch — cart quantity comes from Zustand/localStorage
   const [isMounted, setIsMounted] = useState(false)
   useEffect(() => { setIsMounted(true) }, [])
+  useEffect(() => { setImageSrc(product.image || FALLBACK_IMAGE) }, [product.image])
 
   const getItemQuantity = useCartStore((s) => s.getItemQuantity)
   const quantityInCart = getItemQuantity(product.id)
@@ -72,22 +76,19 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Product Image */}
         <div className="relative h-48 bg-surfaceLight overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/30 z-[1]" />
+          <div className="absolute inset-0 bg-gradient-radial from-primary/20 to-surfaceLight z-0" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/30 z-[11] pointer-events-none" />
           <Image
-            src={product.image}
+            src={imageSrc}
             alt={product.name}
             fill
             className={cn(
-              'object-cover transition-transform duration-500',
+              'object-cover transition-transform duration-500 z-10',
               isOrderable ? 'group-hover:scale-105' : 'grayscale'
             )}
-            onError={(e) => {
-              const target = e.target as HTMLImageElement
-              target.style.display = 'none'
-            }}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            onError={() => setImageSrc(FALLBACK_IMAGE)}
           />
-          {/* Fallback gradient when no image */}
-          <div className="absolute inset-0 bg-gradient-radial from-primary/20 to-surfaceLight" />
 
           {/* Out of stock overlay */}
           {!isOrderable && (

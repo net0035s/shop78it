@@ -8,6 +8,30 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 
+const FALLBACK_IMAGE = '/images/products/placeholder.png'
+
+function CartItemImage({ src, alt }: { src: string; alt: string }) {
+  const [imageSrc, setImageSrc] = useState(src || FALLBACK_IMAGE)
+
+  useEffect(() => {
+    setImageSrc(src || FALLBACK_IMAGE)
+  }, [src])
+
+  return (
+    <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-surface flex-shrink-0">
+      <div className="absolute inset-0 bg-gradient-radial from-primary/20 to-surface z-0" />
+      <Image
+        src={imageSrc}
+        alt={alt}
+        fill
+        sizes="64px"
+        className="object-cover z-10"
+        onError={() => setImageSrc(FALLBACK_IMAGE)}
+      />
+    </div>
+  )
+}
+
 export function CartDrawer() {
   const items = useCartStore((s) => s.items)
   const isOpen = useCartStore((s) => s.isOpen)
@@ -122,16 +146,7 @@ export function CartDrawer() {
                 className="flex gap-3 p-3 bg-surfaceLight rounded-xl border border-border/50"
               >
                 {/* Image */}
-                <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-surface flex-shrink-0">
-                  <Image
-                    src={item.product.image}
-                    alt={item.product.name}
-                    fill
-                    className="object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-radial from-primary/20 to-surface" />
-                </div>
+                <CartItemImage src={item.product.image} alt={item.product.name} />
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">

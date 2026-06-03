@@ -8,6 +8,31 @@ import { formatPrice } from '@/lib/products'
 import Image from 'next/image'
 import { toast } from 'react-hot-toast'
 
+const FALLBACK_IMAGE = '/images/products/placeholder.png'
+
+function CartPageItemImage({ src, alt }: { src: string; alt: string }) {
+  const [imageSrc, setImageSrc] = useState(src || FALLBACK_IMAGE)
+
+  useEffect(() => {
+    setImageSrc(src || FALLBACK_IMAGE)
+  }, [src])
+
+  return (
+    <div className="relative w-16 h-16 sm:w-20 sm:h-20 bg-surfaceLight/80 rounded-xl overflow-hidden shrink-0 border border-border">
+      <div className="absolute inset-0 bg-gradient-radial from-primary/20 to-surfaceLight z-0" />
+      <Image
+        src={imageSrc}
+        alt={alt}
+        fill
+        sizes="(max-width: 640px) 64px, 80px"
+        className="object-cover z-10"
+        priority
+        onError={() => setImageSrc(FALLBACK_IMAGE)}
+      />
+    </div>
+  )
+}
+
 export default function CartPage() {
   const {
     items,
@@ -156,16 +181,7 @@ export default function CartPage() {
                 >
                   {/* Left: Product Info */}
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 bg-surfaceLight/80 rounded-xl overflow-hidden shrink-0 border border-border">
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        sizes="(max-width: 640px) 64px, 80px"
-                        className="object-cover"
-                        priority
-                      />
-                    </div>
+                    <CartPageItemImage src={product.image} alt={product.name} />
                     <div className="min-w-0">
                       <h3 className="text-sm sm:text-base font-bold text-textPrimary truncate hover:text-primary transition-colors">
                         <Link href={`/#products`}>{product.name}</Link>

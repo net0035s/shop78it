@@ -10,6 +10,8 @@ import { StockBadge } from '../ui/StockBadge'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
+const FALLBACK_IMAGE = '/images/products/placeholder.png'
+
 interface ProductModalProps {
   product: Product | null
   isOpen: boolean
@@ -21,6 +23,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   const openCart = useCartStore((s) => s.openCart)
   const getItemQuantity = useCartStore((s) => s.getItemQuantity)
   const [isAdding, setIsAdding] = useState(false)
+  const [imageSrc, setImageSrc] = useState(FALLBACK_IMAGE)
 
   // Avoid body scroll when modal is open
   useEffect(() => {
@@ -33,6 +36,10 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
       document.body.style.overflow = 'unset'
     }
   }, [isOpen])
+
+  useEffect(() => {
+    setImageSrc(product?.image || FALLBACK_IMAGE)
+  }, [product?.image])
 
   if (!isOpen || !product) return null
 
@@ -83,16 +90,17 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
           
           {/* Left Column: Image Area */}
           <div className="relative h-64 sm:h-80 md:h-[450px] bg-surfaceLight flex items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-border/50 shrink-0">
-            <div className="absolute inset-0 bg-gradient-radial from-primary/10 to-surfaceLight" />
+            <div className="absolute inset-0 bg-gradient-radial from-primary/10 to-surfaceLight z-0" />
             <div className="relative w-full h-full p-6 flex items-center justify-center">
               <div className="relative w-4/5 h-4/5 rounded-2xl overflow-hidden shadow-xl border border-border">
                 <Image
-                  src={product.image}
+                  src={imageSrc}
                   alt={product.name}
                   fill
-                  className="object-cover"
+                  className="object-cover z-10"
                   sizes="(max-width: 768px) 100vw, 400px"
                   priority
+                  onError={() => setImageSrc(FALLBACK_IMAGE)}
                 />
               </div>
             </div>
