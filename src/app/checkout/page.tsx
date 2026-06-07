@@ -263,7 +263,7 @@ function CheckoutContent() {
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-textPrimary tracking-tight">ชำระเงิน</h1>
             <p className="text-xs sm:text-sm text-textMuted mt-0.5">
-              {step === 'info' ? 'กรอกรายละเอียดจัดส่งข้อมูล' : 'ชำระเงินด้วยซองอั่งเปาทรูมันนี่เพื่อรับสินค้าทันที'}
+              {step === 'info' ? 'กรอกรายละเอียดสำหรับรับสินค้า' : 'ชำระเงินด้วยซองอั่งเปาทรูมันนี่เพื่อรับสินค้าทันที'}
             </p>
           </div>
         </div>
@@ -307,7 +307,7 @@ function CheckoutContent() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* Left Column: Form or QR */}
+        {/* Left Column: Form or Payment */}
         <div className="lg:col-span-2 space-y-6">
           {step === 'info' ? (
             <CustomerForm
