@@ -8,6 +8,17 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: 'v2.4-hotfix',
+    date: '2026-06-07',
+    title: 'Checkout Thai Encoding และ Version Badge',
+    tags: ['Hotfix', 'UI', 'Encoding'],
+    changes: [
+      'แก้ไขข้อความภาษาไทยในหน้า Checkout ที่แสดงผลเป็นอักขระเพี้ยนให้กลับเป็น UTF-8 ปกติ',
+      'ปรับข้อความหน้า Checkout ให้ตรงกับระบบชำระเงินซองอั่งเปาทรูมันนี่',
+      'เพิ่มเลขเวอร์ชันบนแถบ Navbar เพื่อเทียบเวอร์ชันระหว่างเครื่อง local และเว็บ Production ได้ทันที',
+    ],
+  },
+  {
     version: 'v2.3-update',
     date: '2026-06-07',
     title: 'TrueMoney Angpao Payment',

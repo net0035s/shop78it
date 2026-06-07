@@ -7,6 +7,9 @@ import { useEffect, useRef, useState, type MouseEvent } from 'react'
 import { useTheme } from 'next-themes'
 import { useCartStore } from '@/store/cartStore'
 import { useLanguage } from '@/lib/i18n'
+import { patchNotes } from '@/data/patchNotes'
+
+const CURRENT_VERSION = patchNotes[0]?.version ?? 'dev'
 
 export function Navbar() {
   const itemCount = useCartStore((s) => s.getItemCount())
@@ -106,6 +109,13 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            <span
+              className="hidden sm:inline-flex items-center rounded-full border border-border/70 bg-surfaceLight/40 px-2.5 py-1 text-[10px] font-black uppercase tracking-normal text-textMuted"
+              title="Current version"
+            >
+              {CURRENT_VERSION}
+            </span>
+
             {isMounted ? (
               <button
                 onClick={() => setLanguage(language === 'th' ? 'en' : 'th')}
@@ -169,6 +179,9 @@ export function Navbar() {
 
         {mobileOpen && (
           <div className="md:hidden border-t border-border/50 py-4 space-y-2 animate-fade-in">
+            <div className="px-3 py-2 text-[11px] font-black uppercase text-primary">
+              Version {CURRENT_VERSION}
+            </div>
             {[
               { href: '/', label: t('nav.home') },
               { href: '/#products', label: t('nav.products') },
