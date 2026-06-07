@@ -105,6 +105,12 @@ export async function fulfillPaidOrder(orderIdOrNumber: string): Promise<Fulfill
     })
 
     if (claimedKeys.length !== item.quantity) {
+      void sendTelegramNotify(
+        `⚠️ ออเดอร์ ${order.orderNumber} จ่ายเงินแล้ว แต่สต็อกดิจิทัลหมดกระทันหัน (ชนกัน) ต้องจัดส่งคีย์แบบ Manual!`
+      ).catch((error) => {
+        console.error('Stock race Telegram Notify failed (non-critical):', error)
+      })
+
       manualItems.push(item)
       continue
     }
@@ -164,7 +170,7 @@ export async function fulfillPaidOrder(orderIdOrNumber: string): Promise<Fulfill
     where: { id: order.id },
     data: {
       status: finalStatus,
-      slipUrl: 'beam-webhook',
+      slipUrl: 'truemoney-voucher',
       deliveryItems: {
         create: deliveryItemsToSave.map(encryptDeliveryItemFields),
       },

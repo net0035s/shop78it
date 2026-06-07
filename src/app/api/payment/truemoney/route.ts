@@ -3,6 +3,7 @@ import redeemvouchers from '@prakrit_m/tmn-voucher'
 import prisma from '@/lib/db'
 import { moneyToNumber } from '@/lib/money'
 import { fulfillPaidOrder } from '@/lib/order-fulfillment'
+import { sendTelegramNotify } from '@/lib/telegram'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -233,7 +234,46 @@ export async function POST(request: Request) {
       },
     })
 
-    const fulfilledOrder = await fulfillPaidOrder(order.id)
+    let fulfilledOrder
+    try {
+      fulfilledOrder = await fulfillPaidOrder(order.id)
+    } catch (fulfillError) {
+      console.error('TrueMoney paid but fulfillment failed:', fulfillError)
+
+      await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          status: 'needs_manual_delivery',
+          slipUrl: `truemoney-voucher:${voucherCode}`,
+          internalNote: [
+            order.internalNote,
+            'TrueMoney payment succeeded, but automatic fulfillment failed. Please deliver manually.',
+          ].filter(Boolean).join('\n'),
+        },
+      }).catch((updateError) => {
+        console.error('Failed to mark TrueMoney order for manual delivery:', updateError)
+      })
+
+      void sendTelegramNotify(
+        `🚨 [ฉุกเฉิน] ลูกค้าชำระเงินด้วยซองทรูมันนี่สำเร็จ แต่ออเดอร์ ${order.orderNumber} เกิดข้อผิดพลาดในการตัดสต็อก! กรุณาตรวจสอบและจัดส่งแบบ Manual`
+      ).catch((telegramError) => {
+        console.error('TrueMoney rescue Telegram Notify failed:', telegramError)
+      })
+
+      return NextResponse.json({
+        success: true,
+        warning: true,
+        error: 'ชำระเงินสำเร็จ แต่ระบบจัดส่งอัตโนมัติขัดข้อง กรุณาติดต่อแอดมินเพื่อจัดส่งสินค้า',
+        data: {
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          status: 'needs_manual_delivery',
+          paymentMethod: 'truemoney-voucher',
+          amountReceived: receivedAmountSatang / 100,
+          amountRequired: requiredAmountBaht,
+        },
+      })
+    }
 
     await prisma.order.update({
       where: { id: order.id },

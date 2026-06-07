@@ -2,15 +2,47 @@ import crypto from 'crypto'
 
 const ENCRYPTION_PREFIX = 'enc:v1'
 const IV_LENGTH = 12
+const DEFAULT_UNSAFE_KEYS = new Set([
+  '1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p',
+  'your-32-character-secret-key-here',
+])
+
+function getEncryptionKeyProblem(secret: string | undefined) {
+  if (!secret) return 'ENCRYPTION_KEY is missing'
+  if (secret.length < 32) return 'ENCRYPTION_KEY must be at least 32 characters long'
+  if (DEFAULT_UNSAFE_KEYS.has(secret)) return 'ENCRYPTION_KEY is using an unsafe default value'
+  return ''
+}
+
+function validateEncryptionKey(secret: string | undefined) {
+  const problem = getEncryptionKeyProblem(secret)
+
+  if (problem && process.env.NODE_ENV === 'production') {
+    throw new Error(
+      `${problem}. Generate a secure key with: npx tsx scripts/generate-encryption-key.ts`
+    )
+  }
+
+  if (problem && process.env.NODE_ENV !== 'test') {
+    console.warn(
+      `[security] ${problem}. Generate a secure key with: npx tsx scripts/generate-encryption-key.ts`
+    )
+  }
+}
+
+validateEncryptionKey(process.env.ENCRYPTION_KEY)
 
 function getEncryptionKey() {
   const secret = process.env.ENCRYPTION_KEY
 
-  if (!secret) {
-    throw new Error('ENCRYPTION_KEY is required for encrypted data')
+  const problem = getEncryptionKeyProblem(secret)
+  if (problem) {
+    throw new Error(
+      `${problem}. Generate a secure key with: npx tsx scripts/generate-encryption-key.ts`
+    )
   }
 
-  return crypto.createHash('sha256').update(secret).digest()
+  return crypto.createHash('sha256').update(secret as string).digest()
 }
 
 export function isEncryptedText(value: unknown): value is string {

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { requireAdmin } from '@/lib/admin-auth'
 import { sendOrderReceiptEmail } from '@/lib/mailer'
 import { decryptDeliveryItemFields, decryptText, encryptText } from '@/lib/encryption'
 import { moneyToNumber, normalizeOrderMoney, normalizeProductMoney } from '@/lib/money'
@@ -10,6 +11,9 @@ export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  const authResult = await requireAdmin()
+  if (!authResult.authorized) return authResult.response
+
   try {
     const { id } = params
     const body = await request.json()

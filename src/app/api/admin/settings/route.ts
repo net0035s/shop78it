@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -26,6 +27,9 @@ function normalizeLogoUrl(value: unknown) {
 }
 
 export async function GET() {
+  const authResult = await requireAdmin()
+  if (!authResult.authorized) return authResult.response
+
   try {
     const rows = await prisma.$queryRaw<StoreSettingsRow[]>`
       SELECT "logoUrl", "updatedAt"
@@ -52,6 +56,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const authResult = await requireAdmin()
+  if (!authResult.authorized) return authResult.response
+
   try {
     const body = await request.json().catch(() => ({}))
     const logoUrl = normalizeLogoUrl(body.logoUrl)

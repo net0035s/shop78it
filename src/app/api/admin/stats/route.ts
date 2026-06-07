@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { requireAdmin } from '@/lib/admin-auth'
 import { moneyToNumber, normalizeOrderMoney, normalizeProductMoney } from '@/lib/money'
 
 export const dynamic = 'force-dynamic'
@@ -13,6 +14,9 @@ function sumValue(value: unknown): number {
  * ดึงสถิติสำหรับหน้า Dashboard โดยให้ฐานข้อมูลนับ/รวมยอดให้โดยตรง
  */
 export async function GET() {
+  const authResult = await requireAdmin()
+  if (!authResult.authorized) return authResult.response
+
   try {
     const now = new Date()
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())

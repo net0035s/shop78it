@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { requireAdmin } from '@/lib/admin-auth'
 import { decryptDeliveryItemFields, decryptText } from '@/lib/encryption'
 import { normalizeOrderMoney } from '@/lib/money'
 
@@ -12,6 +13,9 @@ const VALID_ORDER_STATUSES = ['pending', 'completed', 'needs_manual_delivery', '
  * ดึงรายงานบิลใบสั่งซื้อทั้งหมดในร้าน
  */
 export async function GET(request: Request) {
+  const authResult = await requireAdmin()
+  if (!authResult.authorized) return authResult.response
+
   try {
     const { searchParams } = new URL(request.url)
     const page = Math.max(1, Number(searchParams.get('page') || 1))
@@ -48,6 +52,9 @@ export async function GET(request: Request) {
  * อัปเดตสถานะของออเดอร์ด้วยมือแอดมิน (เช่น ยกเลิกออเดอร์)
  */
 export async function PUT(request: Request) {
+  const authResult = await requireAdmin()
+  if (!authResult.authorized) return authResult.response
+
   try {
     const body = await request.json()
     const { id, status } = body

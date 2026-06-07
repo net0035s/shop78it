@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { requireAdmin } from '@/lib/admin-auth'
 
 /**
  * GET /api/admin/categories
  * ดึงหมวดหมู่สินค้าทั้งหมด
  */
 export async function GET() {
+  const authResult = await requireAdmin()
+  if (!authResult.authorized) return authResult.response
+
   try {
     const categories = await prisma.category.findMany({
       orderBy: { sortOrder: 'asc' },
@@ -22,6 +26,9 @@ export async function GET() {
  * เพิ่มหมวดหมู่ใหม่
  */
 export async function POST(request: Request) {
+  const authResult = await requireAdmin()
+  if (!authResult.authorized) return authResult.response
+
   try {
     const body = await request.json()
     const { name, slug, icon, color, sortOrder } = body
@@ -52,6 +59,9 @@ export async function POST(request: Request) {
  * แก้ไขหมวดหมู่
  */
 export async function PUT(request: Request) {
+  const authResult = await requireAdmin()
+  if (!authResult.authorized) return authResult.response
+
   try {
     const body = await request.json()
     const { id, name, slug, icon, color, sortOrder, isActive } = body
@@ -77,6 +87,9 @@ export async function PUT(request: Request) {
  * ลบหมวดหมู่ (ตรวจสอบก่อนว่ามีสินค้าผูกอยู่ไหม)
  */
 export async function DELETE(request: Request) {
+  const authResult = await requireAdmin()
+  if (!authResult.authorized) return authResult.response
+
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')

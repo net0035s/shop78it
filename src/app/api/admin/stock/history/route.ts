@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { requireAdmin } from '@/lib/admin-auth'
 import { decryptText } from '@/lib/encryption'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
+  const authResult = await requireAdmin()
+  if (!authResult.authorized) return authResult.response
+
   try {
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1', 10)

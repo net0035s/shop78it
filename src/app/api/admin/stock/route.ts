@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma, { syncProductStock } from '@/lib/db'
+import { requireAdmin } from '@/lib/admin-auth'
 import { decryptText, encryptText } from '@/lib/encryption'
 
 /**
@@ -8,6 +9,9 @@ import { decryptText, encryptText } from '@/lib/encryption'
  * หลังเพิ่มแล้วจะ sync จำนวนสต็อกจาก DigitalStock ที่ยังไม่ขายจริง
  */
 export async function POST(request: Request) {
+  const authResult = await requireAdmin()
+  if (!authResult.authorized) return authResult.response
+
   try {
     const body = await request.json()
     const { productId, type, bulkData, instructions } = body
@@ -119,6 +123,9 @@ export async function POST(request: Request) {
  * ดึงรายการสต็อกทั้งหมดของสินค้านั้น
  */
 export async function GET(request: Request) {
+  const authResult = await requireAdmin()
+  if (!authResult.authorized) return authResult.response
+
   try {
     const { searchParams } = new URL(request.url)
     const productId = searchParams.get('productId')
@@ -155,6 +162,9 @@ export async function GET(request: Request) {
  * แก้ไขข้อมูล content ของสต็อก
  */
 export async function PUT(request: Request) {
+  const authResult = await requireAdmin()
+  if (!authResult.authorized) return authResult.response
+
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
@@ -200,6 +210,9 @@ export async function PUT(request: Request) {
  * ลบสต็อก เฉพาะรายการที่ยังไม่ขาย
  */
 export async function DELETE(request: Request) {
+  const authResult = await requireAdmin()
+  if (!authResult.authorized) return authResult.response
+
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
