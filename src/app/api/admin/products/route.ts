@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { requireAdmin } from '@/lib/admin-auth'
 import { normalizeProductMoney } from '@/lib/money'
+import { jsonUtf8 } from '@/lib/json-response'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,10 +34,10 @@ export async function GET() {
       stock: p._count?.digitalStocks || 0
     }))
 
-    return NextResponse.json({ success: true, data: products })
+    return jsonUtf8({ success: true, data: products })
   } catch (error) {
     console.error('Error fetching admin products:', error)
-    return NextResponse.json(
+    return jsonUtf8(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูลสินค้า' },
       { status: 500 }
     )
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     } = body
 
     if (!name || !description || !price || !category) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน (ชื่อ, รายละเอียด, ราคา, หมวดหมู่)' },
         { status: 400 }
       )
@@ -93,10 +93,10 @@ export async function POST(request: Request) {
       },
     })
 
-    return NextResponse.json({ success: true, data: normalizeProductMoney(newProduct) })
+    return jsonUtf8({ success: true, data: normalizeProductMoney(newProduct) })
   } catch (error) {
     console.error('Error creating admin product:', error)
-    return NextResponse.json(
+    return jsonUtf8(
       { success: false, error: 'เกิดข้อผิดพลาดในการเพิ่มสินค้า' },
       { status: 500 }
     )
@@ -129,7 +129,7 @@ export async function PUT(request: Request) {
     } = body
 
     if (!id || !name || !description || !price || !category) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'ข้อมูลสำหรับแก้ไขสินค้าไม่ครบถ้วน' },
         { status: 400 }
       )
@@ -152,10 +152,10 @@ export async function PUT(request: Request) {
       },
     })
 
-    return NextResponse.json({ success: true, data: normalizeProductMoney(updatedProduct) })
+    return jsonUtf8({ success: true, data: normalizeProductMoney(updatedProduct) })
   } catch (error) {
     console.error('Error updating admin product:', error)
-    return NextResponse.json(
+    return jsonUtf8(
       { success: false, error: 'เกิดข้อผิดพลาดในการแก้ไขข้อมูลสินค้า' },
       { status: 500 }
     )
@@ -175,7 +175,7 @@ export async function DELETE(request: Request) {
     const id = searchParams.get('id')
 
     if (!id) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'กรุณาระบุ Product ID เพื่อลบสินค้า' },
         { status: 400 }
       )
@@ -185,10 +185,10 @@ export async function DELETE(request: Request) {
       where: { id },
     })
 
-    return NextResponse.json({ success: true, message: 'ลบสินค้าเสร็จสิ้น' })
+    return jsonUtf8({ success: true, message: 'ลบสินค้าเสร็จสิ้น' })
   } catch (error) {
     console.error('Error deleting admin product:', error)
-    return NextResponse.json(
+    return jsonUtf8(
       { success: false, error: 'เกิดข้อผิดพลาดในการลบสินค้า' },
       { status: 500 }
     )

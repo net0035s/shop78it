@@ -63,6 +63,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="th" className={inter.variable} suppressHydrationWarning>
         <head>
+          <meta charSet="utf-8" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link

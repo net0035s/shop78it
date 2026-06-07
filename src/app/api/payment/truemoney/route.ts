@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server'
 import redeemvouchers from '@prakrit_m/tmn-voucher'
 import prisma from '@/lib/db'
 import { moneyToNumber } from '@/lib/money'
 import { fulfillPaidOrder } from '@/lib/order-fulfillment'
 import { sendTelegramNotify } from '@/lib/telegram'
+import { jsonUtf8 } from '@/lib/json-response'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -112,7 +112,7 @@ export async function POST(request: Request) {
     const receivePhone = process.env.TMN_RECEIVE_PHONE
 
     if (!receivePhone) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'ยังไม่ได้ตั้งค่า TMN_RECEIVE_PHONE' },
         { status: 500 }
       )
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
     const voucherLink = typeof body.voucherLink === 'string' ? body.voucherLink.trim() : ''
 
     if (!orderId || !voucherLink) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'กรุณาระบุหมายเลขออเดอร์และลิงก์ซองอั่งเปา' },
         { status: 400 }
       )
@@ -142,21 +142,21 @@ export async function POST(request: Request) {
     })
 
     if (!order) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'ไม่พบออเดอร์นี้' },
         { status: 404 }
       )
     }
 
     if (order.status !== 'pending') {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'ออเดอร์นี้ชำระเงินแล้วหรือกำลังจัดส่งอยู่ ไม่สามารถชำระซ้ำได้' },
         { status: 400 }
       )
     }
 
     if (order.orderItems.length === 0) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'ออเดอร์นี้ไม่มีรายการสินค้า กรุณาติดต่อแอดมิน' },
         { status: 400 }
       )
@@ -166,7 +166,7 @@ export async function POST(request: Request) {
     const requiredAmountSatang = Math.round(requiredAmountBaht * 100)
 
     if (!Number.isFinite(requiredAmountSatang) || requiredAmountSatang < 1) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'ยอดชำระของออเดอร์ไม่ถูกต้อง กรุณาติดต่อแอดมิน' },
         { status: 400 }
       )
@@ -181,7 +181,7 @@ export async function POST(request: Request) {
     const voucherAmount = await verifyVoucherAmount(voucherCode)
 
     if (!voucherAmount.success) {
-      return NextResponse.json(
+      return jsonUtf8(
         {
           success: false,
           error: voucherAmount.error,
@@ -192,7 +192,7 @@ export async function POST(request: Request) {
     }
 
     if (voucherAmount.amountSatang < requiredAmountSatang) {
-      return NextResponse.json(
+      return jsonUtf8(
         {
           success: false,
           error: `ยอดเงินในซองไม่พอ ต้องชำระ ${requiredAmountBaht.toLocaleString('th-TH')} บาท`,
@@ -204,7 +204,7 @@ export async function POST(request: Request) {
     const redeemResult = await redeemvouchers(normalizedPhone, normalizedVoucherLink)
 
     if (!redeemResult.success) {
-      return NextResponse.json(
+      return jsonUtf8(
         {
           success: false,
           error: getRedeemErrorMessage(redeemResult),
@@ -217,7 +217,7 @@ export async function POST(request: Request) {
     const receivedAmountSatang = redeemResult.amount
 
     if (receivedAmountSatang < requiredAmountSatang) {
-      return NextResponse.json(
+      return jsonUtf8(
         {
           success: false,
           error: `ยอดเงินในซองไม่พอ ต้องชำระ ${requiredAmountBaht.toLocaleString('th-TH')} บาท`,
@@ -260,7 +260,7 @@ export async function POST(request: Request) {
         console.error('TrueMoney rescue Telegram Notify failed:', telegramError)
       })
 
-      return NextResponse.json({
+      return jsonUtf8({
         success: true,
         warning: true,
         error: 'ชำระเงินสำเร็จ แต่ระบบจัดส่งอัตโนมัติขัดข้อง กรุณาติดต่อแอดมินเพื่อจัดส่งสินค้า',
@@ -284,7 +284,7 @@ export async function POST(request: Request) {
       console.error('Failed to keep TrueMoney payment marker:', error)
     })
 
-    return NextResponse.json({
+    return jsonUtf8({
       success: true,
       data: {
         ...fulfilledOrder,
@@ -300,7 +300,7 @@ export async function POST(request: Request) {
       ? 'เบอร์รับเงิน TrueMoney ในระบบไม่ถูกต้อง กรุณาติดต่อแอดมิน'
       : 'เกิดข้อผิดพลาดในการตรวจสอบซองอั่งเปา กรุณาลองใหม่อีกครั้ง'
 
-    return NextResponse.json(
+    return jsonUtf8(
       { success: false, error: message },
       { status: 500 }
     )

@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server'
 import { generateOrderNumber } from '@/lib/utils'
 import prisma from '@/lib/db'
 import { CartItem, DeliveryItem } from '@/types'
 import { decryptDeliveryItemFields, decryptText } from '@/lib/encryption'
 import { moneyToNumber } from '@/lib/money'
+import { jsonUtf8 } from '@/lib/json-response'
 
 /**
  * Fallback Mock Delivery Item Generator
@@ -70,14 +70,14 @@ export async function POST(request: Request) {
     const { items, customer, discountCode } = body
 
     if (!Array.isArray(items) || items.length === 0 || !customer) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'กรุณากรอกข้อมูลให้ครบถ้วน (items, customer)' },
         { status: 400 }
       )
     }
 
     if (!customer.name || !customer.email) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'กรุณากรอกชื่อและอีเมลให้ครบถ้วน' },
         { status: 400 }
       )
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
         (item) => !item.productId || !Number.isInteger(item.quantity) || item.quantity <= 0
       )
     ) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'รายการสินค้าไม่ถูกต้อง' },
         { status: 400 }
       )
@@ -114,7 +114,7 @@ export async function POST(request: Request) {
       })
 
       if (!product) {
-        return NextResponse.json(
+        return jsonUtf8(
           {
             success: false,
             error: `ไม่พบสินค้า ID ${item.productId} ในระบบ`,
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
 
       if (product.deliveryType === 'manual') {
         if (product.stockStatus === 'out-of-stock' || product.stock < item.quantity) {
-          return NextResponse.json(
+          return jsonUtf8(
             {
               success: false,
               error: `ขออภัย สินค้า "${product.name}" หมดชั่วคราว`,
@@ -150,7 +150,7 @@ export async function POST(request: Request) {
         take: item.quantity
       })
       if (availableStocks.length < item.quantity) {
-        return NextResponse.json(
+        return jsonUtf8(
           {
             success: false,
             error: `ขออภัย สินค้า "${product.name}" หมดชั่วคราว`,
@@ -171,21 +171,21 @@ export async function POST(request: Request) {
       })
 
       if (!discount || !discount.isActive) {
-        return NextResponse.json(
+        return jsonUtf8(
           { success: false, error: 'โค้ดส่วนลดใช้ไม่ได้ กรุณาตรวจสอบอีกครั้ง' },
           { status: 400 }
         )
       }
 
       if (discount.maxUses !== null && discount.usedCount >= discount.maxUses) {
-        return NextResponse.json(
+        return jsonUtf8(
           { success: false, error: 'โค้ดส่วนลดนี้ถูกใช้ครบจำนวนแล้ว' },
           { status: 400 }
         )
       }
 
       if (discount.expiresAt && discount.expiresAt.getTime() < Date.now()) {
-        return NextResponse.json(
+        return jsonUtf8(
           { success: false, error: 'โค้ดส่วนลดนี้หมดอายุแล้ว' },
           { status: 400 }
         )
@@ -193,7 +193,7 @@ export async function POST(request: Request) {
 
       const minPurchaseAmount = moneyToNumber(discount.minPurchaseAmount)
       if (verifiedSubTotal < minPurchaseAmount) {
-        return NextResponse.json(
+        return jsonUtf8(
           { success: false, error: `ต้องมียอดสั่งซื้อขั้นต่ำ ${minPurchaseAmount.toLocaleString('th-TH')} บาท` },
           { status: 400 }
         )
@@ -214,7 +214,7 @@ export async function POST(request: Request) {
       })
 
       if (!hasMatchingProduct) {
-        return NextResponse.json(
+        return jsonUtf8(
           { success: false, error: 'คูปองนี้ใช้ไม่ได้กับสินค้าในตะกร้า' },
           { status: 400 }
         )
@@ -226,7 +226,7 @@ export async function POST(request: Request) {
       } else if (discount.discountType === 'FIXED') {
         verifiedDiscountAmount = Math.min(Math.max(moneyToNumber(discount.discountValue), 0), verifiedSubTotal)
       } else {
-        return NextResponse.json(
+        return jsonUtf8(
           { success: false, error: 'รูปแบบโค้ดส่วนลดไม่ถูกต้อง' },
           { status: 400 }
         )
@@ -262,7 +262,7 @@ export async function POST(request: Request) {
     // แต่เพื่อความปลอดภัยในการเก็บข้อมูลฝั่งผู้ดูแลระบบ เราจะบันทึกคีย์ชั่วคราวหรือรหัสรายการสินค้าลงออเดอร์
     // โดยในขั้นนี้เราจะสืบค้นหรือเก็บเซสชันสินค้าไว้ในฝั่ง Client (Zustand) และประมวลผลตอนส่ง Slip
 
-    return NextResponse.json({
+    return jsonUtf8({
       success: true,
       data: {
         orderNumber,
@@ -274,7 +274,7 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('Error creating order in DB:', error)
-    return NextResponse.json(
+    return jsonUtf8(
       { success: false, error: 'เกิดข้อผิดพลาดในการสร้างออเดอร์ลงฐานข้อมูล' },
       { status: 500 }
     )
@@ -291,7 +291,7 @@ export async function GET(request: Request) {
     const orderNumber = searchParams.get('orderNumber')
 
     if (!orderNumber) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'กรุณาระบุ Order Number' },
         { status: 400 }
       )
@@ -316,7 +316,7 @@ export async function GET(request: Request) {
     })
 
     if (!order) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'ไม่พบออเดอร์ที่ระบุในระบบหลังบ้าน' },
         { status: 404 }
       )
@@ -386,13 +386,13 @@ export async function GET(request: Request) {
       createdAt: order.createdAt.toISOString(),
     }
 
-    return NextResponse.json({
+    return jsonUtf8({
       success: true,
       data: orderSummary,
     })
   } catch (error) {
     console.error('Error fetching order from DB:', error)
-    return NextResponse.json(
+    return jsonUtf8(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูลออเดอร์' },
       { status: 500 }
     )

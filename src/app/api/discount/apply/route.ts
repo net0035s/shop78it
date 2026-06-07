@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { moneyToNumber } from '@/lib/money'
+import { jsonUtf8 } from '@/lib/json-response'
 
 function normalizeCode(code: unknown) {
   return typeof code === 'string' ? code.trim().toUpperCase() : ''
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     const normalizedItems = normalizeItems(items)
 
     if (!normalizedCode) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'กรุณากรอกโค้ดส่วนลด' },
         { status: 400 }
       )
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
       normalizedItems.length === 0 ||
       normalizedItems.some((item) => !item.productId || !Number.isInteger(item.quantity) || item.quantity <= 0)
     ) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'ไม่พบสินค้าในตะกร้า' },
         { status: 400 }
       )
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     })
 
     if (products.length !== new Set(normalizedItems.map((item) => item.productId)).size) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'รายการสินค้าไม่ถูกต้อง' },
         { status: 400 }
       )
@@ -74,28 +74,28 @@ export async function POST(request: Request) {
     })
 
     if (!discountCode) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'ไม่พบโค้ดส่วนลดนี้ กรุณาตรวจสอบอีกครั้ง' },
         { status: 404 }
       )
     }
 
     if (!discountCode.isActive) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'โค้ดส่วนลดนี้ถูกปิดใช้งานแล้ว' },
         { status: 400 }
       )
     }
 
     if (discountCode.maxUses !== null && discountCode.usedCount >= discountCode.maxUses) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'โค้ดส่วนลดนี้ถูกใช้ครบจำนวนแล้ว' },
         { status: 400 }
       )
     }
 
     if (discountCode.expiresAt && discountCode.expiresAt.getTime() < Date.now()) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'โค้ดส่วนลดนี้หมดอายุแล้ว' },
         { status: 400 }
       )
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
 
     const minPurchaseAmount = moneyToNumber(discountCode.minPurchaseAmount)
     if (subTotal < minPurchaseAmount) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: `ต้องมียอดสั่งซื้อขั้นต่ำ ${minPurchaseAmount.toLocaleString('th-TH')} บาท` },
         { status: 400 }
       )
@@ -114,20 +114,20 @@ export async function POST(request: Request) {
       : null
 
     if (!hasMatchingProduct(products, discountCode, category?.slug)) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'คูปองนี้ใช้ไม่ได้กับสินค้าในตะกร้า' },
         { status: 400 }
       )
     }
 
     if (!['PERCENT', 'FIXED'].includes(discountCode.discountType)) {
-      return NextResponse.json(
+      return jsonUtf8(
         { success: false, error: 'รูปแบบโค้ดส่วนลดไม่ถูกต้อง' },
         { status: 400 }
       )
     }
 
-    return NextResponse.json({
+    return jsonUtf8({
       success: true,
       data: {
         code: discountCode.code,
@@ -138,7 +138,7 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('Error applying discount:', error)
-    return NextResponse.json(
+    return jsonUtf8(
       { success: false, error: 'เกิดข้อผิดพลาดในการตรวจสอบโค้ดส่วนลด' },
       { status: 500 }
     )
