@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   BarChart3, Box, Layers, Receipt, LogOut, RefreshCw,
-  Check, X, Loader2, Tag, Clock, Sparkles
+  Check, X, Loader2, Tag, Clock, Sparkles, Settings
 } from 'lucide-react'
 import { formatPrice } from '@/lib/products'
 import { formatDateWithTime } from '@/lib/utils'
@@ -366,6 +366,11 @@ export default function AdminDashboardPage() {
             className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-textMuted hover:text-textPrimary hover:bg-surfaceLight/40">
             <Sparkles className="w-4 h-4 shrink-0" />
             <span>อัปเดตระบบ</span>
+          </button>
+          <button onClick={() => router.push('/admin11/settings')}
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-textMuted hover:text-textPrimary hover:bg-surfaceLight/40">
+            <Settings className="w-4 h-4 shrink-0" />
+            <span>ตั้งค่าร้านค้า</span>
           </button>
         </nav>
         <div className="p-3 border-t border-border/40">

@@ -13,6 +13,7 @@ export function Navbar() {
   const openCart = useCartStore((s) => s.openCart)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
+  const [logoUrl, setLogoUrl] = useState('')
   const logoClickCount = useRef(0)
   const logoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isRedirecting = useRef(false)
@@ -22,6 +23,18 @@ export function Navbar() {
 
   useEffect(() => {
     setIsMounted(true)
+
+    fetch('/api/settings')
+      .then((response) => response.json())
+      .then((result) => {
+        if (result.success && typeof result.data?.logoUrl === 'string') {
+          setLogoUrl(result.data.logoUrl)
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to load store logo:', error)
+      })
+
     return () => {
       if (logoTimeoutRef.current) clearTimeout(logoTimeoutRef.current)
     }
@@ -55,14 +68,26 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" onClick={handleLogoSecretTrigger} className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-primary-gradient flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/50 transition-all group-hover:scale-105">
-              <Store className="h-[18px] w-[18px] text-white" />
-            </div>
-            <span className="font-black text-xl tracking-normal text-textPrimary">
-              Shop
-              <span className="text-primary">78</span>
-              <span className="text-accent">it</span>
-            </span>
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt="Shop78it"
+                className="h-10 max-w-[160px] object-contain transition-all group-hover:scale-105"
+                onError={() => setLogoUrl('')}
+                draggable={false}
+              />
+            ) : (
+              <>
+                <div className="w-9 h-9 rounded-xl bg-primary-gradient flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/50 transition-all group-hover:scale-105">
+                  <Store className="h-[18px] w-[18px] text-white" />
+                </div>
+                <span className="font-black text-xl tracking-normal text-textPrimary">
+                  Shop
+                  <span className="text-primary">78</span>
+                  <span className="text-accent">it</span>
+                </span>
+              </>
+            )}
           </Link>
 
           <div className="hidden md:flex items-center gap-8">

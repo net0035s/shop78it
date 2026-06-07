@@ -156,3 +156,12 @@ model DiscountCode {
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 }
+
+// ============================================
+// STORE SETTINGS TABLE
+// ============================================
+model StoreSettings {
+  id        String   @id @default(cuid())
+  logoUrl   String?
+  updatedAt DateTime @updatedAt
+}

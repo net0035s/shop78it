@@ -83,7 +83,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
       <div className="absolute inset-0 cursor-default" onClick={onClose} />
 
-      <div className="relative w-full max-w-5xl bg-surface border border-border/80 rounded-3xl overflow-hidden shadow-2xl z-10 animate-scale-up max-h-[90vh] md:max-h-none flex flex-col md:block">
+      <div className="relative w-full max-w-5xl bg-surface border border-border/80 rounded-3xl overflow-hidden shadow-2xl z-10 animate-scale-up max-h-[90vh] flex flex-col">
         <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -96,8 +96,8 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
           <X className="w-5 h-5" />
         </button>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 overflow-y-auto md:overflow-visible flex-1">
-          <div className="relative h-64 sm:h-80 md:h-[520px] bg-surfaceLight flex items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-border/50 shrink-0">
+        <div className="flex flex-col gap-8 overflow-y-auto flex-1">
+          <div className="relative h-64 sm:h-80 md:h-[460px] bg-surfaceLight flex items-center justify-center overflow-hidden border-b border-border/50 shrink-0 w-full max-w-3xl mx-auto">
             <div className="absolute inset-0 bg-gradient-radial from-primary/10 to-surfaceLight z-0" />
             <div className="relative w-full h-full p-6 flex items-center justify-center">
               <div className="relative w-4/5 h-4/5 rounded-2xl overflow-hidden shadow-xl border border-border">
@@ -131,7 +131,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
             </div>
           </div>
 
-          <div className="p-6 sm:p-8 flex flex-col justify-between space-y-6 overflow-y-auto">
+          <div className="w-full max-w-3xl mx-auto px-6 sm:px-8 pb-8 flex flex-col justify-between space-y-6">
             <div className="space-y-4">
               <span className="text-xs font-bold text-primary uppercase tracking-wider block">
                 {product.category === 'digital' && 'สินค้าดิจิทัล'}
@@ -182,8 +182,8 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                 })()}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-10 gap-4">
-                <section className="md:col-span-7 space-y-1.5">
+              <div className="hidden">
+                <section className="space-y-1.5">
                   <span className="block text-[10px] text-textMuted font-bold uppercase tracking-wider">
                     รายละเอียดสินค้า
                   </span>
@@ -192,7 +192,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                   </p>
                 </section>
 
-                <section className="md:col-span-3 space-y-2">
+                <section className="space-y-2">
                   <span className="block text-[10px] text-textMuted font-bold uppercase tracking-wider">
                     สิ่งที่จะได้รับ
                   </span>
@@ -263,6 +263,33 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                   'สินค้าหมดชั่วคราว'
                 )}
               </button>
+
+              <div className="grid grid-cols-1 gap-4 pt-2">
+                <section className="space-y-1.5">
+                  <span className="block text-[10px] text-textMuted font-bold uppercase tracking-wider">
+                    รายละเอียดสินค้า
+                  </span>
+                  <p className="text-sm text-textSecondary leading-relaxed whitespace-pre-line bg-surfaceLight/30 border border-border/40 p-4 rounded-xl min-h-[140px]">
+                    {product.description}
+                  </p>
+                </section>
+
+                <section className="space-y-2">
+                  <span className="block text-[10px] text-textMuted font-bold uppercase tracking-wider">
+                    สิ่งที่จะได้รับ
+                  </span>
+                  <div className="bg-surfaceLight/30 border border-border/40 p-4 rounded-xl">
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {includedItems.map((item) => (
+                        <li key={item} className="flex gap-2 text-xs text-textSecondary leading-relaxed">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </section>
+              </div>
 
               <div className="grid grid-cols-3 gap-2 text-center pt-2 text-[10px] text-textMuted font-medium">
                 <div className="flex flex-col items-center gap-1.5 p-2 bg-surfaceLight/30 border border-border/40 rounded-xl">
