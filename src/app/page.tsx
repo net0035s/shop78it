@@ -88,10 +88,13 @@ export default async function StorefrontPage() {
             </div>
 
             {/* Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-              <Translate tKey="hero.title" />
-              <br />
-              <span className="gradient-text"><Translate tKey="hero.title2" /></span>
+            <h1 className="flex flex-col gap-4 sm:gap-5 text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.35] sm:leading-[1.32] lg:leading-[1.28] mb-7 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+              <span className="block">
+                <Translate tKey="hero.title" />
+              </span>
+              <span className="gradient-text block text-3xl sm:text-4xl lg:text-5xl leading-[1.45] sm:leading-[1.4] lg:leading-[1.35]">
+                <Translate tKey="hero.title2" />
+              </span>
             </h1>
 
             {/* Subheadline */}

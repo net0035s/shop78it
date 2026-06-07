@@ -2,86 +2,59 @@
 
 import Link from 'next/link'
 import { ShoppingCart, Store, Menu, X, Moon, Sun, Globe } from 'lucide-react'
-import { useCartStore } from '@/store/cartStore'
-import { useState, useEffect, useRef } from 'react'
-import { useTheme } from 'next-themes'
-import { useLanguage } from '@/lib/i18n'
 import { UserButton, useUser } from '@clerk/nextjs'
-import { usePathname, useRouter } from 'next/navigation'
-
-const SECRET_CLICK_KEY = 'shop78it-secret-clicks'
-const SECRET_CLICK_STARTED_KEY = 'shop78it-secret-click-started'
+import { useEffect, useRef, useState, type MouseEvent } from 'react'
+import { useTheme } from 'next-themes'
+import { useCartStore } from '@/store/cartStore'
+import { useLanguage } from '@/lib/i18n'
 
 export function Navbar() {
-  const router = useRouter()
-  const pathname = usePathname()
   const itemCount = useCartStore((s) => s.getItemCount())
   const openCart = useCartStore((s) => s.openCart)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+  const logoClickCount = useRef(0)
+  const logoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isRedirecting = useRef(false)
   const { theme, setTheme } = useTheme()
   const { language, setLanguage, t } = useLanguage()
   const { isSignedIn } = useUser()
-  const logoClickCountRef = useRef(0)
-  const logoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  
-  // Must wait for client hydration before showing cart count from localStorage
-  const [isMounted, setIsMounted] = useState(false)
-  useEffect(() => { setIsMounted(true) }, [])
 
   useEffect(() => {
+    setIsMounted(true)
     return () => {
-      if (logoTimerRef.current) clearTimeout(logoTimerRef.current)
+      if (logoTimeoutRef.current) clearTimeout(logoTimeoutRef.current)
     }
   }, [])
 
-  const handleLogoClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    const now = Date.now()
-    const storedStartedAt = Number(sessionStorage.getItem(SECRET_CLICK_STARTED_KEY) || 0)
-    const isExpired = !storedStartedAt || now - storedStartedAt > 3000
-
-    if (isExpired) {
-      logoClickCountRef.current = 0
-      sessionStorage.setItem(SECRET_CLICK_STARTED_KEY, String(now))
-    } else {
-      logoClickCountRef.current = Number(sessionStorage.getItem(SECRET_CLICK_KEY) || logoClickCountRef.current)
-    }
-
-    const nextClickCount = logoClickCountRef.current + 1
-    logoClickCountRef.current = nextClickCount
-    sessionStorage.setItem(SECRET_CLICK_KEY, String(nextClickCount))
-
-    if (nextClickCount === 1 || isExpired) {
-      if (logoTimerRef.current) clearTimeout(logoTimerRef.current)
-      logoTimerRef.current = setTimeout(() => {
-        logoClickCountRef.current = 0
-        logoTimerRef.current = null
-        sessionStorage.removeItem(SECRET_CLICK_KEY)
-        sessionStorage.removeItem(SECRET_CLICK_STARTED_KEY)
-      }, 3000)
-    }
-
-    if (nextClickCount >= 5) {
-      event.preventDefault()
-      if (logoTimerRef.current) clearTimeout(logoTimerRef.current)
-      logoClickCountRef.current = 0
-      logoTimerRef.current = null
-      sessionStorage.removeItem(SECRET_CLICK_KEY)
-      sessionStorage.removeItem(SECRET_CLICK_STARTED_KEY)
-      router.push('/admin11')
+  const handleLogoSecretTrigger = (e: MouseEvent<HTMLAnchorElement>) => {
+    if (isRedirecting.current) {
+      e.preventDefault()
+      e.stopPropagation()
       return
     }
 
-    if (pathname === '/') {
-      event.preventDefault()
+    logoClickCount.current += 1
+
+    if (logoClickCount.current >= 5) {
+      e.preventDefault()
+      e.stopPropagation()
+      isRedirecting.current = true
+      window.location.href = '/admin11'
+      return
     }
+
+    if (logoTimeoutRef.current) clearTimeout(logoTimeoutRef.current)
+    logoTimeoutRef.current = setTimeout(() => {
+      logoClickCount.current = 0
+    }, 1500)
   }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 backdrop-blur-md bg-background/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2.5 group">
+          <Link href="/" onClick={handleLogoSecretTrigger} className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 rounded-xl bg-primary-gradient flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/50 transition-all group-hover:scale-105">
               <Store className="h-[18px] w-[18px] text-white" />
             </div>
@@ -92,37 +65,22 @@ export function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
-            <Link
-              href="/"
-              className="text-textSecondary hover:text-textPrimary transition-colors text-sm font-medium"
-            >
+            <Link href="/" className="text-textSecondary hover:text-textPrimary transition-colors text-sm font-medium">
               {t('nav.home')}
             </Link>
-            <Link
-              href="/#products"
-              className="text-textSecondary hover:text-textPrimary transition-colors text-sm font-medium"
-            >
+            <Link href="/#products" className="text-textSecondary hover:text-textPrimary transition-colors text-sm font-medium">
               {t('nav.products')}
             </Link>
-            <Link
-              href="/cart"
-              className="text-textSecondary hover:text-textPrimary transition-colors text-sm font-medium"
-            >
+            <Link href="/cart" className="text-textSecondary hover:text-textPrimary transition-colors text-sm font-medium">
               {t('nav.cart')}
             </Link>
-            <Link
-              href="/track"
-              className="text-textSecondary hover:text-textPrimary transition-colors text-sm font-medium"
-            >
+            <Link href="/track" className="text-textSecondary hover:text-textPrimary transition-colors text-sm font-medium">
               ติดตามออเดอร์
             </Link>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Language Toggle */}
             {isMounted ? (
               <button
                 onClick={() => setLanguage(language === 'th' ? 'en' : 'th')}
@@ -136,7 +94,6 @@ export function Navbar() {
               <div className="w-[52px] h-[32px] rounded-lg bg-surfaceLight/50 animate-pulse" />
             )}
 
-            {/* Theme Toggle */}
             {isMounted ? (
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -149,7 +106,6 @@ export function Navbar() {
               <div className="w-[32px] h-[32px] rounded-lg bg-surfaceLight/50 animate-pulse" />
             )}
 
-            {/* Cart Button */}
             <button
               onClick={openCart}
               className="relative p-2 rounded-lg text-textSecondary hover:text-textPrimary hover:bg-surfaceLight transition-all"
@@ -176,10 +132,9 @@ export function Navbar() {
               </div>
             )}
 
-            {/* Mobile menu toggle */}
             <button
               className="md:hidden p-2 rounded-lg text-textSecondary hover:text-textPrimary hover:bg-surfaceLight transition-all"
-              onClick={() => setMobileOpen(!mobileOpen)}
+              onClick={() => setMobileOpen((current) => !current)}
               aria-label="เมนู"
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -187,7 +142,6 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {mobileOpen && (
           <div className="md:hidden border-t border-border/50 py-4 space-y-2 animate-fade-in">
             {[

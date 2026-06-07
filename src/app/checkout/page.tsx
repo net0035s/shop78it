@@ -9,7 +9,6 @@ import { useOrderStore } from '@/store/orderStore'
 import { formatPrice } from '@/lib/products'
 import { toast } from 'react-hot-toast'
 import CustomerForm from '@/components/checkout/CustomerForm'
-import PaymentQR from '@/components/checkout/PaymentQR'
 import { CheckoutFormData, OrderSummary } from '@/types'
 import Image from 'next/image'
 import { useLanguage } from '@/lib/i18n'
@@ -60,6 +59,8 @@ function CheckoutContent() {
   const [isVerifying, setIsVerifying] = useState(false)
   const [isCreatingOrder, setIsCreatingOrder] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [voucherLink, setVoucherLink] = useState('')
+  const [isSubmittingVoucher, setIsSubmittingVoucher] = useState(false)
 
   // Discount UI State
   const [discountCodeInput, setDiscountCodeInput] = useState('')
@@ -229,6 +230,55 @@ function CheckoutContent() {
     }
   }
 
+  const handleTrueMoneyPayment = async () => {
+    if (!createdOrder) return
+
+    const trimmedVoucherLink = voucherLink.trim()
+
+    if (!trimmedVoucherLink) {
+      toast.error('กรุณาวางลิงก์ซองอั่งเปาทรูมันนี่ก่อนยืนยัน')
+      return
+    }
+
+    setIsSubmittingVoucher(true)
+    try {
+      const response = await fetch('/api/payment/truemoney', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId: createdOrder.orderNumber,
+          voucherLink: trimmedVoucherLink,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        const completedOrder: OrderSummary = {
+          ...createdOrder,
+          status: result.data?.status === 'completed' ? 'completed' : 'processing',
+          deliveryItems: result.data?.deliveryItems || [],
+        }
+
+        setOrder(completedOrder)
+        addOrderToHistory(completedOrder.orderNumber)
+        clearCart()
+
+        toast.success('ชำระเงินสำเร็จ ระบบกำลังพาไปหน้ารับสินค้า')
+        router.push('/thank-you')
+      } else {
+        toast.error(result.error || 'ไม่สามารถตรวจสอบซองอั่งเปาได้ กรุณาลองใหม่')
+      }
+    } catch (error) {
+      console.error('Error redeeming TrueMoney voucher:', error)
+      toast.error('เกิดข้อผิดพลาดในการยืนยันซองอั่งเปา กรุณาลองใหม่อีกครั้ง')
+    } finally {
+      setIsSubmittingVoucher(false)
+    }
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-fade-in">
       {/* Back Button */}
@@ -308,10 +358,69 @@ function CheckoutContent() {
             />
           ) : (
             createdOrder && (
-              <PaymentQR
-                amount={createdOrder.total}
-                orderNumber={createdOrder.orderNumber}
-              />
+              <div className="bg-surface border border-border shadow-sm rounded-2xl p-6 sm:p-8 space-y-6">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
+                    TrueMoney Angpao
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-textPrimary tracking-tight">
+                    ชำระเงินด้วยซองอั่งเปาทรูมันนี่
+                  </h2>
+                  <p className="text-sm text-textMuted leading-relaxed">
+                    สร้างซองอั่งเปาตามยอดชำระ แล้ววางลิงก์ซองด้านล่าง ระบบจะตรวจยอดเงินและส่งสินค้าให้อัตโนมัติทันทีเมื่อชำระสำเร็จ
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs text-textMuted font-medium">ยอดที่ต้องชำระ</p>
+                      <p className="text-2xl font-extrabold text-primary-light mt-1">
+                        {formatPrice(createdOrder.total)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-textMuted font-medium">เลขออเดอร์</p>
+                      <p className="text-sm font-mono font-bold text-textPrimary mt-1">
+                        {createdOrder.orderNumber}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="block text-sm font-bold text-textPrimary">
+                    ลิงก์ซองอั่งเปาทรูมันนี่
+                  </label>
+                  <input
+                    type="text"
+                    value={voucherLink}
+                    onChange={(event) => setVoucherLink(event.target.value)}
+                    placeholder="วางลิงก์ซองอั่งเปาที่นี่..."
+                    className="w-full bg-surfaceLight/50 border border-border/60 rounded-xl px-4 py-3 text-sm text-textPrimary placeholder:text-textMuted focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all"
+                    disabled={isSubmittingVoucher}
+                  />
+                  <p className="text-xs text-textMuted leading-relaxed">
+                    เพื่อความปลอดภัย ระบบจะรับชำระเฉพาะซองที่มียอดเท่ากับหรือมากกว่ายอดออเดอร์เท่านั้น
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleTrueMoneyPayment}
+                  disabled={isSubmittingVoucher || !voucherLink.trim()}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary-gradient px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-primary/20 transition-all hover:opacity-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSubmittingVoucher ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      กำลังตรวจสอบซอง...
+                    </>
+                  ) : (
+                    'ยืนยันการชำระเงิน'
+                  )}
+                </button>
+              </div>
             )
           )}
         </div>

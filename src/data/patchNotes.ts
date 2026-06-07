@@ -8,6 +8,17 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: 'v2.3-update',
+    date: '2026-06-07',
+    title: 'TrueMoney Angpao Payment',
+    tags: ['Payment', 'Automation', 'Security'],
+    changes: [
+      'เพิ่มระบบชำระเงินด้วยซองอั่งเปาทรูมันนี่อัตโนมัติ',
+      'ตรวจสอบยอดเงินจากซองให้เท่ากับหรือมากกว่ายอดออเดอร์ก่อนตัดสต็อก',
+      'เชื่อมต่อระบบตัดสต็อกและส่งสินค้าอัตโนมัติหลังชำระเงินสำเร็จ',
+    ],
+  },
+  {
     version: 'v2.2-update',
     date: '2026-06-03',
     title: 'Telegram Sold-out Alert',
