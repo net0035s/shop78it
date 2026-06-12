@@ -12,8 +12,11 @@ import CustomerForm from '@/components/checkout/CustomerForm'
 import { CheckoutFormData, OrderSummary } from '@/types'
 import Image from 'next/image'
 import { useLanguage } from '@/lib/i18n'
+import { QRCodeCanvas } from 'qrcode.react'
 
 const FALLBACK_IMAGE = '/images/products/placeholder.png'
+
+type PaymentChannel = 'truemoney' | 'promptpay'
 
 function CheckoutItemImage({ src, alt }: { src: string; alt: string }) {
   const [imageSrc, setImageSrc] = useState(src || FALLBACK_IMAGE)
@@ -59,6 +62,13 @@ function CheckoutContent() {
   const [isCreatingOrder, setIsCreatingOrder] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [voucherLink, setVoucherLink] = useState('')
+  const [paymentChannel, setPaymentChannel] = useState<PaymentChannel>('truemoney')
+  const [promptPayPayload, setPromptPayPayload] = useState('')
+  const [promptPayError, setPromptPayError] = useState('')
+  const [isLoadingPromptPay, setIsLoadingPromptPay] = useState(false)
+  const [slipFile, setSlipFile] = useState<File | null>(null)
+  const [slipError, setSlipError] = useState('')
+  const [isSubmittingSlip, setIsSubmittingSlip] = useState(false)
   const [isSubmittingVoucher, setIsSubmittingVoucher] = useState(false)
 
   // Discount UI State
@@ -177,6 +187,12 @@ function CheckoutContent() {
 
         setCreatedOrder(orderData)
         setOrder(orderData) // save to client store
+        setPaymentChannel('truemoney')
+        setVoucherLink('')
+        setPromptPayPayload('')
+        setPromptPayError('')
+        setSlipFile(null)
+        setSlipError('')
         setStep('payment')
       } else {
         toast.error(result.error || 'เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ')
@@ -238,6 +254,103 @@ function CheckoutContent() {
     }
   }
 
+  useEffect(() => {
+    if (!createdOrder || step !== 'payment' || paymentChannel !== 'promptpay') return
+
+    let cancelled = false
+
+    const loadPromptPayQr = async () => {
+      setIsLoadingPromptPay(true)
+      setPromptPayError('')
+
+      try {
+        const response = await fetch('/api/payment/promptpay', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+          },
+          body: JSON.stringify({
+            orderId: createdOrder.orderNumber,
+          }),
+        })
+
+        const result = await response.json()
+        if (cancelled) return
+
+        if (result.success && result.data?.payload) {
+          setPromptPayPayload(result.data.payload)
+        } else {
+          setPromptPayPayload('')
+          setPromptPayError(result.error || 'ไม่สามารถสร้าง QR PromptPay ได้')
+        }
+      } catch (error) {
+        if (cancelled) return
+        console.error('Error loading PromptPay QR:', error)
+        setPromptPayPayload('')
+        setPromptPayError('ไม่สามารถโหลด QR PromptPay ได้ กรุณาลองใหม่อีกครั้ง')
+      } finally {
+        if (!cancelled) setIsLoadingPromptPay(false)
+      }
+    }
+
+    loadPromptPayQr()
+
+    return () => {
+      cancelled = true
+    }
+  }, [createdOrder, step, paymentChannel])
+
+  const handleSlipOkPayment = async () => {
+    if (!createdOrder) return
+
+    if (!slipFile) {
+      setSlipError('กรุณาอัปโหลดรูปสลิปก่อนยืนยันการชำระเงิน')
+      return
+    }
+
+    setIsSubmittingSlip(true)
+    setSlipError('')
+
+    try {
+      const paymentForm = new FormData()
+      paymentForm.append('orderId', createdOrder.orderNumber)
+      paymentForm.append('files', slipFile)
+
+      const response = await fetch('/api/payment/slipok', {
+        method: 'POST',
+        body: paymentForm,
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        const completedOrder: OrderSummary = {
+          ...createdOrder,
+          status: result.data?.status === 'completed' ? 'completed' : 'processing',
+          deliveryItems: result.data?.deliveryItems || [],
+        }
+
+        setOrder(completedOrder)
+        addOrderToHistory(completedOrder.orderNumber)
+        clearCart()
+
+        toast.success('ตรวจสลิปสำเร็จ ระบบกำลังพาไปหน้ารับสินค้า')
+        router.push('/thank-you')
+      } else {
+        const errorMessage = result.error || 'ตรวจสอบสลิปไม่สำเร็จ กรุณาลองใหม่'
+        setSlipError(errorMessage)
+        toast.error(errorMessage)
+      }
+    } catch (error) {
+      console.error('Error verifying SlipOK payment:', error)
+      const errorMessage = 'เกิดข้อผิดพลาดในการตรวจสอบสลิป กรุณาลองใหม่อีกครั้ง'
+      setSlipError(errorMessage)
+      toast.error(errorMessage)
+    } finally {
+      setIsSubmittingSlip(false)
+    }
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-fade-in">
       {/* Back Button */}
@@ -263,7 +376,7 @@ function CheckoutContent() {
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-textPrimary tracking-tight">ชำระเงิน</h1>
             <p className="text-xs sm:text-sm text-textMuted mt-0.5">
-              {step === 'info' ? 'กรอกรายละเอียดสำหรับรับสินค้า' : 'ชำระเงินด้วยซองอั่งเปาทรูมันนี่เพื่อรับสินค้าทันที'}
+              {step === 'info' ? 'กรอกรายละเอียดสำหรับรับสินค้า' : 'เลือกช่องทางชำระเงินและรับสินค้าอัตโนมัติ'}
             </p>
           </div>
         </div>
@@ -318,16 +431,49 @@ function CheckoutContent() {
           ) : (
             createdOrder && (
               <div className="bg-surface border border-border shadow-sm rounded-2xl p-6 sm:p-8 space-y-6">
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
-                    ซองอั่งเปาทรูมันนี่
+                    เลือกช่องทางชำระเงิน
                   </div>
                   <h2 className="text-xl sm:text-2xl font-extrabold text-textPrimary tracking-tight">
-                    ชำระเงินด้วยซองอั่งเปาทรูมันนี่
+                    ชำระเงินและรับสินค้าทันที
                   </h2>
                   <p className="text-sm text-textMuted leading-relaxed">
-                    สร้างซองอั่งเปาตามยอดชำระ แล้ววางลิงก์ซองด้านล่าง ระบบจะตรวจยอดเงินและส่งสินค้าให้อัตโนมัติทันทีเมื่อชำระสำเร็จ
+                    เลือกชำระผ่านซองอั่งเปาทรูมันนี่ หรือสแกน QR PromptPay แล้วอัปโหลดสลิปให้ระบบตรวจสอบอัตโนมัติ
                   </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentChannel('truemoney')
+                      setSlipError('')
+                    }}
+                    className={`rounded-2xl border px-4 py-3 text-left transition-all ${
+                      paymentChannel === 'truemoney'
+                        ? 'border-emerald-400/60 bg-emerald-500/10 shadow-lg shadow-emerald-500/10'
+                        : 'border-border bg-surfaceLight/30 hover:border-primary/40'
+                    }`}
+                  >
+                    <span className="block text-sm font-extrabold text-textPrimary">🧧 ซองทรูมันนี่</span>
+                    <span className="mt-1 block text-xs text-textMuted">วางลิงก์ซอง ระบบตรวจยอดและจัดส่งสินค้า</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentChannel('promptpay')
+                      setPromptPayError('')
+                    }}
+                    className={`rounded-2xl border px-4 py-3 text-left transition-all ${
+                      paymentChannel === 'promptpay'
+                        ? 'border-primary/70 bg-primary/10 shadow-lg shadow-primary/10'
+                        : 'border-border bg-surfaceLight/30 hover:border-primary/40'
+                    }`}
+                  >
+                    <span className="block text-sm font-extrabold text-textPrimary">💳 สแกน QR โอนเงิน</span>
+                    <span className="mt-1 block text-xs text-textMuted">สร้าง QR PromptPay และตรวจสลิปด้วย SlipOK</span>
+                  </button>
                 </div>
 
                 <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5">
@@ -347,38 +493,123 @@ function CheckoutContent() {
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <label className="block text-sm font-bold text-textPrimary">
-                    ลิงก์ซองอั่งเปาทรูมันนี่
-                  </label>
-                  <input
-                    type="text"
-                    value={voucherLink}
-                    onChange={(event) => setVoucherLink(event.target.value)}
-                    placeholder="วางลิงก์ซองอั่งเปาที่นี่..."
-                    className="w-full bg-surfaceLight/50 border border-border/60 rounded-xl px-4 py-3 text-sm text-textPrimary placeholder:text-textMuted focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all"
-                    disabled={isSubmittingVoucher}
-                  />
-                  <p className="text-xs text-textMuted leading-relaxed">
-                    เพื่อความปลอดภัย ระบบจะรับชำระเฉพาะซองที่มียอดเท่ากับหรือมากกว่ายอดออเดอร์เท่านั้น
-                  </p>
-                </div>
+                {paymentChannel === 'truemoney' ? (
+                  <>
+                    <div className="space-y-3">
+                      <label className="block text-sm font-bold text-textPrimary">
+                        ลิงก์ซองอั่งเปาทรูมันนี่
+                      </label>
+                      <input
+                        type="text"
+                        value={voucherLink}
+                        onChange={(event) => setVoucherLink(event.target.value)}
+                        placeholder="วางลิงก์ซองอั่งเปาที่นี่..."
+                        className="w-full bg-surfaceLight/50 border border-border/60 rounded-xl px-4 py-3 text-sm text-textPrimary placeholder:text-textMuted focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all"
+                        disabled={isSubmittingVoucher}
+                      />
+                      <p className="text-xs text-textMuted leading-relaxed">
+                        เพื่อความปลอดภัย ระบบจะรับชำระเฉพาะซองที่มียอดเท่ากับหรือมากกว่ายอดออเดอร์เท่านั้น
+                      </p>
+                    </div>
 
-                <button
-                  type="button"
-                  onClick={handleTrueMoneyPayment}
-                  disabled={isSubmittingVoucher || !voucherLink.trim()}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary-gradient px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-primary/20 transition-all hover:opacity-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isSubmittingVoucher ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      กำลังตรวจสอบซอง...
-                    </>
-                  ) : (
-                    'ยืนยันการชำระเงิน'
-                  )}
-                </button>
+                    <button
+                      type="button"
+                      onClick={handleTrueMoneyPayment}
+                      disabled={isSubmittingVoucher || !voucherLink.trim()}
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary-gradient px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-primary/20 transition-all hover:opacity-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isSubmittingVoucher ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          กำลังตรวจสอบซอง...
+                        </>
+                      ) : (
+                        'ยืนยันการชำระเงิน'
+                      )}
+                    </button>
+                  </>
+                ) : (
+                  <div className="space-y-5">
+                    <div className="rounded-2xl border border-border/60 bg-surfaceLight/30 p-5">
+                      <div className="flex flex-col lg:flex-row items-center gap-5">
+                        <div className="flex h-64 w-64 items-center justify-center rounded-2xl bg-white p-4 shadow-inner">
+                          {isLoadingPromptPay ? (
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                          ) : promptPayPayload ? (
+                            <QRCodeCanvas
+                              value={promptPayPayload}
+                              size={224}
+                              includeMargin
+                              className="rounded-xl"
+                            />
+                          ) : (
+                            <p className="px-4 text-center text-sm font-semibold text-slate-500">
+                              ไม่สามารถสร้าง QR ได้
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex-1 space-y-3 text-center lg:text-left">
+                          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-bold text-primary-light">
+                            PromptPay QR
+                          </div>
+                          <h3 className="text-lg font-extrabold text-textPrimary">
+                            สแกน QR ตามยอดคำสั่งซื้อ
+                          </h3>
+                          <p className="text-sm leading-relaxed text-textMuted">
+                            หลังโอนเงินแล้วให้อัปโหลดรูปสลิปด้านล่าง ระบบ SlipOK จะตรวจยอดเงินและบัญชีผู้รับก่อนจัดส่งสินค้าอัตโนมัติ
+                          </p>
+                          {promptPayError && (
+                            <p className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-300">
+                              {promptPayError}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="block text-sm font-bold text-textPrimary">
+                        อัปโหลดรูปสลิปโอนเงิน
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg,image/webp"
+                        onChange={(event) => {
+                          setSlipFile(event.target.files?.[0] || null)
+                          setSlipError('')
+                        }}
+                        className="block w-full cursor-pointer rounded-xl border border-border/60 bg-surfaceLight/50 text-sm text-textSecondary file:mr-4 file:border-0 file:bg-primary file:px-4 file:py-3 file:text-sm file:font-bold file:text-white hover:file:bg-primary-light"
+                        disabled={isSubmittingSlip}
+                      />
+                      {slipFile && (
+                        <p className="text-xs text-emerald-400">
+                          เลือกไฟล์แล้ว: {slipFile.name}
+                        </p>
+                      )}
+                      {slipError && (
+                        <p className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-300">
+                          {slipError}
+                        </p>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleSlipOkPayment}
+                      disabled={isSubmittingSlip || !slipFile || !promptPayPayload}
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary-gradient px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-primary/20 transition-all hover:opacity-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isSubmittingSlip ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          กำลังอัปโหลดและตรวจสลิป...
+                        </>
+                      ) : (
+                        'ยืนยันการชำระเงิน'
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             )
           )}

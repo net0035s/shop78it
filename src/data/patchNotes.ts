@@ -8,6 +8,17 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: 'v2.5-update',
+    date: '2026-06-12',
+    title: 'PromptPay QR และ SlipOK Verification',
+    tags: ['Payment', 'SlipOK', 'Automation'],
+    changes: [
+      'เพิ่มตัวเลือกชำระเงินด้วย PromptPay QR ในหน้า Checkout ควบคู่กับซองอั่งเปาทรูมันนี่',
+      'เพิ่ม API ตรวจสลิปผ่าน SlipOK โดยตรวจยอดออเดอร์จากฐานข้อมูลฝั่ง Server ก่อนจัดส่งสินค้า',
+      'เชื่อมระบบตัดสต็อกและส่งสินค้าอัตโนมัติหลัง SlipOK ยืนยันสลิปสำเร็จ พร้อมแจ้งเตือน Telegram หากจัดส่งอัตโนมัติขัดข้อง',
+    ],
+  },
+  {
     version: 'v2.4-hotfix',
     date: '2026-06-07',
     title: 'Checkout Thai Encoding และ Version Badge',

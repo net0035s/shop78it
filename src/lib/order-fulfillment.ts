@@ -13,7 +13,10 @@ type FulfillPaidOrderResult = {
   deliveryItems: Record<string, unknown>[]
 }
 
-export async function fulfillPaidOrder(orderIdOrNumber: string): Promise<FulfillPaidOrderResult> {
+export async function fulfillPaidOrder(
+  orderIdOrNumber: string,
+  paymentMarker = 'truemoney-voucher'
+): Promise<FulfillPaidOrderResult> {
   const order = await prisma.order.findFirst({
     where: {
       OR: [
@@ -170,7 +173,7 @@ export async function fulfillPaidOrder(orderIdOrNumber: string): Promise<Fulfill
     where: { id: order.id },
     data: {
       status: finalStatus,
-      slipUrl: 'truemoney-voucher',
+      slipUrl: paymentMarker,
       deliveryItems: {
         create: deliveryItemsToSave.map(encryptDeliveryItemFields),
       },
