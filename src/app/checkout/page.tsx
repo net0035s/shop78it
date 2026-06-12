@@ -15,8 +15,23 @@ import { useLanguage } from '@/lib/i18n'
 import { QRCodeCanvas } from 'qrcode.react'
 
 const FALLBACK_IMAGE = '/images/products/placeholder.png'
+const PROMPTPAY_EXPIRY_SECONDS = 60 * 60
 
 type PaymentChannel = 'truemoney' | 'promptpay'
+
+function getPromptPaySecondsRemaining(createdAt: string) {
+  const expiresAt = new Date(createdAt).getTime() + PROMPTPAY_EXPIRY_SECONDS * 1000
+  const remainingSeconds = Math.floor((expiresAt - Date.now()) / 1000)
+
+  return Math.max(0, remainingSeconds)
+}
+
+function formatCountdown(seconds: number) {
+  const minutes = Math.floor(seconds / 60).toString().padStart(2, '0')
+  const remainingSeconds = (seconds % 60).toString().padStart(2, '0')
+
+  return `${minutes}:${remainingSeconds}`
+}
 
 function CheckoutItemImage({ src, alt }: { src: string; alt: string }) {
   const [imageSrc, setImageSrc] = useState(src || FALLBACK_IMAGE)
@@ -69,6 +84,7 @@ function CheckoutContent() {
   const [slipFile, setSlipFile] = useState<File | null>(null)
   const [slipError, setSlipError] = useState('')
   const [isSubmittingSlip, setIsSubmittingSlip] = useState(false)
+  const [promptPayTimeRemaining, setPromptPayTimeRemaining] = useState(PROMPTPAY_EXPIRY_SECONDS)
   const [isSubmittingVoucher, setIsSubmittingVoucher] = useState(false)
 
   // Discount UI State
@@ -115,6 +131,70 @@ function CheckoutContent() {
     setMounted(true)
   }, [])
 
+  useEffect(() => {
+    if (!createdOrder || step !== 'payment' || paymentChannel !== 'promptpay') return
+
+    let cancelled = false
+
+    const loadPromptPayQr = async () => {
+      setIsLoadingPromptPay(true)
+      setPromptPayError('')
+
+      try {
+        const response = await fetch('/api/payment/promptpay', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+          },
+          body: JSON.stringify({
+            orderId: createdOrder.orderNumber,
+          }),
+        })
+
+        const result = await response.json()
+        if (cancelled) return
+
+        if (result.success && result.data?.payload) {
+          setPromptPayPayload(result.data.payload)
+        } else {
+          setPromptPayPayload('')
+          setPromptPayError(result.error || 'ไม่สามารถสร้าง QR PromptPay ได้')
+        }
+      } catch (error) {
+        if (cancelled) return
+        console.error('Error loading PromptPay QR:', error)
+        setPromptPayPayload('')
+        setPromptPayError('ไม่สามารถโหลด QR PromptPay ได้ กรุณาลองใหม่อีกครั้ง')
+      } finally {
+        if (!cancelled) setIsLoadingPromptPay(false)
+      }
+    }
+
+    loadPromptPayQr()
+
+    return () => {
+      cancelled = true
+    }
+  }, [createdOrder, step, paymentChannel])
+
+  useEffect(() => {
+    if (!createdOrder || step !== 'payment' || paymentChannel !== 'promptpay') {
+      setPromptPayTimeRemaining(PROMPTPAY_EXPIRY_SECONDS)
+      return
+    }
+
+    const updateRemainingTime = () => {
+      setPromptPayTimeRemaining(getPromptPaySecondsRemaining(createdOrder.createdAt))
+    }
+
+    updateRemainingTime()
+    const timerId = window.setInterval(updateRemainingTime, 1000)
+
+    return () => {
+      window.clearInterval(timerId)
+    }
+  }, [createdOrder, step, paymentChannel])
+
   if (!mounted) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-16 flex items-center justify-center min-h-[50vh]">
@@ -130,6 +210,8 @@ function CheckoutContent() {
   const subtotal = getSubTotal()
   const discountAmount = getDiscountAmount()
   const totalAmount = getTotal()
+  const isPromptPayExpired = step === 'payment' && paymentChannel === 'promptpay' && promptPayTimeRemaining <= 0
+  const promptPayCountdown = formatCountdown(promptPayTimeRemaining)
 
   // If no items in cart and not in payment step, redirect or show empty state
   if (items.length === 0 && step === 'info') {
@@ -254,54 +336,15 @@ function CheckoutContent() {
     }
   }
 
-  useEffect(() => {
-    if (!createdOrder || step !== 'payment' || paymentChannel !== 'promptpay') return
-
-    let cancelled = false
-
-    const loadPromptPayQr = async () => {
-      setIsLoadingPromptPay(true)
-      setPromptPayError('')
-
-      try {
-        const response = await fetch('/api/payment/promptpay', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-          },
-          body: JSON.stringify({
-            orderId: createdOrder.orderNumber,
-          }),
-        })
-
-        const result = await response.json()
-        if (cancelled) return
-
-        if (result.success && result.data?.payload) {
-          setPromptPayPayload(result.data.payload)
-        } else {
-          setPromptPayPayload('')
-          setPromptPayError(result.error || 'ไม่สามารถสร้าง QR PromptPay ได้')
-        }
-      } catch (error) {
-        if (cancelled) return
-        console.error('Error loading PromptPay QR:', error)
-        setPromptPayPayload('')
-        setPromptPayError('ไม่สามารถโหลด QR PromptPay ได้ กรุณาลองใหม่อีกครั้ง')
-      } finally {
-        if (!cancelled) setIsLoadingPromptPay(false)
-      }
-    }
-
-    loadPromptPayQr()
-
-    return () => {
-      cancelled = true
-    }
-  }, [createdOrder, step, paymentChannel])
-
   const handleSlipOkPayment = async () => {
     if (!createdOrder) return
+
+    if (getPromptPaySecondsRemaining(createdOrder.createdAt) <= 0) {
+      const errorMessage = 'หมดเวลาชำระเงินสำหรับออเดอร์นี้แล้ว กรุณากลับไปทำรายการสั่งซื้อใหม่'
+      setSlipError(errorMessage)
+      toast.error(errorMessage)
+      return
+    }
 
     if (!slipFile) {
       setSlipError('กรุณาอัปโหลดรูปสลิปก่อนยืนยันการชำระเงิน')
@@ -530,84 +573,112 @@ function CheckoutContent() {
                   </>
                 ) : (
                   <div className="space-y-5">
-                    <div className="rounded-2xl border border-border/60 bg-surfaceLight/30 p-5">
-                      <div className="flex flex-col lg:flex-row items-center gap-5">
-                        <div className="flex h-64 w-64 items-center justify-center rounded-2xl bg-white p-4 shadow-inner">
-                          {isLoadingPromptPay ? (
-                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                          ) : promptPayPayload ? (
-                            <QRCodeCanvas
-                              value={promptPayPayload}
-                              size={224}
-                              includeMargin
-                              className="rounded-xl"
-                            />
-                          ) : (
-                            <p className="px-4 text-center text-sm font-semibold text-slate-500">
-                              ไม่สามารถสร้าง QR ได้
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex-1 space-y-3 text-center lg:text-left">
-                          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-bold text-primary-light">
-                            PromptPay QR
-                          </div>
-                          <h3 className="text-lg font-extrabold text-textPrimary">
-                            สแกน QR ตามยอดคำสั่งซื้อ
-                          </h3>
-                          <p className="text-sm leading-relaxed text-textMuted">
-                            หลังโอนเงินแล้วให้อัปโหลดรูปสลิปด้านล่าง ระบบ SlipOK จะตรวจยอดเงินและบัญชีผู้รับก่อนจัดส่งสินค้าอัตโนมัติ
-                          </p>
-                          {promptPayError && (
-                            <p className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-300">
-                              {promptPayError}
-                            </p>
-                          )}
-                        </div>
+                    {isPromptPayExpired ? (
+                      <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-5 py-6 text-center">
+                        <p className="text-base font-extrabold text-rose-300">
+                          ⏳ หมดเวลาชำระเงินสำหรับออเดอร์นี้แล้ว กรุณากลับไปทำรายการสั่งซื้อใหม่
+                        </p>
+                        <Link
+                          href="/cart"
+                          className="mt-4 inline-flex items-center justify-center rounded-xl border border-rose-400/30 px-4 py-2 text-sm font-bold text-rose-200 transition-colors hover:bg-rose-500/10"
+                        >
+                          กลับไปที่ตะกร้าสินค้า
+                        </Link>
                       </div>
-                    </div>
+                    ) : (
+                      <>
+                        <div className="rounded-2xl border border-border/60 bg-surfaceLight/30 p-5">
+                          <div className="flex flex-col lg:flex-row items-center gap-5">
+                            <div className="flex flex-col items-center gap-3">
+                              <div className="flex h-64 w-64 items-center justify-center rounded-2xl bg-white p-4 shadow-inner">
+                                {isLoadingPromptPay ? (
+                                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                ) : promptPayPayload ? (
+                                  <div className="relative inline-block">
+                                    <QRCodeCanvas
+                                      value={promptPayPayload}
+                                      size={224}
+                                      includeMargin
+                                      className="rounded-xl"
+                                    />
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+                                      <span className="-rotate-45 whitespace-nowrap text-center text-lg font-black text-red-600 opacity-45 drop-shadow-sm">
+                                        สำหรับชำระเงินร้าน shop78it เท่านั้น
+                                      </span>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p className="px-4 text-center text-sm font-semibold text-slate-500">
+                                    ไม่สามารถสร้าง QR ได้
+                                  </p>
+                                )}
+                              </div>
+                              <p className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-extrabold text-amber-300">
+                                เหลือเวลาชำระเงิน {promptPayCountdown}
+                              </p>
+                            </div>
+                            <div className="flex-1 space-y-3 text-center lg:text-left">
+                              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-bold text-primary-light">
+                                PromptPay QR
+                              </div>
+                              <h3 className="text-lg font-extrabold text-textPrimary">
+                                สแกน QR ตามยอดคำสั่งซื้อ
+                              </h3>
+                              <p className="text-sm leading-relaxed text-textMuted">
+                                หลังโอนเงินแล้วให้อัปโหลดรูปสลิปด้านล่าง ระบบ SlipOK จะตรวจยอดเงินและบัญชีผู้รับก่อนจัดส่งสินค้าอัตโนมัติ
+                              </p>
+                              {promptPayError && (
+                                <p className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-300">
+                                  {promptPayError}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
 
-                    <div className="space-y-3">
-                      <label className="block text-sm font-bold text-textPrimary">
-                        อัปโหลดรูปสลิปโอนเงิน
-                      </label>
-                      <input
-                        type="file"
-                        accept="image/png,image/jpeg,image/jpg,image/webp"
-                        onChange={(event) => {
-                          setSlipFile(event.target.files?.[0] || null)
-                          setSlipError('')
-                        }}
-                        className="block w-full cursor-pointer rounded-xl border border-border/60 bg-surfaceLight/50 text-sm text-textSecondary file:mr-4 file:border-0 file:bg-primary file:px-4 file:py-3 file:text-sm file:font-bold file:text-white hover:file:bg-primary-light"
-                        disabled={isSubmittingSlip}
-                      />
-                      {slipFile && (
-                        <p className="text-xs text-emerald-400">
-                          เลือกไฟล์แล้ว: {slipFile.name}
-                        </p>
-                      )}
-                      {slipError && (
-                        <p className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-300">
-                          {slipError}
-                        </p>
-                      )}
-                    </div>
+                        <div className="space-y-3">
+                          <label className="block text-sm font-bold text-textPrimary">
+                            อัปโหลดรูปสลิปโอนเงิน
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/jpg,image/webp"
+                            onChange={(event) => {
+                              setSlipFile(event.target.files?.[0] || null)
+                              setSlipError('')
+                            }}
+                            className="block w-full cursor-pointer rounded-xl border border-border/60 bg-surfaceLight/50 text-sm text-textSecondary file:mr-4 file:border-0 file:bg-primary file:px-4 file:py-3 file:text-sm file:font-bold file:text-white hover:file:bg-primary-light"
+                            disabled={isSubmittingSlip}
+                          />
+                          {slipFile && (
+                            <p className="text-xs text-emerald-400">
+                              เลือกไฟล์แล้ว: {slipFile.name}
+                            </p>
+                          )}
+                          {slipError && (
+                            <p className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-300">
+                              {slipError}
+                            </p>
+                          )}
+                        </div>
 
-                    <button
-                      type="button"
-                      onClick={handleSlipOkPayment}
-                      disabled={isSubmittingSlip || !slipFile || !promptPayPayload}
-                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary-gradient px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-primary/20 transition-all hover:opacity-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isSubmittingSlip ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          กำลังอัปโหลดและตรวจสลิป...
-                        </>
-                      ) : (
-                        'ยืนยันการชำระเงิน'
-                      )}
-                    </button>
+                        <button
+                          type="button"
+                          onClick={handleSlipOkPayment}
+                          disabled={isSubmittingSlip || !slipFile || !promptPayPayload || isPromptPayExpired}
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary-gradient px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-primary/20 transition-all hover:opacity-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {isSubmittingSlip ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              กำลังอัปโหลดและตรวจสลิป...
+                            </>
+                          ) : (
+                            'ยืนยันการชำระเงิน'
+                          )}
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>

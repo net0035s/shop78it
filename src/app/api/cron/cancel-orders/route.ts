@@ -3,6 +3,8 @@ import prisma, { syncProductStock } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
+const PENDING_ORDER_EXPIRY_MINUTES = 65
+
 export async function GET(request: Request) {
   const cronSecret = process.env.CRON_SECRET
   const authorization = request.headers.get('Authorization')
@@ -12,7 +14,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const targetTime = new Date(Date.now() - 30 * 60 * 1000)
+    const targetTime = new Date(Date.now() - PENDING_ORDER_EXPIRY_MINUTES * 60 * 1000)
 
     const expiredOrders = await prisma.order.findMany({
       where: {
