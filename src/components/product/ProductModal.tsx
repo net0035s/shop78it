@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { X, ShoppingCart, Zap, ShieldCheck, Key, Clock, CheckCircle2 } from 'lucide-react'
+import { X, ShoppingCart, Zap, ShieldCheck, Clock, CheckCircle2 } from 'lucide-react'
 import { Product } from '@/types'
 import { useCartStore } from '@/store/cartStore'
 import { formatPrice, getDiscountPercent } from '@/lib/products'
@@ -18,12 +18,38 @@ interface ProductModalProps {
   onClose: () => void
 }
 
-const includedItems = [
-  'คีย์ผลิตภัณฑ์ (Product Key)',
-  'ลิงก์ดาวน์โหลดซอฟต์แวร์แท้',
-  'คู่มือการติดตั้งฉบับภาษาไทย',
-  'บริการช่วยเหลือ 24 ชั่วโมง',
-]
+type ProductWithOptionalFeatures = Product & {
+  features?: unknown
+  benefits?: unknown
+  includedItems?: unknown
+}
+
+function normalizeFeatureItems(value: unknown) {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => String(item).trim())
+      .filter(Boolean)
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(/\r?\n|,/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+  }
+
+  return []
+}
+
+function getProductFeatureItems(product: Product) {
+  const productWithFeatures = product as ProductWithOptionalFeatures
+
+  return [
+    ...normalizeFeatureItems(productWithFeatures.features),
+    ...normalizeFeatureItems(productWithFeatures.benefits),
+    ...normalizeFeatureItems(productWithFeatures.includedItems),
+  ]
+}
 
 function getStableSalesCount(productId: string) {
   let hash = 0
@@ -64,6 +90,8 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   const quantityInCart = getItemQuantity(product.id)
   const stock = product.stock ?? 0
   const salesCount = getStableSalesCount(product.id)
+  const featureItems = getProductFeatureItems(product)
+  const hasFeatureItems = featureItems.length > 0
 
   const handleAddToCart = async () => {
     if (!isOrderable || isAdding) return
@@ -182,32 +210,6 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                 })()}
               </div>
 
-              <div className="hidden">
-                <section className="space-y-1.5">
-                  <span className="block text-[10px] text-textMuted font-bold uppercase tracking-wider">
-                    รายละเอียดสินค้า
-                  </span>
-                  <p className="text-sm text-textSecondary leading-relaxed whitespace-pre-line bg-surfaceLight/30 border border-border/40 p-4 rounded-xl min-h-[160px]">
-                    {product.description}
-                  </p>
-                </section>
-
-                <section className="space-y-2">
-                  <span className="block text-[10px] text-textMuted font-bold uppercase tracking-wider">
-                    สิ่งที่จะได้รับ
-                  </span>
-                  <div className="bg-surfaceLight/30 border border-border/40 p-4 rounded-xl h-full">
-                    <ul className="space-y-3">
-                      {includedItems.map((item) => (
-                        <li key={item} className="flex gap-2 text-xs text-textSecondary leading-relaxed">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </section>
-              </div>
             </div>
 
             <div className="space-y-4 pt-4 border-t border-border/60">
@@ -274,36 +276,23 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                   </p>
                 </section>
 
-                <section className="space-y-2">
-                  <span className="block text-[10px] text-textMuted font-bold uppercase tracking-wider">
-                    สิ่งที่จะได้รับ
-                  </span>
-                  <div className="bg-surfaceLight/30 border border-border/40 p-4 rounded-xl">
-                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {includedItems.map((item) => (
-                        <li key={item} className="flex gap-2 text-xs text-textSecondary leading-relaxed">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </section>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 text-center pt-2 text-[10px] text-textMuted font-medium">
-                <div className="flex flex-col items-center gap-1.5 p-2 bg-surfaceLight/30 border border-border/40 rounded-xl">
-                  <Zap className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>ส่งออโต้ 24/7</span>
-                </div>
-                <div className="flex flex-col items-center gap-1.5 p-2 bg-surfaceLight/30 border border-border/40 rounded-xl">
-                  <Key className="w-3.5 h-3.5 text-primary shrink-0" />
-                  <span>ข้อมูลครบถ้วน</span>
-                </div>
-                <div className="flex flex-col items-center gap-1.5 p-2 bg-surfaceLight/30 border border-border/40 rounded-xl">
-                  <Clock className="w-3.5 h-3.5 text-accent shrink-0" />
-                  <span>ช่วยเหลือหลังขาย</span>
-                </div>
+                {hasFeatureItems && (
+                  <section className="space-y-2">
+                    <span className="block text-[10px] text-textMuted font-bold uppercase tracking-wider">
+                      สิ่งที่จะได้รับ
+                    </span>
+                    <div className="bg-surfaceLight/30 border border-border/40 p-4 rounded-xl">
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {featureItems.map((item) => (
+                          <li key={item} className="flex gap-2 text-xs text-textSecondary leading-relaxed">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </section>
+                )}
               </div>
             </div>
           </div>

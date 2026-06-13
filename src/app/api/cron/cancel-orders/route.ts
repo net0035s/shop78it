@@ -6,15 +6,24 @@ export const dynamic = 'force-dynamic'
 const PENDING_ORDER_EXPIRY_MINUTES = 65
 
 export async function GET(request: Request) {
+  console.log('🧹 Cron Job Started...')
+
   const cronSecret = process.env.CRON_SECRET
   const authorization = request.headers.get('Authorization')
 
-  if (!cronSecret || authorization !== `Bearer ${cronSecret}`) {
+  if (!cronSecret) {
+    console.error('Cron cancel orders blocked: CRON_SECRET is not configured.')
+    return new NextResponse('Unauthorized', { status: 401 })
+  }
+
+  if (authorization !== `Bearer ${cronSecret}`) {
+    console.warn('Cron cancel orders blocked: invalid Authorization header.')
     return new NextResponse('Unauthorized', { status: 401 })
   }
 
   try {
     const targetTime = new Date(Date.now() - PENDING_ORDER_EXPIRY_MINUTES * 60 * 1000)
+    console.log(`🕒 Cancelling pending orders older than ${PENDING_ORDER_EXPIRY_MINUTES} minutes...`)
 
     const expiredOrders = await prisma.order.findMany({
       where: {
@@ -37,6 +46,7 @@ export async function GET(request: Request) {
     })
 
     if (expiredOrders.length === 0) {
+      console.log('✅ Cancelled 0 orders')
       return NextResponse.json({
         success: true,
         cancelledCount: 0,
@@ -96,6 +106,8 @@ export async function GET(request: Request) {
     await Promise.all(
       Array.from(productIdsToSync).map((productId) => syncProductStock(productId))
     )
+
+    console.log(`✅ Cancelled ${result.cancelledCount} orders`)
 
     return NextResponse.json({
       success: true,
