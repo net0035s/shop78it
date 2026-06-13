@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 
 const FALLBACK_IMAGE = '/images/products/placeholder.png'
 
+// Force update UI for Vercel
 interface ProductModalProps {
   product: Product | null
   isOpen: boolean
