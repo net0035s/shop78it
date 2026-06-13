@@ -92,7 +92,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   const stock = product.stock ?? 0
   const salesCount = getStableSalesCount(product.id)
   const featureItems = getProductFeatureItems(product)
-  const hasFeatureItems = featureItems.length > 0
+  const shouldShowFeatures = product.showFeatures === true
 
   const handleAddToCart = async () => {
     if (!isOrderable || isAdding) return
@@ -277,20 +277,26 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                   </p>
                 </section>
 
-                {hasFeatureItems && (
+                {shouldShowFeatures && (
                   <section className="space-y-2">
                     <span className="block text-[10px] text-textMuted font-bold uppercase tracking-wider">
                       สิ่งที่จะได้รับ
                     </span>
                     <div className="bg-surfaceLight/30 border border-border/40 p-4 rounded-xl">
-                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {featureItems.map((item) => (
-                          <li key={item} className="flex gap-2 text-xs text-textSecondary leading-relaxed">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      {featureItems.length > 0 ? (
+                        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {featureItems.map((item) => (
+                            <li key={item} className="flex gap-2 text-xs text-textSecondary leading-relaxed">
+                              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-xs text-textMuted leading-relaxed">
+                          ยังไม่ได้ระบุข้อมูลสิ่งที่จะได้รับ
+                        </p>
+                      )}
                     </div>
                   </section>
                 )}

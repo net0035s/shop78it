@@ -26,6 +26,7 @@ export interface AdminProduct {
   tags?: string | string[] | null
   isNew?: boolean
   isFeatured?: boolean
+  showFeatures?: boolean
   deliveryInfo?: string | null
   deliveryType?: 'auto' | 'manual' | string
 }

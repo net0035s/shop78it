@@ -64,6 +64,7 @@ export async function POST(request: Request) {
       tags,
       isNew,
       isFeatured,
+      showFeatures,
       deliveryInfo,
       deliveryType,
     } = body
@@ -88,6 +89,7 @@ export async function POST(request: Request) {
         tags: tags || '',
         isNew: !!isNew,
         isFeatured: !!isFeatured,
+        showFeatures: !!showFeatures,
         deliveryInfo: deliveryInfo || 'ส่งด่วนอัตโนมัติ',
         deliveryType: deliveryType || 'auto',
       },
@@ -124,6 +126,7 @@ export async function PUT(request: Request) {
       tags,
       isNew,
       isFeatured,
+      showFeatures,
       deliveryInfo,
       deliveryType,
     } = body
@@ -147,6 +150,7 @@ export async function PUT(request: Request) {
         tags: tags || '',
         isNew: !!isNew,
         isFeatured: !!isFeatured,
+        showFeatures: !!showFeatures,
         deliveryInfo: deliveryInfo || 'ส่งด่วนอัตโนมัติ',
         deliveryType: deliveryType || 'auto',
       },

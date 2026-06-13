@@ -41,6 +41,7 @@ model Product {
   tags          String
   isNew         Boolean        @default(false)
   isFeatured    Boolean        @default(false)
+  showFeatures  Boolean        @default(false)
   deliveryInfo  String?
   deliveryType  String         @default("auto") // 'auto' | 'manual'
   digitalStocks DigitalStock[]

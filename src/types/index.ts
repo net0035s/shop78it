@@ -21,6 +21,7 @@ export interface Product {
   tags?: string | string[]
   isNew?: boolean
   isFeatured?: boolean
+  showFeatures?: boolean
   deliveryInfo?: string // เช่น "ส่งทันที", "1-3 วัน"
   deliveryType?: 'auto' | 'manual'
 }

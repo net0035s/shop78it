@@ -48,7 +48,7 @@ export default function AdminDashboardPage() {
   const [productForm, setProductForm] = useState({
     name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png',
     category: 'subscription', categoryId: '', tags: '', isNew: false, isFeatured: false,
-    deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto'
+    showFeatures: false, deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto'
   })
 
   // Stock form
@@ -212,13 +212,13 @@ export default function AdminDashboardPage() {
   // ---- Product Handlers ----
   const openAddProduct = () => {
     setEditingProduct(null)
-    setProductForm({ name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png', category: categories[0]?.slug || 'subscription', categoryId: categories[0]?.id || '', tags: '', isNew: false, isFeatured: false, deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto' })
+    setProductForm({ name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png', category: categories[0]?.slug || 'subscription', categoryId: categories[0]?.id || '', tags: '', isNew: false, isFeatured: false, showFeatures: false, deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto' })
     setIsProductModalOpen(true)
   }
 
   const openEditProduct = (p: any) => {
     setEditingProduct(p)
-    setProductForm({ name: p.name, description: p.description, price: p.price.toString(), originalPrice: p.originalPrice?.toString() || '', image: p.image, category: p.category, categoryId: p.categoryId || '', tags: p.tags || '', isNew: p.isNew, isFeatured: p.isFeatured, deliveryInfo: p.deliveryInfo || 'ส่งด่วนอัตโนมัติ', deliveryType: p.deliveryType || 'auto' })
+    setProductForm({ name: p.name, description: p.description, price: p.price.toString(), originalPrice: p.originalPrice?.toString() || '', image: p.image, category: p.category, categoryId: p.categoryId || '', tags: p.tags || '', isNew: p.isNew, isFeatured: p.isFeatured, showFeatures: !!p.showFeatures, deliveryInfo: p.deliveryInfo || 'ส่งด่วนอัตโนมัติ', deliveryType: p.deliveryType || 'auto' })
     setIsProductModalOpen(true)
   }
 
@@ -559,8 +559,8 @@ export default function AdminDashboardPage() {
                 <textarea rows={3} value={productForm.description} onChange={e => setProductForm(f => ({ ...f, description: e.target.value }))} required
                   className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-sm text-textPrimary focus:outline-none focus:border-primary/60 resize-none" />
               </div>
-              <div className="flex gap-4">
-                {[{ label: 'สินค้าใหม่', key: 'isNew' }, { label: 'สินค้าแนะนำ', key: 'isFeatured' }].map(cb => (
+              <div className="flex flex-wrap gap-4">
+                {[{ label: 'สินค้าใหม่', key: 'isNew' }, { label: 'สินค้าแนะนำ', key: 'isFeatured' }, { label: 'แสดงส่วนสิ่งที่จะได้รับ', key: 'showFeatures' }].map(cb => (
                   <label key={cb.key} className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={(productForm as any)[cb.key]}
                       onChange={e => setProductForm(f => ({ ...f, [cb.key]: e.target.checked }))}
