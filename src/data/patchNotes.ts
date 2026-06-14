@@ -8,6 +8,15 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: 'v2.6-update',
+    date: '2026-06-14',
+    title: 'อัปเดตระบบป้องกันข้อมูลสูญหาย (Admin Panel)',
+    tags: ['Admin', 'UX', 'Safety'],
+    changes: [
+      'เพิ่มระบบแจ้งเตือนยืนยันการปิดหน้าต่าง (Modal) ในทุกเมนูของระบบหลังบ้าน เพื่อป้องกันปัญหาข้อมูลสูญหายจากการเผลอคลิกนอกกรอบ',
+    ],
+  },
+  {
     version: 'v2.5-update',
     date: '2026-06-12',
     title: 'PromptPay QR และ SlipOK Verification',

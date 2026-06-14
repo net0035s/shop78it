@@ -139,6 +139,25 @@ export default function AdminDashboardPage() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
   const [editOrderForm, setEditOrderForm] = useState({ customerEmail: '', status: '', internalNote: '', deliveredContent: '', sendEmailNotification: true })
   const [isSavingOrder, setIsSavingOrder] = useState(false)
+  const confirmCloseModal = () =>
+    window.confirm('คุณมีข้อมูลที่กำลังแก้ไขอยู่ ต้องการยกเลิกและปิดหน้าต่างนี้หรือไม่?')
+
+  const closeProductModal = () => {
+    if (!confirmCloseModal()) return
+    setIsProductModalOpen(false)
+    setEditingProduct(null)
+  }
+
+  const closeCategoryModal = () => {
+    if (!confirmCloseModal()) return
+    setIsCatModalOpen(false)
+    setEditingCat(null)
+  }
+
+  const closeOrderModal = () => {
+    if (!confirmCloseModal()) return
+    setSelectedOrder(null)
+  }
 
   const openOrderEdit = (order: any) => {
     setSelectedOrder(order)
@@ -506,11 +525,11 @@ export default function AdminDashboardPage() {
 
       {/* ========== MODAL: Product Form ========== */}
       {isProductModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setIsProductModalOpen(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={closeProductModal}>
           <div className="w-full max-w-lg glass-card border border-border/80 rounded-3xl p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-base font-bold text-textPrimary">{editingProduct ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่'}</h3>
-              <button onClick={() => setIsProductModalOpen(false)} className="p-1.5 text-textMuted hover:text-textPrimary rounded-lg hover:bg-surfaceLight/40">
+              <button onClick={closeProductModal} className="p-1.5 text-textMuted hover:text-textPrimary rounded-lg hover:bg-surfaceLight/40">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -582,11 +601,11 @@ export default function AdminDashboardPage() {
 
       {/* ========== MODAL: Category Form ========== */}
       {isCatModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setIsCatModalOpen(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={closeCategoryModal}>
           <div className="w-full max-w-md glass-card border border-border/80 rounded-3xl p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-base font-bold text-textPrimary">{editingCat ? 'แก้ไขหมวดหมู่' : 'เพิ่มหมวดหมู่ใหม่'}</h3>
-              <button onClick={() => setIsCatModalOpen(false)} className="p-1.5 text-textMuted hover:text-textPrimary rounded-lg hover:bg-surfaceLight/40"><X className="w-5 h-5" /></button>
+              <button onClick={closeCategoryModal} className="p-1.5 text-textMuted hover:text-textPrimary rounded-lg hover:bg-surfaceLight/40"><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={handleCatSubmit} className="space-y-3">
               <div>
@@ -641,14 +660,14 @@ export default function AdminDashboardPage() {
 
       {/* ========== MODAL: Order Detail & Safe Edit ========== */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setSelectedOrder(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={closeOrderModal}>
           <div className="w-full max-w-2xl glass-card border border-border/80 rounded-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h3 className="text-base font-bold text-textPrimary">ออเดอร์ {selectedOrder.orderNumber}</h3>
                 <p className="text-xs text-textMuted">{formatDateWithTime(selectedOrder.createdAt)}</p>
               </div>
-              <button onClick={() => setSelectedOrder(null)} className="p-1.5 text-textMuted hover:text-textPrimary rounded-lg hover:bg-surfaceLight/40"><X className="w-5 h-5" /></button>
+              <button onClick={closeOrderModal} className="p-1.5 text-textMuted hover:text-textPrimary rounded-lg hover:bg-surfaceLight/40"><X className="w-5 h-5" /></button>
             </div>
 
             <form onSubmit={handleSaveOrderEdit} className="space-y-6 text-xs">
@@ -768,7 +787,7 @@ export default function AdminDashboardPage() {
                   {isSavingOrder ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                   บันทึกและอัปเดตออเดอร์
                 </button>
-                <button type="button" onClick={() => setSelectedOrder(null)} className="px-6 py-2.5 bg-surfaceLight hover:bg-surfaceLight/80 border border-border rounded-xl text-textPrimary font-bold text-sm transition-all">
+                <button type="button" onClick={closeOrderModal} className="px-6 py-2.5 bg-surfaceLight hover:bg-surfaceLight/80 border border-border rounded-xl text-textPrimary font-bold text-sm transition-all">
                   ปิดหน้าต่าง
                 </button>
               </div>
