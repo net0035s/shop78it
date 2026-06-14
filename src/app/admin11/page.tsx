@@ -15,6 +15,7 @@ import { OrderManager } from '@/components/admin/OrderManager'
 import { CategoryManager } from '@/components/admin/CategoryManager'
 
 type AdminTab = 'overview' | 'products' | 'stock' | 'stock-history' | 'orders' | 'categories'
+type ConfirmCloseTarget = 'product' | 'category' | 'order'
 
 // ===================================================
 // MAIN ADMIN DASHBOARD
@@ -139,24 +140,40 @@ export default function AdminDashboardPage() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
   const [editOrderForm, setEditOrderForm] = useState({ customerEmail: '', status: '', internalNote: '', deliveredContent: '', sendEmailNotification: true })
   const [isSavingOrder, setIsSavingOrder] = useState(false)
-  const confirmCloseModal = () =>
-    window.confirm('คุณมีข้อมูลที่กำลังแก้ไขอยู่ ต้องการยกเลิกและปิดหน้าต่างนี้หรือไม่?')
+  const [confirmCloseTarget, setConfirmCloseTarget] = useState<ConfirmCloseTarget | null>(null)
 
   const closeProductModal = () => {
-    if (!confirmCloseModal()) return
-    setIsProductModalOpen(false)
-    setEditingProduct(null)
+    setConfirmCloseTarget('product')
   }
 
   const closeCategoryModal = () => {
-    if (!confirmCloseModal()) return
-    setIsCatModalOpen(false)
-    setEditingCat(null)
+    setConfirmCloseTarget('category')
   }
 
   const closeOrderModal = () => {
-    if (!confirmCloseModal()) return
-    setSelectedOrder(null)
+    setConfirmCloseTarget('order')
+  }
+
+  const cancelConfirmClose = () => {
+    setConfirmCloseTarget(null)
+  }
+
+  const confirmCloseModal = () => {
+    if (confirmCloseTarget === 'product') {
+      setIsProductModalOpen(false)
+      setEditingProduct(null)
+    }
+
+    if (confirmCloseTarget === 'category') {
+      setIsCatModalOpen(false)
+      setEditingCat(null)
+    }
+
+    if (confirmCloseTarget === 'order') {
+      setSelectedOrder(null)
+    }
+
+    setConfirmCloseTarget(null)
   }
 
   const openOrderEdit = (order: any) => {
@@ -793,6 +810,41 @@ export default function AdminDashboardPage() {
               </div>
 
             </form>
+          </div>
+        </div>
+      )}
+
+      {confirmCloseTarget && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div
+            className="w-full max-w-sm rounded-xl border border-gray-800 bg-[#1a1b1e] p-6 text-center shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-400">
+              <X className="h-6 w-6" />
+            </div>
+            <h3 className="text-lg font-bold text-textPrimary">
+              คุณมีข้อมูลที่ยังไม่ได้บันทึก
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-textMuted">
+              ต้องการยกเลิกและปิดหน้าต่างนี้หรือไม่? ข้อมูลที่พิมพ์ไว้จะสูญหาย
+            </p>
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={cancelConfirmClose}
+                className="rounded-xl border border-border bg-surfaceLight/40 px-4 py-2.5 text-sm font-bold text-textPrimary transition-colors hover:bg-surfaceLight"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                onClick={confirmCloseModal}
+                className="rounded-xl bg-red-500 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-red-400"
+              >
+                ยืนยันการปิด
+              </button>
+            </div>
           </div>
         </div>
       )}
