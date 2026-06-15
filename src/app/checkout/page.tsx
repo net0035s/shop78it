@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CreditCard, ArrowLeft, ShieldCheck, Check, ShoppingBag, Tag, Loader2, X } from 'lucide-react'
+import { CreditCard, ArrowLeft, ShieldCheck, Check, ShoppingBag, Tag, Loader2, X, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 import { useCartStore } from '@/store/cartStore'
 import { useOrderStore } from '@/store/orderStore'
@@ -86,6 +86,7 @@ function CheckoutContent() {
   const [isSubmittingSlip, setIsSubmittingSlip] = useState(false)
   const [promptPayTimeRemaining, setPromptPayTimeRemaining] = useState(PROMPTPAY_EXPIRY_SECONDS)
   const [isSubmittingVoucher, setIsSubmittingVoucher] = useState(false)
+  const [stockErrorMessage, setStockErrorMessage] = useState('')
 
   // Discount UI State
   const [discountCodeInput, setDiscountCodeInput] = useState('')
@@ -275,9 +276,14 @@ function CheckoutContent() {
         setPromptPayError('')
         setSlipFile(null)
         setSlipError('')
+        setStockErrorMessage('')
         setStep('payment')
       } else {
-        toast.error(result.error || 'เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ')
+        if (result.code === 'STOCK_UNAVAILABLE') {
+          setStockErrorMessage(result.error || 'ขออภัย สินค้าคงเหลือไม่เพียงพอ กรุณาปรับจำนวนในตะกร้า')
+        } else {
+          toast.error(result.error || 'เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ')
+        }
       }
     } catch (error) {
       console.error('Error creating order:', error)
@@ -408,6 +414,37 @@ function CheckoutContent() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-fade-in">
+      {stockErrorMessage && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl border border-amber-400/20 bg-surface p-6 text-center shadow-2xl">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-400/10 text-amber-300">
+              <AlertTriangle className="h-7 w-7" />
+            </div>
+            <h3 className="text-xl font-extrabold text-textPrimary">
+              สินค้าคงเหลือไม่เพียงพอ
+            </h3>
+            <p className="mt-3 text-sm leading-relaxed text-textSecondary">
+              {stockErrorMessage}
+            </p>
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setStockErrorMessage('')}
+                className="rounded-xl border border-border bg-surfaceLight/40 px-4 py-3 text-sm font-bold text-textPrimary transition-colors hover:bg-surfaceLight"
+              >
+                ตกลง
+              </button>
+              <Link
+                href="/cart"
+                className="rounded-xl bg-primary-gradient px-4 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all hover:opacity-95"
+              >
+                กลับไปแก้ไขตะกร้า
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Back Button */}
       <Link
         href={step === 'payment' ? '#' : '/cart'}

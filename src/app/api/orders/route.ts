@@ -133,15 +133,34 @@ export async function POST(request: Request) {
       })
 
       if (product.deliveryType === 'manual') {
-        if (product.stockStatus === 'out-of-stock' || product.stock < item.quantity) {
+        const dbStock = Math.max(0, product.stock || 0)
+
+        if (dbStock === 0) {
           return jsonUtf8(
             {
               success: false,
+              code: 'STOCK_UNAVAILABLE',
               error: `ขออภัย สินค้า "${product.name}" หมดชั่วคราว`,
+              productId: product.id,
+              dbStock,
             },
             { status: 400 }
           )
         }
+
+        if (dbStock < item.quantity) {
+          return jsonUtf8(
+            {
+              success: false,
+              code: 'STOCK_UNAVAILABLE',
+              error: `ขออภัย สินค้า "${product.name}" มีจำนวนคงเหลือเพียง ${dbStock} ชิ้น กรุณาปรับจำนวนในตะกร้า`,
+              productId: product.id,
+              dbStock,
+            },
+            { status: 400 }
+          )
+        }
+
         continue
       }
 
@@ -149,15 +168,34 @@ export async function POST(request: Request) {
         where: { productId: product.id, isSold: false },
         take: item.quantity
       })
-      if (availableStocks.length < item.quantity) {
+
+      const dbStock = availableStocks.length
+      if (dbStock === 0) {
         return jsonUtf8(
           {
             success: false,
+            code: 'STOCK_UNAVAILABLE',
             error: `ขออภัย สินค้า "${product.name}" หมดชั่วคราว`,
+            productId: product.id,
+            dbStock,
           },
           { status: 400 }
         )
       }
+
+      if (dbStock < item.quantity) {
+        return jsonUtf8(
+          {
+            success: false,
+            code: 'STOCK_UNAVAILABLE',
+            error: `ขออภัย สินค้า "${product.name}" มีจำนวนคงเหลือเพียง ${dbStock} ชิ้น กรุณาปรับจำนวนในตะกร้า`,
+            productId: product.id,
+            dbStock,
+          },
+          { status: 400 }
+        )
+      }
+
       stocksToAssign.push(...availableStocks.map((s: any) => s.id))
     }
 
