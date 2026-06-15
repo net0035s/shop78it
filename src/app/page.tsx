@@ -38,6 +38,7 @@ export default async function StorefrontPage() {
       originalPrice: p.originalPrice ? moneyToNumber(p.originalPrice) : undefined,
       tags: p.tags ?? undefined,
       showFeatures: p.showFeatures,
+      features: p.features ?? undefined,
       showInstruction: p.showInstruction,
       instruction: p.instruction ?? undefined,
       deliveryInfo: p.deliveryInfo ?? undefined,

@@ -27,6 +27,7 @@ export interface AdminProduct {
   isNew?: boolean
   isFeatured?: boolean
   showFeatures?: boolean
+  features?: string | null
   showInstruction?: boolean
   instruction?: string | null
   deliveryInfo?: string | null

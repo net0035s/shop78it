@@ -55,6 +55,7 @@ export async function fulfillPaidOrder(
       product: {
       ...product,
       originalPrice: product.originalPrice ?? undefined,
+      features: product.features ?? undefined,
       deliveryInfo: product.deliveryInfo ?? undefined,
       instruction: product.instruction ?? undefined,
       stockStatus: orderItem.product.stockStatus as any,

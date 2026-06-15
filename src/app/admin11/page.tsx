@@ -49,7 +49,7 @@ export default function AdminDashboardPage() {
   const [productForm, setProductForm] = useState({
     name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png',
     category: 'subscription', categoryId: '', tags: '', isNew: false, isFeatured: false,
-    showFeatures: false, showInstruction: false, instruction: '',
+    showFeatures: false, features: '', showInstruction: false, instruction: '',
     deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto'
   })
 
@@ -249,13 +249,13 @@ export default function AdminDashboardPage() {
   // ---- Product Handlers ----
   const openAddProduct = () => {
     setEditingProduct(null)
-    setProductForm({ name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png', category: categories[0]?.slug || 'subscription', categoryId: categories[0]?.id || '', tags: '', isNew: false, isFeatured: false, showFeatures: false, showInstruction: false, instruction: '', deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto' })
+    setProductForm({ name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png', category: categories[0]?.slug || 'subscription', categoryId: categories[0]?.id || '', tags: '', isNew: false, isFeatured: false, showFeatures: false, features: '', showInstruction: false, instruction: '', deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto' })
     setIsProductModalOpen(true)
   }
 
   const openEditProduct = (p: any) => {
     setEditingProduct(p)
-    setProductForm({ name: p.name, description: p.description, price: p.price.toString(), originalPrice: p.originalPrice?.toString() || '', image: p.image, category: p.category, categoryId: p.categoryId || '', tags: p.tags || '', isNew: p.isNew, isFeatured: p.isFeatured, showFeatures: !!p.showFeatures, showInstruction: !!p.showInstruction, instruction: p.instruction || '', deliveryInfo: p.deliveryInfo || 'ส่งด่วนอัตโนมัติ', deliveryType: p.deliveryType || 'auto' })
+    setProductForm({ name: p.name, description: p.description, price: p.price.toString(), originalPrice: p.originalPrice?.toString() || '', image: p.image, category: p.category, categoryId: p.categoryId || '', tags: p.tags || '', isNew: p.isNew, isFeatured: p.isFeatured, showFeatures: !!p.showFeatures, features: p.features || '', showInstruction: !!p.showInstruction, instruction: p.instruction || '', deliveryInfo: p.deliveryInfo || 'ส่งด่วนอัตโนมัติ', deliveryType: p.deliveryType || 'auto' })
     setIsProductModalOpen(true)
   }
 
@@ -610,6 +610,19 @@ export default function AdminDashboardPage() {
                   </label>
                 ))}
               </div>
+              {productForm.showFeatures && (
+                <div>
+                  <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">สิ่งที่จะได้รับ</label>
+                  <textarea
+                    rows={4}
+                    value={productForm.features}
+                    onChange={e => setProductForm(f => ({ ...f, features: e.target.value }))}
+                    placeholder={`กรอก 1 รายการต่อ 1 บรรทัด เช่น\nคีย์ผลิตภัณฑ์แท้\nลิงก์ดาวน์โหลดซอฟต์แวร์\nคู่มือการติดตั้งภาษาไทย`}
+                    className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-sm text-textPrimary focus:outline-none focus:border-primary/60 resize-none"
+                  />
+                  <p className="mt-1 text-[10px] text-textMuted">ข้อมูลนี้จะแสดงในกล่อง “สิ่งที่จะได้รับ” บนหน้ารายละเอียดสินค้า</p>
+                </div>
+              )}
               <div>
                 <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">วิธีใช้งาน (แสดงในหน้าร้าน)</label>
                 <textarea

@@ -22,6 +22,7 @@ export interface Product {
   isNew?: boolean
   isFeatured?: boolean
   showFeatures?: boolean
+  features?: string
   showInstruction?: boolean
   instruction?: string
   deliveryInfo?: string // เช่น "ส่งทันที", "1-3 วัน"
