@@ -49,11 +49,12 @@ export default function AdminDashboardPage() {
   const [productForm, setProductForm] = useState({
     name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png',
     category: 'subscription', categoryId: '', tags: '', isNew: false, isFeatured: false,
-    showFeatures: false, deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto'
+    showFeatures: false, showInstruction: false, instruction: '',
+    deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto'
   })
 
   // Stock form
-  const [stockForm, setStockForm] = useState({ productId: '', type: 'login-info', bulkData: '', instructions: '' })
+  const [stockForm, setStockForm] = useState({ productId: '', type: 'login-info', bulkData: '', instructions: '', showInstruction: true })
   const [isStockSubmitting, setIsStockSubmitting] = useState(false)
   const [stockMsg, setStockMsg] = useState('')
   const fileInputRef = React.useRef<HTMLInputElement>(null)
@@ -248,13 +249,13 @@ export default function AdminDashboardPage() {
   // ---- Product Handlers ----
   const openAddProduct = () => {
     setEditingProduct(null)
-    setProductForm({ name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png', category: categories[0]?.slug || 'subscription', categoryId: categories[0]?.id || '', tags: '', isNew: false, isFeatured: false, showFeatures: false, deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto' })
+    setProductForm({ name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png', category: categories[0]?.slug || 'subscription', categoryId: categories[0]?.id || '', tags: '', isNew: false, isFeatured: false, showFeatures: false, showInstruction: false, instruction: '', deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto' })
     setIsProductModalOpen(true)
   }
 
   const openEditProduct = (p: any) => {
     setEditingProduct(p)
-    setProductForm({ name: p.name, description: p.description, price: p.price.toString(), originalPrice: p.originalPrice?.toString() || '', image: p.image, category: p.category, categoryId: p.categoryId || '', tags: p.tags || '', isNew: p.isNew, isFeatured: p.isFeatured, showFeatures: !!p.showFeatures, deliveryInfo: p.deliveryInfo || 'ส่งด่วนอัตโนมัติ', deliveryType: p.deliveryType || 'auto' })
+    setProductForm({ name: p.name, description: p.description, price: p.price.toString(), originalPrice: p.originalPrice?.toString() || '', image: p.image, category: p.category, categoryId: p.categoryId || '', tags: p.tags || '', isNew: p.isNew, isFeatured: p.isFeatured, showFeatures: !!p.showFeatures, showInstruction: !!p.showInstruction, instruction: p.instruction || '', deliveryInfo: p.deliveryInfo || 'ส่งด่วนอัตโนมัติ', deliveryType: p.deliveryType || 'auto' })
     setIsProductModalOpen(true)
   }
 
@@ -316,7 +317,11 @@ export default function AdminDashboardPage() {
     const res = await fetch(`/api/admin/stock?id=${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: editingStockContent })
+      body: JSON.stringify({
+        content: editingStockContent,
+        showInstruction: editingStockItem?.showInstruction ?? true,
+        instruction: editingStockItem?.instruction ?? ((editingStockContent as any)?.instructions || ''),
+      })
     })
     const result = await res.json()
     if (result.success) {
@@ -596,7 +601,7 @@ export default function AdminDashboardPage() {
                   className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-sm text-textPrimary focus:outline-none focus:border-primary/60 resize-none" />
               </div>
               <div className="flex flex-wrap gap-4">
-                {[{ label: 'สินค้าใหม่', key: 'isNew' }, { label: 'สินค้าแนะนำ', key: 'isFeatured' }, { label: 'แสดงส่วนสิ่งที่จะได้รับ', key: 'showFeatures' }].map(cb => (
+                {[{ label: 'สินค้าใหม่', key: 'isNew' }, { label: 'สินค้าแนะนำ', key: 'isFeatured' }, { label: 'แสดงส่วนสิ่งที่จะได้รับ', key: 'showFeatures' }, { label: 'แสดงกล่องวิธีใช้งาน (หน้าร้าน)', key: 'showInstruction' }].map(cb => (
                   <label key={cb.key} className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={(productForm as any)[cb.key]}
                       onChange={e => setProductForm(f => ({ ...f, [cb.key]: e.target.checked }))}
@@ -604,6 +609,17 @@ export default function AdminDashboardPage() {
                     <span className="text-xs text-textMuted">{cb.label}</span>
                   </label>
                 ))}
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-textMuted uppercase tracking-wider mb-1.5">วิธีใช้งาน (แสดงในหน้าร้าน)</label>
+                <textarea
+                  rows={4}
+                  value={productForm.instruction}
+                  onChange={e => setProductForm(f => ({ ...f, instruction: e.target.value }))}
+                  placeholder="เช่น ขั้นตอนเปิดใช้งานสินค้า, วิธีติดตั้ง, หรือข้อควรรู้หลังซื้อ"
+                  className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-sm text-textPrimary focus:outline-none focus:border-primary/60 resize-none"
+                />
+                <p className="mt-1 text-[10px] text-textMuted">ระบบจะแสดงกล่องนี้เฉพาะเมื่อเปิดสวิตช์ด้านบน</p>
               </div>
               <div className="pt-2 bg-primary/5 border border-primary/20 rounded-xl p-3 text-xs text-textMuted">
                 ไม่ต้องกรอกจำนวนสต็อก ระบบคำนวณจาก DigitalStock อัตโนมัติ

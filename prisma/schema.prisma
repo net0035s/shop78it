@@ -42,6 +42,8 @@ model Product {
   isNew         Boolean        @default(false)
   isFeatured    Boolean        @default(false)
   showFeatures  Boolean        @default(false)
+  showInstruction Boolean       @default(false)
+  instruction   String?        @db.Text
   deliveryInfo  String?
   deliveryType  String         @default("auto") // 'auto' | 'manual'
   digitalStocks DigitalStock[]
@@ -58,6 +60,8 @@ model DigitalStock {
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   type      String // 'ai-credit' | 'login-info' | 'login-link' | 'license-key'
   content   String // JSON string containing keys/passwords/links details
+  showInstruction Boolean @default(true)
+  instruction String? @db.Text
   isSold    Boolean @default(false)
   orderId   String?
   order     Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
@@ -136,6 +140,7 @@ model DeliveryItem {
   // Keys
   licenseKey   String?
   expiresAt    String?
+  showInstruction Boolean @default(true)
   instructions String?
 }
 

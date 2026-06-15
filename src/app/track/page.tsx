@@ -32,13 +32,15 @@ export default function TrackOrderPage() {
   }
 
   const getDeliveryLines = (item: any) => {
+    const instructionText = item.instructions || 'เปิดใช้งานสินค้าตามคำแนะนำของทางร้าน'
+
     return [
       item.licenseKey && { label: 'ข้อมูลสินค้า', value: item.licenseKey },
       item.creditCode && { label: 'รหัสเครดิต', value: item.creditCode },
       item.email && { label: 'อีเมลใช้งาน', value: item.email },
       item.password && { label: 'รหัสผ่าน', value: item.password },
       item.loginUrl && { label: 'ลิงก์เข้าใช้งาน', value: item.loginUrl },
-      item.instructions && { label: 'วิธีใช้งาน', value: item.instructions },
+      item.showInstruction !== false && { label: 'วิธีใช้งาน', value: instructionText },
     ].filter(Boolean) as { label: string; value: string }[]
   }
 

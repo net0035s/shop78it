@@ -11,6 +11,7 @@ type StockForm = {
   type: string
   bulkData: string
   instructions: string
+  showInstruction: boolean
 }
 
 type Props = {
@@ -106,7 +107,17 @@ export function StockManager(props: Props) {
               <label className="block text-xs font-bold text-textMuted uppercase tracking-wider mb-2">เลือกสินค้า</label>
               <select
                 value={props.stockForm.productId}
-                onChange={event => props.setStockForm(form => ({ ...form, productId: event.target.value }))}
+                onChange={event => {
+                  const productId = event.target.value
+                  const selectedProduct = props.products.find(product => product.id === productId)
+
+                  props.setStockForm(form => ({
+                    ...form,
+                    productId,
+                    instructions: selectedProduct?.instruction || form.instructions,
+                    showInstruction: selectedProduct?.showInstruction ?? true,
+                  }))
+                }}
                 required
                 className="w-full px-3 py-2.5 bg-surfaceLight/40 border border-border rounded-xl text-sm text-textPrimary focus:outline-none focus:border-primary/60"
               >
@@ -148,11 +159,21 @@ export function StockManager(props: Props) {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-textMuted uppercase tracking-wider mb-2">คำแนะนำเพิ่มเติม</label>
-              <input
+              <label className="flex items-center gap-2 cursor-pointer mb-2">
+                <input
+                  type="checkbox"
+                  checked={props.stockForm.showInstruction}
+                  onChange={event => props.setStockForm(form => ({ ...form, showInstruction: event.target.checked }))}
+                  className="w-4 h-4 rounded accent-primary"
+                />
+                <span className="text-xs font-bold text-textMuted uppercase tracking-wider">แสดงวิธีใช้งาน (หน้าออเดอร์)</span>
+              </label>
+              <textarea
+                rows={3}
                 value={props.stockForm.instructions}
                 onChange={event => props.setStockForm(form => ({ ...form, instructions: event.target.value }))}
-                className="w-full px-3 py-2.5 bg-surfaceLight/40 border border-border rounded-xl text-sm text-textPrimary focus:outline-none focus:border-primary/60"
+                placeholder="วิธีใช้งานสำหรับคีย์/บัญชีชุดนี้ หากเว้นว่างระบบจะใช้ข้อความ Default"
+                className="w-full px-3 py-2.5 bg-surfaceLight/40 border border-border rounded-xl text-sm text-textPrimary focus:outline-none focus:border-primary/60 resize-none"
               />
             </div>
 
@@ -178,18 +199,36 @@ export function StockManager(props: Props) {
                 <div key={stock.id} className="p-4 flex items-start gap-3">
                   <div className="flex-1 min-w-0">
                     {props.editingStockItem?.id === stock.id ? (
-                      <textarea
-                        rows={4}
-                        value={JSON.stringify(props.editingStockContent, null, 2)}
-                        onChange={event => {
-                          try {
-                            props.setEditingStockContent(JSON.parse(event.target.value))
-                          } catch {
-                            props.setEditingStockContent(event.target.value)
-                          }
-                        }}
-                        className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-xs text-textPrimary font-mono"
-                      />
+                      <div className="space-y-3">
+                        <textarea
+                          rows={4}
+                          value={JSON.stringify(props.editingStockContent, null, 2)}
+                          onChange={event => {
+                            try {
+                              props.setEditingStockContent(JSON.parse(event.target.value))
+                            } catch {
+                              props.setEditingStockContent(event.target.value)
+                            }
+                          }}
+                          className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-xs text-textPrimary font-mono"
+                        />
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={props.editingStockItem.showInstruction ?? true}
+                            onChange={event => props.setEditingStockItem(current => current ? { ...current, showInstruction: event.target.checked } : current)}
+                            className="w-4 h-4 rounded accent-primary"
+                          />
+                          <span className="text-xs font-bold text-textMuted">แสดงวิธีใช้งาน (หน้าออเดอร์)</span>
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={props.editingStockItem.instruction ?? (typeof props.editingStockContent === 'object' && props.editingStockContent !== null ? String((props.editingStockContent as any).instructions || '') : '')}
+                          onChange={event => props.setEditingStockItem(current => current ? { ...current, instruction: event.target.value } : current)}
+                          placeholder="วิธีใช้งานสำหรับสต็อกรายการนี้"
+                          className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-xs text-textPrimary resize-none"
+                        />
+                      </div>
                     ) : (
                       <StockContentParser stock={stock} />
                     )}

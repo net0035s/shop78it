@@ -22,6 +22,8 @@ export interface Product {
   isNew?: boolean
   isFeatured?: boolean
   showFeatures?: boolean
+  showInstruction?: boolean
+  instruction?: string
   deliveryInfo?: string // เช่น "ส่งทันที", "1-3 วัน"
   deliveryType?: 'auto' | 'manual'
 }
@@ -144,6 +146,7 @@ export interface DeliveryItem {
   licenseKey?: string
   // ข้อมูลทั่วไป
   expiresAt?: string         // วันหมดอายุ
+  showInstruction?: boolean
   instructions?: string      // วิธีใช้งาน
   supportUrl?: string
 }

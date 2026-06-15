@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json()
-    const { productId, type, bulkData, instructions } = body
+    const { productId, type, bulkData, instructions, showInstruction } = body
 
     if (!productId || !type || !bulkData) {
       return NextResponse.json(
@@ -85,10 +85,15 @@ export async function POST(request: Request) {
         }
       }
 
+      const stockInstruction = String(instructions || product.instruction || contentObj.instructions || '').trim()
+      contentObj.instructions = stockInstruction
+
       return {
         productId,
         type,
         content: encryptText(JSON.stringify(contentObj)),
+        showInstruction: showInstruction !== false,
+        instruction: stockInstruction || null,
         isSold: false,
       }
     })
@@ -169,7 +174,7 @@ export async function PUT(request: Request) {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
     const body = await request.json()
-    const { content } = body
+    const { content, showInstruction, instruction } = body
 
     if (!id || !content) {
       return NextResponse.json(
@@ -186,9 +191,18 @@ export async function PUT(request: Request) {
       )
     }
 
+    const contentToSave =
+      typeof content === 'object' && content !== null
+        ? { ...content, instructions: String(instruction ?? content.instructions ?? '').trim() }
+        : content
+
     const updated = await prisma.digitalStock.update({
       where: { id },
-      data: { content: encryptText(JSON.stringify(content)) },
+      data: {
+        content: encryptText(typeof contentToSave === 'string' ? contentToSave : JSON.stringify(contentToSave)),
+        showInstruction: showInstruction !== false,
+        instruction: String(instruction ?? '').trim() || null,
+      },
     })
 
     return NextResponse.json({

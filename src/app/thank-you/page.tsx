@@ -134,8 +134,9 @@ export default function ThankYouPage() {
       if (item.expiresAt) {
         textContent += `วันหมดอายุ / ประกันสินค้า: ${item.expiresAt}\n`
       }
-      if (item.instructions) {
-        textContent += `วิธีใช้งาน:\n${item.instructions.split('\n').map(line => `  ${line}`).join('\n')}\n`
+      if (item.showInstruction !== false) {
+        const instructionText = item.instructions || 'เปิดใช้งานสินค้าตามคำแนะนำของทางร้าน'
+        textContent += `วิธีใช้งาน:\n${instructionText.split('\n').map(line => `  ${line}`).join('\n')}\n`
       }
       textContent += `\n--------------------------------------------------\n\n`
     })
@@ -416,11 +417,11 @@ export default function ThankYouPage() {
                     )}
 
                     {/* Instructions area */}
-                    {item.instructions && (
+                    {item.showInstruction !== false && (
                       <div className="bg-surfaceLight/30 border border-border/40 rounded-xl p-3.5 space-y-1.5 text-xs">
                         <p className="font-bold text-textPrimary">💡 วิธีเปิดใช้งานและข้อมูลเพิ่มเติม:</p>
                         <div className="text-textMuted leading-relaxed whitespace-pre-line text-[11px] sm:text-xs">
-                          {item.instructions}
+                          {item.instructions || 'เปิดใช้งานสินค้าตามคำแนะนำของทางร้าน'}
                         </div>
                       </div>
                     )}

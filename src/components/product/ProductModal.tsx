@@ -93,6 +93,8 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   const salesCount = getStableSalesCount(product.id)
   const featureItems = getProductFeatureItems(product)
   const shouldShowFeatures = product.showFeatures === true
+  const shouldShowInstruction = product.showInstruction === true
+  const productInstruction = product.instruction?.trim() || 'ยังไม่ได้ระบุวิธีใช้งานสำหรับสินค้านี้'
 
   const handleAddToCart = async () => {
     if (!isOrderable || isAdding) return
@@ -276,6 +278,17 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                     {product.description}
                   </p>
                 </section>
+
+                {shouldShowInstruction && (
+                  <section className="space-y-1.5">
+                    <span className="block text-[10px] text-textMuted font-bold uppercase tracking-wider">
+                      วิธีใช้งาน
+                    </span>
+                    <div className="text-sm text-textSecondary leading-relaxed whitespace-pre-line bg-surfaceLight/30 border border-border/40 p-4 rounded-xl">
+                      {productInstruction}
+                    </div>
+                  </section>
+                )}
 
                 {shouldShowFeatures && (
                   <section className="space-y-2">

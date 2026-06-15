@@ -56,6 +56,7 @@ export async function fulfillPaidOrder(
       ...product,
       originalPrice: product.originalPrice ?? undefined,
       deliveryInfo: product.deliveryInfo ?? undefined,
+      instruction: product.instruction ?? undefined,
       stockStatus: orderItem.product.stockStatus as any,
       category: orderItem.product.category as any,
       deliveryType: orderItem.product.deliveryType === 'manual' ? 'manual' : 'auto',
@@ -134,7 +135,10 @@ export async function fulfillPaidOrder(
           loginUrl: content.loginUrl || null,
           licenseKey: content.licenseKey || null,
           expiresAt: content.expiresAt || null,
-          instructions: content.instructions || null,
+          showInstruction: stockItem.showInstruction !== false,
+          instructions: stockItem.showInstruction === false
+            ? null
+            : stockItem.instruction || content.instructions || 'เปิดใช้งานสินค้าตามคำแนะนำของทางร้าน',
         })
       } catch (error) {
         console.error('Error parsing stock content:', error)

@@ -27,6 +27,8 @@ export interface AdminProduct {
   isNew?: boolean
   isFeatured?: boolean
   showFeatures?: boolean
+  showInstruction?: boolean
+  instruction?: string | null
   deliveryInfo?: string | null
   deliveryType?: 'auto' | 'manual' | string
 }
@@ -37,6 +39,8 @@ export interface AdminDeliveryItem {
   licenseKey?: string | null
   email?: string | null
   password?: string | null
+  showInstruction?: boolean
+  instructions?: string | null
 }
 
 export interface AdminOrder {
@@ -57,6 +61,8 @@ export interface AdminDigitalStock {
   productId?: string
   type: string
   content: string
+  showInstruction?: boolean
+  instruction?: string | null
   orderId?: string | null
   createdAt?: string | Date
   product?: Pick<AdminProduct, 'id' | 'name'>
