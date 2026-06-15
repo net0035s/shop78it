@@ -8,6 +8,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const SLIPOK_BASE_URL = 'https://api.slipok.com/api/line/apikey'
+const SLIP_TIME_TOLERANCE_MS = 10 * 60 * 1000
 
 async function readSlipOkResponse(response: Response) {
   const text = await response.text().catch(() => '')
@@ -76,6 +77,53 @@ function getSlipOkErrorMessage(code: unknown, status: number, fallback?: string)
     default:
       return cleanFallback || 'ตรวจสอบสลิปไม่สำเร็จ กรุณาตรวจสอบรูปภาพแล้วลองใหม่'
   }
+}
+
+function getSlipOkTransTimestamp(payload: any): unknown {
+  return (
+    payload?.data?.transTimestamp ??
+    payload?.transTimestamp ??
+    payload?.data?.data?.transTimestamp
+  )
+}
+
+function parseSlipOkTimestamp(value: unknown): Date | null {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value
+  }
+
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    const timestampMs = value > 1_000_000_000_000 ? value : value * 1000
+    const date = new Date(timestampMs)
+    return Number.isNaN(date.getTime()) ? null : date
+  }
+
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return null
+  }
+
+  if (/^\d+$/.test(trimmed)) {
+    return parseSlipOkTimestamp(Number(trimmed))
+  }
+
+  const hasTimezone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(trimmed)
+  const normalized = trimmed.includes('T') ? trimmed : trimmed.replace(' ', 'T')
+  const timestamp = Date.parse(hasTimezone ? normalized : `${normalized}+07:00`)
+
+  if (Number.isNaN(timestamp)) {
+    return null
+  }
+
+  return new Date(timestamp)
+}
+
+function isSlipOlderThanOrderTolerance(transferredAt: Date, orderCreatedAt: Date) {
+  return transferredAt.getTime() < orderCreatedAt.getTime() - SLIP_TIME_TOLERANCE_MS
 }
 
 export async function POST(request: Request) {
@@ -169,6 +217,21 @@ export async function POST(request: Request) {
           code: errorCode,
           slipOkStatus: slipOkResponse.status,
         },
+        { status: 400 }
+      )
+    }
+
+    const slipTransferredAt = parseSlipOkTimestamp(getSlipOkTransTimestamp(slipOkResult))
+    if (!slipTransferredAt) {
+      return jsonUtf8(
+        { success: false, error: 'ไม่พบเวลาโอนเงินบนสลิป กรุณาใช้รูปสลิปจากแอปธนาคารที่ถูกต้อง' },
+        { status: 400 }
+      )
+    }
+
+    if (isSlipOlderThanOrderTolerance(slipTransferredAt, order.createdAt)) {
+      return jsonUtf8(
+        { success: false, error: 'สลิปนี้ถูกโอนนานแล้วก่อนออเดอร์ กรุณาทำรายการโอนใหม่หรือใช้สลิปที่ถูกต้อง' },
         { status: 400 }
       )
     }
