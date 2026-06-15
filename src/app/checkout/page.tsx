@@ -364,9 +364,16 @@ function CheckoutContent() {
         body: paymentForm,
       })
 
-      const result = await response.json()
+      const responseText = await response.text()
+      let result: any = null
 
-      if (result.success) {
+      try {
+        result = responseText ? JSON.parse(responseText) : null
+      } catch {
+        result = null
+      }
+
+      if (result?.success) {
         const completedOrder: OrderSummary = {
           ...createdOrder,
           status: result.data?.status === 'completed' ? 'completed' : 'processing',
@@ -380,7 +387,12 @@ function CheckoutContent() {
         toast.success('ตรวจสลิปสำเร็จ ระบบกำลังพาไปหน้ารับสินค้า')
         router.push('/thank-you')
       } else {
-        const errorMessage = result.error || 'ตรวจสอบสลิปไม่สำเร็จ กรุณาลองใหม่'
+        const errorMessage =
+          result?.error ||
+          result?.message ||
+          (response.status === 404
+            ? 'ไม่พบ API ตรวจสลิป กรุณาติดต่อแอดมินเพื่อตรวจสอบระบบ'
+            : 'ตรวจสอบสลิปไม่สำเร็จ กรุณาลองใหม่')
         setSlipError(errorMessage)
         toast.error(errorMessage)
       }
