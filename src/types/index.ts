@@ -23,6 +23,9 @@ export interface Product {
   isFeatured?: boolean
   showFeatures?: boolean
   features?: string
+  manualSoldCount?: number
+  realSold?: number
+  totalSold?: number
   showInstruction?: boolean
   instruction?: string
   deliveryInfo?: string // เช่น "ส่งทันที", "1-3 วัน"

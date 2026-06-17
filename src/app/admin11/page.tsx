@@ -49,7 +49,7 @@ export default function AdminDashboardPage() {
   const [productForm, setProductForm] = useState({
     name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png',
     category: 'subscription', categoryId: '', tags: '', isNew: false, isFeatured: false,
-    showFeatures: false, features: '', showInstruction: false, instruction: '',
+    showFeatures: false, features: '', manualSoldCount: '0', showInstruction: false, instruction: '',
     deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto'
   })
 
@@ -249,13 +249,13 @@ export default function AdminDashboardPage() {
   // ---- Product Handlers ----
   const openAddProduct = () => {
     setEditingProduct(null)
-    setProductForm({ name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png', category: categories[0]?.slug || 'subscription', categoryId: categories[0]?.id || '', tags: '', isNew: false, isFeatured: false, showFeatures: false, features: '', showInstruction: false, instruction: '', deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto' })
+    setProductForm({ name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png', category: categories[0]?.slug || 'subscription', categoryId: categories[0]?.id || '', tags: '', isNew: false, isFeatured: false, showFeatures: false, features: '', manualSoldCount: '0', showInstruction: false, instruction: '', deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto' })
     setIsProductModalOpen(true)
   }
 
   const openEditProduct = (p: any) => {
     setEditingProduct(p)
-    setProductForm({ name: p.name, description: p.description, price: p.price.toString(), originalPrice: p.originalPrice?.toString() || '', image: p.image, category: p.category, categoryId: p.categoryId || '', tags: p.tags || '', isNew: p.isNew, isFeatured: p.isFeatured, showFeatures: !!p.showFeatures, features: p.features || '', showInstruction: !!p.showInstruction, instruction: p.instruction || '', deliveryInfo: p.deliveryInfo || 'ส่งด่วนอัตโนมัติ', deliveryType: p.deliveryType || 'auto' })
+    setProductForm({ name: p.name, description: p.description, price: p.price.toString(), originalPrice: p.originalPrice?.toString() || '', image: p.image, category: p.category, categoryId: p.categoryId || '', tags: p.tags || '', isNew: p.isNew, isFeatured: p.isFeatured, showFeatures: !!p.showFeatures, features: p.features || '', manualSoldCount: String(p.manualSoldCount ?? 0), showInstruction: !!p.showInstruction, instruction: p.instruction || '', deliveryInfo: p.deliveryInfo || 'ส่งด่วนอัตโนมัติ', deliveryType: p.deliveryType || 'auto' })
     setIsProductModalOpen(true)
   }
 
@@ -561,6 +561,7 @@ export default function AdminDashboardPage() {
                 { label: 'URL รูปภาพ', key: 'image', type: 'text' },
                 { label: 'ราคาปัจจุบัน (฿)', key: 'price', type: 'number', required: true },
                 { label: 'ราคาก่อนลด (฿)', key: 'originalPrice', type: 'number' },
+                { label: 'ยอดขายตั้งต้น (บวกเพิ่มจากยอดจริง)', key: 'manualSoldCount', type: 'number' },
                 { label: 'แท็ก (คั่นด้วย ,)', key: 'tags', type: 'text' },
                 { label: 'ข้อมูลการส่ง', key: 'deliveryInfo', type: 'text' },
               ].map(field => (

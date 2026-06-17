@@ -17,14 +17,6 @@ interface ProductCardProps {
   product: Product
 }
 
-function getStableSalesCount(productId: string) {
-  let hash = 0
-  for (let i = 0; i < productId.length; i += 1) {
-    hash = (hash * 31 + productId.charCodeAt(i)) >>> 0
-  }
-  return (hash % 999) + 1
-}
-
 export function ProductCard({ product }: ProductCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [imageSrc, setImageSrc] = useState(product.image || FALLBACK_IMAGE)
@@ -39,7 +31,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const discountPercent = product.originalPrice
     ? getDiscountPercent(product.price, product.originalPrice)
     : 0
-  const salesCount = getStableSalesCount(product.id)
+  const salesCount = Math.max(0, product.totalSold ?? 0)
   const openProductModal = () => setIsModalOpen(true)
 
   const handleCardKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {

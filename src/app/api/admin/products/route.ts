@@ -5,6 +5,14 @@ import { jsonUtf8 } from '@/lib/json-response'
 
 export const dynamic = 'force-dynamic'
 
+const PAID_ORDER_STATUSES = ['completed', 'needs_manual_delivery', 'paid']
+
+function parseNonNegativeInt(value: unknown) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return 0
+  return Math.max(0, Math.floor(parsed))
+}
+
 /**
  * GET /api/admin/products
  * ดึงรายการสินค้าทั้งหมดฝั่งผู้ดูแลระบบ
@@ -14,25 +22,50 @@ export async function GET() {
   if (!authResult.authorized) return authResult.response
 
   try {
-    const rawProducts = await prisma.product.findMany({
-      include: {
-        _count: {
-          select: {
-            digitalStocks: {
-              where: { isSold: false }
+    const [rawProducts, soldQuantityGroups] = await Promise.all([
+      prisma.product.findMany({
+        include: {
+          _count: {
+            select: {
+              digitalStocks: {
+                where: { isSold: false }
+              }
             }
           }
-        }
-      },
-      orderBy: {
-        name: 'asc',
-      },
-    })
+        },
+        orderBy: {
+          name: 'asc',
+        },
+      }),
+      prisma.orderItem.groupBy({
+        by: ['productId'],
+        where: {
+          order: {
+            status: { in: PAID_ORDER_STATUSES },
+          },
+        },
+        _sum: {
+          quantity: true,
+        },
+      }),
+    ])
 
-    const products = rawProducts.map(p => ({
-      ...normalizeProductMoney(p),
-      stock: p._count?.digitalStocks || 0
-    }))
+    const realSoldByProductId = new Map(
+      soldQuantityGroups.map((group) => [group.productId, group._sum.quantity ?? 0])
+    )
+
+    const products = rawProducts.map(p => {
+      const realSold = realSoldByProductId.get(p.id) ?? 0
+      const manualSoldCount = p.manualSoldCount ?? 0
+
+      return {
+        ...normalizeProductMoney(p),
+        stock: p._count?.digitalStocks || 0,
+        manualSoldCount,
+        realSold,
+        totalSold: realSold + manualSoldCount,
+      }
+    })
 
     return jsonUtf8({ success: true, data: products })
   } catch (error) {
@@ -66,6 +99,7 @@ export async function POST(request: Request) {
       isFeatured,
       showFeatures,
       features,
+      manualSoldCount,
       showInstruction,
       instruction,
       deliveryInfo,
@@ -94,6 +128,7 @@ export async function POST(request: Request) {
         isFeatured: !!isFeatured,
         showFeatures: !!showFeatures,
         features: typeof features === 'string' ? features.trim() || null : null,
+        manualSoldCount: parseNonNegativeInt(manualSoldCount),
         showInstruction: !!showInstruction,
         instruction: instruction?.trim() || null,
         deliveryInfo: deliveryInfo || 'ส่งด่วนอัตโนมัติ',
@@ -134,6 +169,7 @@ export async function PUT(request: Request) {
       isFeatured,
       showFeatures,
       features,
+      manualSoldCount,
       showInstruction,
       instruction,
       deliveryInfo,
@@ -161,6 +197,7 @@ export async function PUT(request: Request) {
         isFeatured: !!isFeatured,
         showFeatures: !!showFeatures,
         features: typeof features === 'string' ? features.trim() || null : null,
+        manualSoldCount: parseNonNegativeInt(manualSoldCount),
         showInstruction: !!showInstruction,
         instruction: instruction?.trim() || null,
         deliveryInfo: deliveryInfo || 'ส่งด่วนอัตโนมัติ',

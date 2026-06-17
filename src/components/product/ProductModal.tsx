@@ -52,14 +52,6 @@ function getProductFeatureItems(product: Product) {
   ]
 }
 
-function getStableSalesCount(productId: string) {
-  let hash = 0
-  for (let i = 0; i < productId.length; i += 1) {
-    hash = (hash * 31 + productId.charCodeAt(i)) >>> 0
-  }
-  return (hash % 999) + 1
-}
-
 export default function ProductModal({ product, isOpen, onClose }: ProductModalProps) {
   const addItem = useCartStore((s) => s.addItem)
   const openCart = useCartStore((s) => s.openCart)
@@ -90,7 +82,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
     : 0
   const quantityInCart = getItemQuantity(product.id)
   const stock = product.stock ?? 0
-  const salesCount = getStableSalesCount(product.id)
+  const salesCount = Math.max(0, product.totalSold ?? 0)
   const featureItems = getProductFeatureItems(product)
   const shouldShowFeatures = product.showFeatures === true
   const shouldShowInstruction = product.showInstruction === true

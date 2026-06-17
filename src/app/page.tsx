@@ -11,24 +11,45 @@ export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
 export const revalidate = 0
 
+const PAID_ORDER_STATUSES = ['completed', 'needs_manual_delivery', 'paid']
+
 export default async function StorefrontPage() {
   // ดึงสินค้าทุกตัวจากฐานข้อมูล (ห้ามใส่ where กรองสินค้าออก)
-  const rawProducts = await prisma.product.findMany({
-    include: {
-      _count: {
-        select: {
-          digitalStocks: {
-            where: { isSold: false }
+  const [rawProducts, soldQuantityGroups] = await Promise.all([
+    prisma.product.findMany({
+      include: {
+        _count: {
+          select: {
+            digitalStocks: {
+              where: { isSold: false }
+            }
           }
         }
       }
-    }
-  })
+    }),
+    prisma.orderItem.groupBy({
+      by: ['productId'],
+      where: {
+        order: {
+          status: { in: PAID_ORDER_STATUSES },
+        },
+      },
+      _sum: {
+        quantity: true,
+      },
+    }),
+  ])
+
+  const realSoldByProductId = new Map(
+    soldQuantityGroups.map((group) => [group.productId, group._sum.quantity ?? 0])
+  )
 
   // Debug: ตรวจสอบค่าที่ดึงมาใน Terminal
   // คำนวณสต๊อกจากจำนวน DigitalStock ที่ยังพร้อมส่ง (isSold = false)
   const products: Product[] = rawProducts.map(p => {
     const currentStock = p._count?.digitalStocks || 0
+    const realSold = realSoldByProductId.get(p.id) ?? 0
+    const manualSoldCount = p.manualSoldCount ?? 0
     const stockStatus: Product['stockStatus'] =
       currentStock > 5 ? 'in-stock' : currentStock > 0 ? 'low-stock' : 'out-of-stock'
 
@@ -39,6 +60,9 @@ export default async function StorefrontPage() {
       tags: p.tags ?? undefined,
       showFeatures: p.showFeatures,
       features: p.features ?? undefined,
+      manualSoldCount,
+      realSold,
+      totalSold: realSold + manualSoldCount,
       showInstruction: p.showInstruction,
       instruction: p.instruction ?? undefined,
       deliveryInfo: p.deliveryInfo ?? undefined,

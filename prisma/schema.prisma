@@ -43,6 +43,7 @@ model Product {
   isFeatured    Boolean        @default(false)
   showFeatures  Boolean        @default(false)
   features      String?        @db.Text
+  manualSoldCount Int          @default(0)
   showInstruction Boolean       @default(false)
   instruction   String?        @db.Text
   deliveryInfo  String?
