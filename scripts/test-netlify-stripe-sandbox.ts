@@ -86,6 +86,12 @@ async function main() {
     console.log(JSON.stringify(result))
   } finally {
     for(const fixture of fixtures) {
+      // A request can create a session before a subsequent assertion or read fails.
+      // Recover its reference from the fixture's payment attempt before cleanup.
+      if(!fixture.session) {
+        const attempt=await db.paymentAttempt.findFirst({where:{orderId:fixture.id,method:'stripe'},orderBy:{createdAt:'desc'}})
+        if(attempt?.reference?.startsWith('stripe:cs_')) fixture.session=attempt.reference.slice(7)
+      }
       if(fixture.session) {
         const session=await stripe.checkout.sessions.retrieve(fixture.session)
         if(session.status==='open') await stripe.checkout.sessions.expire(session.id)
