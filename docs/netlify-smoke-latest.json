@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-12T16:10:46.578Z",
+  "url": "https://shop78it.netlify.app",
+  "siteId": "1d1c3222-a3ce-4ad2-a38c-bae6a324f56c",
+  "deploymentId": "6acd053755916f70756a1ee4",
+  "passed": true,
+  "groups": [
+    "public pages reachable without login; no server secrets",
+    "Linux Prisma queries and order lookup reflect database without exposing goods or sending email",
+    "admin and cron unauthenticated requests rejected",
+    "new orders stay closed before business writes",
+    "Stripe disabled and TrueMoney cannot accept money",
+    "foreign-origin writes rejected",
+    "orders stock deliveries payment and notification counts unchanged"
+  ],
+  "realPaymentsEnabled": false,
+  "ordersEnabled": false,
+  "externalMessagesSent": 0,
+  "businessCountsUnchanged": true
+}

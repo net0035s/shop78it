@@ -8,6 +8,7 @@ import { DEFAULT_UNSAFE_ENCRYPTION_KEYS } from '../src/lib/encryption'
 const env = cloudSandboxEnvironment()
 const keys = ['DATABASE_URL','DIRECT_URL','ENCRYPTION_KEY','SANDBOX_DATABASE_FINGERPRINT','PRODUCTION_DATABASE_FINGERPRINT','NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY','CLERK_SECRET_KEY','ADMIN_EMAILS']
 const selected: Record<string,string> = Object.fromEntries(keys.map(k=>[k,env[k] || '']))
+selected.AWS_LAMBDA_JS_RUNTIME='nodejs22.x'
 Object.assign(selected, {APP_MODE:'sandbox',ORDERS_ENABLED:'false',PAYMENTS_ENABLED:'false',LAUNCH_APPROVED:'false',STRIPE_ENABLED:'false',MAINTENANCE_ENABLED:'false',NEXT_PUBLIC_SITE_URL:'https://shop78it.netlify.app',CRON_SECRET:randomBytes(32).toString('hex'),EMAIL_USER:'',EMAIL_PASS:'',TELEGRAM_BOT_TOKEN:'',TELEGRAM_CHAT_ID:'',STRIPE_SECRET_KEY:'',STRIPE_WEBHOOK_SECRET:'',TMN_RECEIVE_PHONE:'',PROMPTPAY_NUMBER:'',SLIPOK_API_KEY:'',SLIPOK_BRANCH_ID:'',SLIP_VERIFY_API_KEY:'',SLIP_VERIFY_API_URL:'',NEXT_PUBLIC_GA_ID:'',NEXT_PUBLIC_FB_PIXEL_ID:''})
 writeFileSync('.env.netlify.local', Object.entries(selected).map(([k,v])=>`${k}=${JSON.stringify(v)}`).join('\n')+'\n')
 execFileSync('git',['check-ignore','.env.netlify.local'],{stdio:'pipe'})

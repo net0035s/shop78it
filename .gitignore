@@ -23,6 +23,7 @@ backup/
 *.sql.gz
 # Local package cache and isolated verification artifacts
 .cache/
+.netlify/
 
 # Versioned migrations contain schema changes only, never database backups.
 !prisma/migrations/**/migration.sql
