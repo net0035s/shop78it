@@ -74,6 +74,7 @@ export interface AdminDigitalStock {
 }
 
 export interface AdminStats {
+  refundedToday?: number
   todayRevenue: number
   monthRevenue: number
   pendingOrders: number

@@ -12,44 +12,35 @@ const LINE_URL = process.env.NEXT_PUBLIC_LINE_URL || '#'
 
 export default function ThankYouPage() {
   const router = useRouter()
-  const { currentOrder, clearOrder, setOrder } = useOrderStore()
+  const { currentOrder, currentOrderNumber, clearOrder, setOrder } = useOrderStore()
+  const [loadError, setLoadError] = useState('')
+  const [synced, setSynced] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>({})
   const [visiblePasswords, setVisiblePasswords] = useState<{ [key: string]: boolean }>({})
 
+  useEffect(() => { setMounted(true); localStorage.removeItem('shopauto-guest-orders') }, [])
   useEffect(() => {
-    setMounted(true)
-
-    // Background sync order status from server
-    if (currentOrder?.orderNumber) {
-      fetch(`/api/orders?orderNumber=${currentOrder.orderNumber}`)
-        .then(res => res.json())
-        .then(result => {
-          if (result.success && result.data && result.data.status !== currentOrder.status) {
-            setOrder({ ...currentOrder, status: result.data.status })
-          }
-        })
-        .catch(err => console.error('Failed to sync order status:', err))
-    }
-  }, [currentOrder?.orderNumber, currentOrder?.status, setOrder])
-
-  useEffect(() => {
-    if (mounted && currentOrder) {
+    if (!mounted) return
+    if (!currentOrderNumber) { setSynced(true); return }
+    let cancelled = false
+    const refresh = async () => {
       try {
-        const stored = localStorage.getItem('shopauto-guest-orders')
-        const orders = stored ? JSON.parse(stored) : []
-        const isDuplicate = orders.some((o: any) => o.orderNumber === currentOrder.orderNumber)
-        if (!isDuplicate) {
-          const updated = [currentOrder, ...orders].slice(0, 50)
-          localStorage.setItem('shopauto-guest-orders', JSON.stringify(updated))
-        }
-      } catch (err) {
-        console.error('Failed to save order to history:', err)
-      }
+        const result = await (await fetch('/api/orders?orderNumber=' + encodeURIComponent(currentOrderNumber), { cache: 'no-store' })).json()
+        if (cancelled) return
+        if (result.success) { setOrder(result.data); setLoadError('') }
+        else setLoadError(result.error || 'กรุณายืนยันสิทธิ์ผ่านหน้าติดตามออเดอร์')
+      } catch { if (!cancelled) setLoadError('ตรวจสถานะล่าสุดไม่สำเร็จ กรุณาลองอีกครั้ง') }
+      finally { if (!cancelled) setSynced(true) }
     }
-  }, [mounted, currentOrder])
+    void refresh()
+    const timer = window.setInterval(refresh, 10000)
+    return () => { cancelled = true; window.clearInterval(timer) }
+  }, [mounted, currentOrderNumber, setOrder])
 
-  if (!mounted) {
+
+
+  if (!mounted || !synced) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-24 flex items-center justify-center min-h-[70vh]">
         <div className="text-center space-y-4">
@@ -60,6 +51,7 @@ export default function ThankYouPage() {
     )
   }
 
+  if (loadError) return <div className="max-w-xl mx-auto p-8 space-y-4"><p role="alert">{loadError}</p><Link href="/track" className="text-primary">ยืนยันสิทธิ์และติดตามออเดอร์</Link></div>
   if (!currentOrder) {
     return (
       <div className="max-w-md mx-auto px-4 py-24 text-center animate-fade-in">
@@ -83,6 +75,8 @@ export default function ThankYouPage() {
   }
 
 
+  if (currentOrder.status === 'refunded') return <div className="max-w-xl mx-auto p-8 space-y-4"><h1 className="text-2xl font-bold">ร้านบันทึกคืนเงินเต็มยอดแล้ว</h1><p>ออเดอร์ {currentOrder.orderNumber} กรุณาติดต่อร้านหากต้องการตรวจหลักฐานหรือพบว่ายังไม่ได้รับยอดคืน</p><Link href="/help" className="text-primary">ติดต่อร้าน</Link></div>
+
   const handleCopy = (text: string, id: string) => {
     navigator.clipboard.writeText(text)
     setCopiedStates((prev) => ({ ...prev, [id]: true }))
@@ -93,16 +87,21 @@ export default function ThankYouPage() {
 
   const deliveryItems = currentOrder?.deliveryItems || []
   const hasAuto = deliveryItems.length > 0
-  const manualCartItems = currentOrder?.items?.filter((item: any) => {
-    return !deliveryItems.some((dItem: any) => dItem.productName === item.product.name)
-  }) || []
+  const manualCartItems = currentOrder.items.map(item => ({
+    ...item,
+    quantity: Math.max(0, item.quantity - deliveryItems.filter(dItem => dItem.orderItemId ? dItem.orderItemId === item.orderItemId : dItem.productName === item.product.name).length)
+  })).filter(item => item.quantity > 0)
   const hasManual = manualCartItems.length > 0
+  const deliveryStatus = currentOrder.status === 'completed' ? 'จัดส่งครบแล้ว' :
+    currentOrder.status === 'needs_manual_delivery' ? 'รอร้านค้าจัดส่ง' :
+    ['paid', 'fulfilling'].includes(currentOrder.status) ? 'กำลังจัดส่ง' :
+    currentOrder.status === 'cancelled' ? 'ยกเลิกแล้ว' : 'ยังไม่จัดส่ง'
 
   const handleDownloadTxt = () => {
     if (!currentOrder || !currentOrder.deliveryItems) return
 
     let textContent = `==================================================\n`
-    textContent += `      ShopAuto 24/7 - สรุปรายละเอียดการจัดส่งสินค้า\n`
+    textContent += `      Shop78it - สรุปรายละเอียดการจัดส่งสินค้า\n`
     textContent += `==================================================\n\n`
     textContent += `เลขที่ใบสั่งซื้อ: ${currentOrder.orderNumber}\n`
     textContent += `วันที่สั่งซื้อ: ${formatDateWithTime(currentOrder.createdAt)}\n`
@@ -115,7 +114,7 @@ export default function ThankYouPage() {
     currentOrder.deliveryItems.forEach((item, index) => {
       textContent += `${index + 1}. สินค้า: ${item.productName}\n`
       textContent += `ประเภท: ${item.type}\n`
-      
+
       if (item.creditCode) {
         textContent += `โค้ดเครดิต AI: ${item.creditCode} (${item.creditAmount} - ${item.platform})\n`
       }
@@ -141,14 +140,15 @@ export default function ThankYouPage() {
       textContent += `\n--------------------------------------------------\n\n`
     })
 
-    textContent += `ขอบคุณที่ใช้บริการ ShopAuto 24/7\n`
-    textContent += `ระบบจัดส่งสินค้าดิจิทัลอัตโนมัติตลอด 24 ชั่วโมง\n`
+    if (currentOrder.deliveredContent) textContent += `ข้อมูลจัดส่งจากร้านค้า:\n${currentOrder.deliveredContent}\n\n`
+    textContent += `ขอบคุณที่ใช้บริการ Shop78it\n`
+    textContent += `ติดตามสถานะการจัดส่งและติดต่อร้านได้ผ่านหน้าช่วยเหลือบนเว็บไซต์\n`
 
     const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `ShopAuto-Order-${currentOrder.orderNumber}.txt`
+    link.download = `Shop78it-Order-${currentOrder.orderNumber}.txt`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -164,10 +164,10 @@ export default function ThankYouPage() {
           <span className="absolute inset-0 rounded-full bg-emerald-500/5 animate-ping" />
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-textPrimary tracking-tight">
-          ชำระเงินเสร็จสมบูรณ์!
+          {['paid','completed','needs_manual_delivery'].includes(currentOrder.status) ? 'ยืนยันการชำระเงินแล้ว' : currentOrder.status === 'cancelled' ? 'ออเดอร์ถูกยกเลิก' : currentOrder.status === 'pending' ? 'ออเดอร์รอชำระเงิน' : 'กำลังตรวจสอบการชำระเงิน'}
         </h1>
         <p className="text-sm sm:text-base text-textMuted max-w-lg mx-auto">
-          ขอบคุณที่สั่งซื้อสินค้ากับ <span className="text-primary font-bold">ShopAuto 24/7</span> ระบบ AI ตรวจสลิปได้เรียบร้อย และทำการส่งมอบสินค้าดิจิทัลให้คุณทันทีด้านล่าง
+          ขอบคุณที่สั่งซื้อสินค้ากับ <span className="text-primary font-bold">Shop78it</span> ติดตามผลชำระเงินและข้อมูลสินค้าที่จัดส่งด้านล่าง หากกำลังตรวจสอบ กรุณาอย่าชำระซ้ำ
         </p>
 
         {/* Order Details Grid */}
@@ -188,8 +188,8 @@ export default function ThankYouPage() {
           </div>
           <div>
             <span className="text-textMuted block">สถานะจัดส่ง</span>
-            <span className="inline-flex items-center gap-1 text-emerald-400 font-bold mt-0.5">
-              สำเร็จ ⚡
+            <span className={`inline-flex items-center gap-1 font-bold mt-0.5 ${currentOrder.status === 'completed' ? 'text-emerald-600 dark:text-emerald-400' : 'text-textSecondary'}`}>
+              {deliveryStatus}
             </span>
           </div>
         </div>
@@ -239,7 +239,7 @@ export default function ThankYouPage() {
 
                     {/* Delivery badge */}
                     <span className="px-2.5 py-1 text-[10px] font-bold rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 w-fit">
-                      จัดส่งทันที
+                      ข้อมูลรับสินค้า
                     </span>
                   </div>
 
@@ -266,7 +266,7 @@ export default function ThankYouPage() {
                               type="text"
                               readOnly
                               value={item.creditCode}
-                              className="flex-1 px-4 py-3 bg-surfaceLight border border-border rounded-xl text-sm font-mono font-bold text-primary-light focus:outline-none"
+                              className="min-w-0 flex-1 px-4 py-3 bg-surfaceLight border border-border rounded-xl text-sm font-mono font-bold text-primary-light focus:outline-none"
                             />
                             <button
                               onClick={() => handleCopy(item.creditCode || '', `${itemUniqueId}-code`)}
@@ -296,7 +296,7 @@ export default function ThankYouPage() {
                                 type="text"
                                 readOnly
                                 value={item.email}
-                                className="flex-1 px-4 py-2.5 bg-surfaceLight border border-border rounded-xl text-xs sm:text-sm font-medium text-textPrimary focus:outline-none"
+                                className="min-w-0 flex-1 px-4 py-2.5 bg-surfaceLight border border-border rounded-xl text-xs sm:text-sm font-medium text-textPrimary focus:outline-none"
                               />
                               <button
                                 onClick={() => handleCopy(item.email || '', `${itemUniqueId}-email`)}
@@ -319,7 +319,7 @@ export default function ThankYouPage() {
                                 type={visiblePasswords[`${itemUniqueId}-pass`] ? 'text' : 'password'}
                                 readOnly
                                 value={item.password}
-                                className="flex-1 px-4 py-2.5 bg-surfaceLight border border-border rounded-xl text-xs sm:text-sm font-mono font-bold text-textPrimary focus:outline-none"
+                                className="min-w-0 flex-1 px-4 py-2.5 bg-surfaceLight border border-border rounded-xl text-xs sm:text-sm font-mono font-bold text-textPrimary focus:outline-none"
                               />
                               <button
                                 type="button"
@@ -376,7 +376,7 @@ export default function ThankYouPage() {
                             type="text"
                             readOnly
                             value={item.licenseKey}
-                            className="flex-1 px-4 py-3 bg-surfaceLight border border-border rounded-xl text-sm font-mono font-bold text-primary-light tracking-wide focus:outline-none"
+                            className="min-w-0 flex-1 px-4 py-3 bg-surfaceLight border border-border rounded-xl text-sm font-mono font-bold text-primary-light tracking-wide focus:outline-none"
                           />
                           <button
                             onClick={() => handleCopy(item.licenseKey || '', `${itemUniqueId}-key`)}
@@ -401,7 +401,7 @@ export default function ThankYouPage() {
                             href={item.loginUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 px-4 py-3 bg-primary-gradient hover:opacity-90 active:scale-[0.99] text-center font-bold text-xs sm:text-sm text-white rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+                            className="min-w-0 flex-1 px-4 py-3 bg-primary-gradient hover:opacity-90 active:scale-[0.99] text-center font-bold text-xs sm:text-sm text-white rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
                           >
                             <ExternalLink className="w-4 h-4" />
                             คลิกเพื่อลงชื่อเข้าใช้ทันที
@@ -435,10 +435,10 @@ export default function ThankYouPage() {
 
         {hasManual && (
           <div className={`space-y-6 p-6 rounded-2xl border ${
-            currentOrder.status === 'cancelled' ? 'bg-red-500/5 border-red-500/20' : 
+            currentOrder.status === 'cancelled' ? 'bg-red-500/5 border-red-500/20' :
             currentOrder.status === 'completed' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-orange-500/5 border-orange-500/20'}`}>
             <div className={`flex items-center justify-between border-b pb-4 ${
-              currentOrder.status === 'cancelled' ? 'border-red-500/20' : 
+              currentOrder.status === 'cancelled' ? 'border-red-500/20' :
               currentOrder.status === 'completed' ? 'border-emerald-500/20' : 'border-orange-500/20'}`}>
               <h2 className="text-lg font-bold text-textPrimary flex items-center gap-2">
                 {currentOrder.status === 'cancelled' ? (
@@ -471,12 +471,12 @@ export default function ThankYouPage() {
               )}
               {manualCartItems.map((item: any, idx: number) => (
                 <div key={`manual-${idx}`} className={`bg-surface shadow-sm rounded-2xl p-5 border-l-4 ${
-                  currentOrder.status === 'cancelled' ? 'border-l-red-500/50' : 
+                  currentOrder.status === 'cancelled' ? 'border-l-red-500/50' :
                   currentOrder.status === 'completed' ? 'border-l-emerald-500/50' : 'border-l-orange-500/50'}`}>
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-bold text-textPrimary">{item.product.name} <span className="text-textMuted text-xs font-normal ml-1">(x{item.quantity})</span></h3>
-                      <p className="text-xs text-textMuted mt-1">สินค้าประเภทจัดส่งโดยแอดมิน กรุณารอรับทางแชทหรืออีเมล</p>
+                      <p className="text-xs text-textMuted mt-1">รายการที่ยังไม่มีข้อมูลจัดส่งอัตโนมัติครบ ตรวจสถานะและข้อมูลเพิ่มเติมจากร้านค้าด้านล่าง</p>
                     </div>
                     {currentOrder.status === 'cancelled' ? (
                        <span className="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-bold">❌ ออเดอร์ถูกยกเลิก</span>
@@ -488,7 +488,7 @@ export default function ThankYouPage() {
                   </div>
                 </div>
               ))}
-              
+
               {/* Contact Button */}
               {currentOrder.status !== 'completed' && (
                 <div className="text-center mt-6">
@@ -502,11 +502,13 @@ export default function ThankYouPage() {
         )}
       </div>
 
+      {currentOrder.deliveredContent && <section className="mt-6 rounded-2xl border border-emerald-500/30 p-6 space-y-3"><h2 className="font-bold">ข้อมูลที่ร้านค้าจัดส่งเพิ่มเติม</h2><pre className="whitespace-pre-wrap break-words text-sm font-sans">{currentOrder.deliveredContent}</pre></section>}
+      {currentOrder.status === 'pending' && <Link href={'/checkout?order=' + encodeURIComponent(currentOrder.orderNumber)} className="block mt-6 text-primary">ชำระออเดอร์นี้ต่อ</Link>}
       {/* Info Warning */}
       <div className="mt-8 p-4 bg-surfaceLight/20 border border-border/50 rounded-2xl text-xs text-textMuted leading-relaxed space-y-1">
         <p>📧 <strong>หมายเหตุเพิ่มเติม:</strong></p>
-        <p>รายละเอียดสินค้าและคีย์ทั้งหมดได้รับการจัดส่งสำเนาไปยังกล่องข้อความอีเมลของคุณที่ <strong className="text-textPrimary">{currentOrder.customer.email}</strong> เรียบร้อยแล้ว (หากไม่พบ กรุณาตรวจสอบในโฟลเดอร์ Junk Mail หรือสแปม)</p>
-        <p>หากพบปัญหาในการใช้งานหรือคีย์มีปัญหา ท่านสามารถแจ้งสอบถามซัพพอร์ตได้ตลอด 24 ชั่วโมง ผ่านระบบติดต่อฝ่ายบริการลูกค้า</p>
+        <p>{currentOrder.emailStatus === 'sent' ? 'ระบบส่งอีเมลยืนยันไปแล้ว กรุณาตรวจกล่องอีเมลหรือสแปม' : 'ยังไม่มีผลยืนยันว่าส่งอีเมลสำเร็จ คุณสามารถรับข้อมูลที่จัดส่งแล้วจากหน้านี้ได้'}</p>
+        <p>หากพบปัญหาในการใช้งานหรือคีย์มีปัญหา กรุณาติดต่อร้านผ่านหน้าช่วยเหลือเพื่อตรวจสอบรายการ</p>
       </div>
 
       {/* Final Action Buttons */}

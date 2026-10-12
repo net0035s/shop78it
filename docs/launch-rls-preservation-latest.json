@@ -1,0 +1,81 @@
+{
+  "checkedAt": "2026-10-11T06:45:01.908Z",
+  "readOnlyVerification": true,
+  "allNineTablesMatch": true,
+  "before": {
+    "Category": {
+      "count": 1,
+      "digest": "35111eab14f43ae6aa61acd264513e833faca32f8ab5123378dfda09c8f8313a"
+    },
+    "DeliveryItem": {
+      "count": 6,
+      "digest": "71a0910d5cb551aa838dd8ead415f29bc7451dd70470e603d1c05d08f3fe3354"
+    },
+    "DigitalKey": {
+      "count": 0,
+      "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "DigitalStock": {
+      "count": 20,
+      "digest": "1f9e8707405dd219d4d0c64dd8713a2466b3c11f18c8e5cfc4ebdf000f4b9da8"
+    },
+    "DiscountCode": {
+      "count": 1,
+      "digest": "00f4d75109ef515561aa79d1bc439ae324cfb3d56bb223e97b176d5d50f614cc"
+    },
+    "Order": {
+      "count": 24,
+      "digest": "e806e5207ae0ca13522a5df3f692b046b93f72e71b975cb1fbee0a70f899f4a7"
+    },
+    "OrderItem": {
+      "count": 24,
+      "digest": "f59cfeab8ebcecbafd8cda18c674a4f7d8f279253a544b709f3025b44ddb46ef"
+    },
+    "Product": {
+      "count": 4,
+      "digest": "4ae37db031b1d1cc6f015ee9f5ba0531e43b067efa1f47fe347bbf4b02c3d026"
+    },
+    "StoreSettings": {
+      "count": 0,
+      "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "after": {
+    "Category": {
+      "count": 1,
+      "digest": "35111eab14f43ae6aa61acd264513e833faca32f8ab5123378dfda09c8f8313a"
+    },
+    "DeliveryItem": {
+      "count": 6,
+      "digest": "71a0910d5cb551aa838dd8ead415f29bc7451dd70470e603d1c05d08f3fe3354"
+    },
+    "DigitalKey": {
+      "count": 0,
+      "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "DigitalStock": {
+      "count": 20,
+      "digest": "1f9e8707405dd219d4d0c64dd8713a2466b3c11f18c8e5cfc4ebdf000f4b9da8"
+    },
+    "DiscountCode": {
+      "count": 1,
+      "digest": "00f4d75109ef515561aa79d1bc439ae324cfb3d56bb223e97b176d5d50f614cc"
+    },
+    "Order": {
+      "count": 24,
+      "digest": "e806e5207ae0ca13522a5df3f692b046b93f72e71b975cb1fbee0a70f899f4a7"
+    },
+    "OrderItem": {
+      "count": 24,
+      "digest": "f59cfeab8ebcecbafd8cda18c674a4f7d8f279253a544b709f3025b44ddb46ef"
+    },
+    "Product": {
+      "count": 4,
+      "digest": "4ae37db031b1d1cc6f015ee9f5ba0531e43b067efa1f47fe347bbf4b02c3d026"
+    },
+    "StoreSettings": {
+      "count": 0,
+      "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

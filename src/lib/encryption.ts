@@ -1,21 +1,36 @@
 import crypto from 'crypto'
 
-const ENCRYPTION_PREFIX = 'enc:v1'
+export const ENCRYPTION_PREFIX = 'enc:v1'
 const IV_LENGTH = 12
-const DEFAULT_UNSAFE_KEYS = new Set([
+export const DEFAULT_UNSAFE_ENCRYPTION_KEYS = new Set([
   '1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p',
   'your-32-character-secret-key-here',
 ])
 
-function getEncryptionKeyProblem(secret: string | undefined) {
-  if (!secret) return 'ENCRYPTION_KEY is missing'
-  if (secret.length < 32) return 'ENCRYPTION_KEY must be at least 32 characters long'
-  if (DEFAULT_UNSAFE_KEYS.has(secret)) return 'ENCRYPTION_KEY is using an unsafe default value'
+type EncryptionKeyValidationOptions = {
+  allowUnsafeDefault?: boolean
+  variableName?: string
+}
+
+export function getEncryptionKeyProblem(
+  secret: string | undefined,
+  options: EncryptionKeyValidationOptions = {}
+) {
+  const variableName = options.variableName ?? 'ENCRYPTION_KEY'
+
+  if (!secret) return `${variableName} is missing`
+  if (secret.length < 32) return `${variableName} must be at least 32 characters long`
+  if (!options.allowUnsafeDefault && DEFAULT_UNSAFE_ENCRYPTION_KEYS.has(secret)) {
+    return `${variableName} is using an unsafe default value`
+  }
   return ''
 }
 
-function validateEncryptionKey(secret: string | undefined) {
-  const problem = getEncryptionKeyProblem(secret)
+export function validateEncryptionSecret(
+  secret: string | undefined,
+  options: EncryptionKeyValidationOptions = {}
+) {
+  const problem = getEncryptionKeyProblem(secret, options)
 
   if (problem && process.env.NODE_ENV === 'production') {
     throw new Error(
@@ -30,12 +45,17 @@ function validateEncryptionKey(secret: string | undefined) {
   }
 }
 
-validateEncryptionKey(process.env.ENCRYPTION_KEY)
+// Validate when a secret is used, not while Next.js imports routes at build time.
+// This preserves fail-closed encryption without requiring production keys to build.
+export function assertEncryptionReady() {
+  deriveEncryptionKey(process.env.ENCRYPTION_KEY)
+}
 
-function getEncryptionKey() {
-  const secret = process.env.ENCRYPTION_KEY
-
-  const problem = getEncryptionKeyProblem(secret)
+export function deriveEncryptionKey(
+  secret: string | undefined,
+  options: EncryptionKeyValidationOptions = {}
+) {
+  const problem = getEncryptionKeyProblem(secret, options)
   if (problem) {
     throw new Error(
       `${problem}. Generate a secure key with: npx tsx scripts/generate-encryption-key.ts`
@@ -50,10 +70,18 @@ export function isEncryptedText(value: unknown): value is string {
 }
 
 export function encryptText(text: string) {
+  return encryptTextWithKey(text, process.env.ENCRYPTION_KEY)
+}
+
+export function encryptTextWithKey(
+  text: string,
+  secret: string | undefined,
+  options: EncryptionKeyValidationOptions = {}
+) {
   if (isEncryptedText(text)) return text
 
   const iv = crypto.randomBytes(IV_LENGTH)
-  const cipher = crypto.createCipheriv('aes-256-gcm', getEncryptionKey(), iv)
+  const cipher = crypto.createCipheriv('aes-256-gcm', deriveEncryptionKey(secret, options), iv)
   const encrypted = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()])
   const tag = cipher.getAuthTag()
 
@@ -66,6 +94,14 @@ export function encryptText(text: string) {
 }
 
 export function decryptText(encryptedText: string) {
+  return decryptTextWithKey(encryptedText, process.env.ENCRYPTION_KEY)
+}
+
+export function decryptTextWithKey(
+  encryptedText: string,
+  secret: string | undefined,
+  options: EncryptionKeyValidationOptions = {}
+) {
   if (!isEncryptedText(encryptedText)) return encryptedText
 
   const [, , ivBase64, tagBase64, encryptedBase64] = encryptedText.split(':')
@@ -75,7 +111,7 @@ export function decryptText(encryptedText: string) {
 
   const decipher = crypto.createDecipheriv(
     'aes-256-gcm',
-    getEncryptionKey(),
+    deriveEncryptionKey(secret, options),
     Buffer.from(ivBase64, 'base64')
   )
   decipher.setAuthTag(Buffer.from(tagBase64, 'base64'))
@@ -94,7 +130,22 @@ export function decryptNullableText(value: string | null | undefined) {
   return value ? decryptText(value) : null
 }
 
-const DELIVERY_SECRET_FIELDS = [
+export function reencryptTextWithKeys(
+  encryptedText: string,
+  oldSecret: string | undefined,
+  newSecret: string | undefined
+) {
+  const plaintext = decryptTextWithKey(encryptedText, oldSecret, {
+    allowUnsafeDefault: true,
+    variableName: 'OLD_ENCRYPTION_KEY',
+  })
+
+  return encryptTextWithKey(plaintext, newSecret, {
+    variableName: 'ENCRYPTION_KEY',
+  })
+}
+
+export const DELIVERY_SECRET_FIELDS = [
   'creditCode',
   'creditAmount',
   'platform',

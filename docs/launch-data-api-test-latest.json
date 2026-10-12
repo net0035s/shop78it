@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-10-11T17:11:19.258Z",
+  "sandboxOnly": true,
+  "productionChangesApplied": false,
+  "groups": [
+    "reproduces readable order fixture before lockdown",
+    "locks all 15 tables without changing money, customer fixtures or encrypted bytes",
+    "anon, authenticated and PUBLIC-only roles cannot read/insert/update/delete/truncate/copy",
+    "RLS blocks accidental grant; readiness flags it; repeated lockdown repairs grant",
+    "non-superuser server Prisma still reads and writes through its trusted role",
+    "unexpected existing policy aborts atomically and preserves prior permissions",
+    "legacy 9 tables work; incomplete baseline refuses changes"
+  ],
+  "passed": 7
+}

@@ -1,0 +1,40 @@
+{
+  "checkedAt": "2026-10-11T15:03:38Z",
+  "scope": "local and isolated sandbox developer preparation",
+  "readyForRealPayments": false,
+  "deployed": false,
+  "productionDataChangedThisRound": false,
+  "productionEncryptionKeyChanged": false,
+  "realPayments": false,
+  "externalMessagesSentThisRound": 0,
+  "existingWorkPreserved": true,
+  "fixes": [
+    "free coupon checkout preserves newly completed order during navigation",
+    "delivery badge reflects actual order status",
+    "closed cart hidden from keyboard and accessibility navigation",
+    "mobile delivery fields shrink inside their container",
+    "loopback sandbox SMTP works in Next development; live and production require TLS",
+    "unsupported 24 hour support claims removed from delivery page and download"
+  ],
+  "validation": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "isolatedBuild": "passed",
+    "storefrontBrowserE2e": { "passed": 9, "database": "temporary-loopback", "clerk": "test sessions via official helper", "externalEmails": 0, "cleanup": "synthetic users removed and fixture database closed" },
+    "multiConnectionPostgres": { "commerceGroups": 28, "launchGroups": 9, "rlsGroups": 7, "encryptedBackupRestoreAndMigration": "passed" },
+    "cloudSandbox": { "projectId": "acocmsdnkpjfggycsxro", "migrationHistory": "resolved both existing files", "schemaDrift": "none", "businessTablesUnchanged": 15, "metadataRls": true, "securityAdvisorsErrors": 0, "securityAdvisorsWarnings": 0 },
+    "audit": { "runtimeVulnerabilities": 0, "fullHighEntries": 7, "fullCiAuditGate": "still failing; no gate reduction" }
+  },
+  "remaining": [
+    "unpatched braces tooling advisory GHSA-vfj7-8cjw-p6xm",
+    "hosting budget and commercial scheduler choice",
+    "provider-supported payment sandbox and owner credentials",
+    "Clerk live and actual login on final domain",
+    "SMTP Telegram scheduler and storefront on authorized isolated deployment",
+    "owner catalog terms support details and off-device backup",
+    "review and approve real commerce migration and encryption plan with fresh backup",
+    "final deploy and launch approval"
+  ],
+  "newFeatures": "feature-backlog.md",
+  "handoff": "launch-owner-handoff.md"
+}

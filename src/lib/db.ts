@@ -29,7 +29,7 @@ export default prisma
  */
 export async function syncProductStock(productId: string): Promise<void> {
   const unsoldCount = await prisma.digitalStock.count({
-    where: { productId, isSold: false },
+    where: { productId, isSold: false, orderId: null },
   })
 
   const newStatus =

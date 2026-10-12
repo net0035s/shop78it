@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-12T04:50:35.364Z",
+  "sandboxOnly": true,
+  "realPayments": false,
+  "primaryDomainUnchanged": true,
+  "url": "https://shop78it-lxcs29u7u-netnaruto0035s1-5199s-projects.vercel.app",
+  "alias": "shop78it-stripe-sandbox.vercel.app",
+  "stripeEnabled": true,
+  "unsignedWebhookRejected": true,
+  "actualStripeWebhookAcknowledged": true,
+  "paidCheckoutTested": false,
+  "promptPayPaidTested": false,
+  "sessionExpired": true,
+  "originalBusinessDataWritten": false,
+  "passed": true
+}

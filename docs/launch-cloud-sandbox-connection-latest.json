@@ -1,0 +1,24 @@
+{
+  "checkedAt": "2026-10-11T08:23:02.888Z",
+  "projectId": "acocmsdnkpjfggycsxro",
+  "productionConnected": false,
+  "credentialsPrinted": false,
+  "passed": true,
+  "connected": true,
+  "backendRole": {
+    "name": "postgres",
+    "bypassRls": true,
+    "superuser": false
+  },
+  "counts": {
+    "products": 3,
+    "orders": 0,
+    "stock": 6
+  },
+  "stockDecryption": {
+    "total": 6,
+    "readable": 6
+  },
+  "prismaProducts": 3,
+  "schemaDrift": "none"
+}

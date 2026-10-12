@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { sameOrigin, readJson, apiError } from '@/lib/server-guards'
 import { requireAdmin } from '@/lib/admin-auth'
 
 export const runtime = 'nodejs'
@@ -60,7 +61,8 @@ export async function POST(request: Request) {
   if (!authResult.authorized) return authResult.response
 
   try {
-    const body = await request.json().catch(() => ({}))
+    sameOrigin(request)
+    const body = await readJson(request)
     const logoUrl = normalizeLogoUrl(body.logoUrl)
 
     if (body.logoUrl && !logoUrl) {
@@ -87,10 +89,6 @@ export async function POST(request: Request) {
       },
     })
   } catch (error) {
-    console.error('Admin settings POST failed:', error)
-    return NextResponse.json(
-      { success: false, error: 'บันทึกการตั้งค่าร้านค้าไม่สำเร็จ' },
-      { status: 500 }
-    )
+    return apiError(error)
   }
 }

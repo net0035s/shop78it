@@ -4,6 +4,10 @@ import { formatPrice } from '@/lib/products'
 import type { AdminDigitalStock } from './AdminTypes'
 
 export const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
+  refunded: { label: 'บันทึกคืนเงินแล้ว', color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/30', dot: 'bg-purple-400' },
+  payment_processing: { label: 'กำลังตรวจเงิน', color: 'text-amber-400', bg: 'bg-amber-500/10', dot: 'bg-amber-400' },
+  payment_review: { label: 'ต้องตรวจผลรับเงิน', color: 'text-red-400', bg: 'bg-red-500/10', dot: 'bg-red-400' },
+  paid: { label: 'รับเงินแล้ว รอส่ง', color: 'text-blue-400', bg: 'bg-blue-500/10', dot: 'bg-blue-400' },
   pending: { label: 'รอชำระ', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/30', dot: 'bg-amber-400' },
   completed: { label: 'สำเร็จ', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/30', dot: 'bg-emerald-400' },
   needs_manual_delivery: { label: 'รอแอดมินจัดส่ง', color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/30', dot: 'bg-orange-400' },

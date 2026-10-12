@@ -1,0 +1,159 @@
+{
+  "environment": "preview",
+  "checkedAt": "2026-10-11T06:00:56.547Z",
+  "checks": [
+    {
+      "id": "database",
+      "label": "การตั้งค่าฐานข้อมูล",
+      "status": "pass",
+      "detail": "ตั้งค่าแล้ว ต้องตรวจผลใช้งานตามแผนเปิดร้าน"
+    },
+    {
+      "id": "encryption",
+      "label": "กุญแจเข้ารหัส",
+      "status": "blocked",
+      "detail": "ตรวจแผนกุญแจและข้อมูลเดิมก่อนเปลี่ยนค่า ห้ามเปลี่ยนเพื่อให้การตรวจผ่านเฉย ๆ"
+    },
+    {
+      "id": "site",
+      "label": "ลิงก์ร้านและลิงก์รับสินค้า",
+      "status": "blocked",
+      "detail": "ตั้ง URL ร้านให้เป็น HTTPS ของสภาพแวดล้อมนี้"
+    },
+    {
+      "id": "clerk",
+      "label": "ระบบเข้าสู่ระบบ",
+      "status": "blocked",
+      "detail": "ใช้ Clerk live และระบุแอดมินที่ยืนยันอีเมลแล้ว"
+    },
+    {
+      "id": "email",
+      "label": "อีเมลรับสินค้าและยืนยันออเดอร์",
+      "status": "pass",
+      "detail": "ตั้งค่าแล้ว ต้องตรวจผลใช้งานตามแผนเปิดร้าน"
+    },
+    {
+      "id": "support",
+      "label": "ช่องทางติดต่อร้าน",
+      "status": "pass",
+      "detail": "ตั้งค่าแล้ว ต้องตรวจผลใช้งานตามแผนเปิดร้าน"
+    },
+    {
+      "id": "cron",
+      "label": "กุญแจงานอัตโนมัติ",
+      "status": "blocked",
+      "detail": "ตั้งกุญแจสุ่มอย่างน้อย 32 ตัวอักษรให้ตรงกับตัวเรียกงาน"
+    },
+    {
+      "id": "provider",
+      "label": "ช่องทางรับเงิน",
+      "status": "pass",
+      "detail": "ตั้งค่าแล้ว ต้องตรวจผลใช้งานตามแผนเปิดร้าน"
+    },
+    {
+      "id": "isolation",
+      "label": "แยกเว็บทดสอบจากข้อมูลจริง",
+      "status": "blocked",
+      "detail": "ต้องใช้ฐานข้อมูลทดสอบแยก พร้อม fingerprint ของฐานทดสอบและฐานจริง"
+    },
+    {
+      "id": "backup",
+      "label": "สำรองและทดลองกู้คืนข้อมูล",
+      "status": "pending",
+      "detail": "ยังไม่มีผลตรวจยืนยัน ห้ามตั้งผ่านก่อนทำจริง"
+    },
+    {
+      "id": "migration",
+      "label": "ซ้อมย้ายข้อมูลและตรวจการถอดรหัส",
+      "status": "pending",
+      "detail": "ยังไม่มีผลตรวจยืนยัน ห้ามตั้งผ่านก่อนทำจริง"
+    },
+    {
+      "id": "providerTest",
+      "label": "ทดสอบผู้ให้บริการใน sandbox",
+      "status": "pending",
+      "detail": "ยังไม่มีผลตรวจยืนยัน ห้ามตั้งผ่านก่อนทำจริง"
+    },
+    {
+      "id": "adminTest",
+      "label": "ทดสอบสิทธิ์แอดมินกับ Clerk",
+      "status": "pending",
+      "detail": "ยังไม่มีผลตรวจยืนยัน ห้ามตั้งผ่านก่อนทำจริง"
+    },
+    {
+      "id": "workerTest",
+      "label": "ทดสอบงานอัตโนมัติและส่งข้อความ",
+      "status": "pending",
+      "detail": "ยังไม่มีผลตรวจยืนยัน ห้ามตั้งผ่านก่อนทำจริง"
+    },
+    {
+      "id": "hosting",
+      "label": "โฮสต์รองรับการขายจริง",
+      "status": "pending",
+      "detail": "ยังไม่มีผลตรวจยืนยัน ห้ามตั้งผ่านก่อนทำจริง"
+    },
+    {
+      "id": "approval",
+      "label": "อนุมัติเปิดร้าน",
+      "status": "pending",
+      "detail": "เปิดหลังตรวจหลักฐานทุกขั้นตอนแล้วเท่านั้น"
+    }
+  ],
+  "database": {
+    "checked": true,
+    "readOnly": true,
+    "tables": [
+      "Category",
+      "DeliveryItem",
+      "DigitalKey",
+      "DigitalStock",
+      "DiscountCode",
+      "Order",
+      "OrderItem",
+      "Product",
+      "StoreSettings"
+    ],
+    "missingTables": [
+      "PaymentAttempt",
+      "OrderAccessSession",
+      "OrderAccessChallenge",
+      "NotificationJob",
+      "OrderAuditEvent",
+      "RateLimitBucket"
+    ],
+    "missingOrderColumns": [
+      "expiresAt",
+      "paidAt",
+      "paidAtEstimated",
+      "reservationActive",
+      "discountReserved"
+    ],
+    "statuses": [
+      {
+        "status": "cancelled",
+        "count": 19
+      },
+      {
+        "status": "completed",
+        "count": 4
+      },
+      {
+        "status": "pending",
+        "count": 1
+      }
+    ],
+    "soldStockOnPendingOrders": 0,
+    "encryption": {
+      "values": 38,
+      "plaintext": 0,
+      "encrypted": 38,
+      "decryptable": 14,
+      "unreadable": 24,
+      "emptyPayload": 0,
+      "invalidFormat": 0,
+      "authenticationFailures": 24,
+      "currentKeySafe": false
+    }
+  },
+  "externalTests": "not verified by this audit"
+}

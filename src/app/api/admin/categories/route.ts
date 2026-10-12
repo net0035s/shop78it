@@ -1,5 +1,14 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { updateCategory } from '@/lib/admin-category'
+import { transaction } from '@/lib/transactions'
+import { sameOrigin, readJson, apiError } from '@/lib/server-guards'
+import { CommerceError, textField } from '@/lib/commerce-rules'
+function validateCategory(b: any) {
+ textField(b.name,'ชื่อหมวดหมู่',100)
+ if (!/^[a-z0-9][a-z0-9-]{0,99}$/.test(b.slug)) throw new CommerceError('Slug ใช้ตัวอักษรอังกฤษเล็ก ตัวเลข และขีดกลาง')
+ if (b.sortOrder !== undefined && !Number.isSafeInteger(b.sortOrder)) throw new CommerceError('ลำดับต้องเป็นจำนวนเต็ม')
+}
 import { requireAdmin } from '@/lib/admin-auth'
 
 /**
@@ -30,7 +39,9 @@ export async function POST(request: Request) {
   if (!authResult.authorized) return authResult.response
 
   try {
-    const body = await request.json()
+    sameOrigin(request)
+    const body = await readJson(request)
+    validateCategory(body)
     const { name, slug, icon, color, sortOrder } = body
 
     if (!name || !slug) {
@@ -44,11 +55,12 @@ export async function POST(request: Request) {
     }
 
     const newCategory = await prisma.category.create({
-      data: { name, slug, icon: icon || '📦', color: color || '#6366f1', sortOrder: sortOrder || 99, isActive: true },
+      data: { name, slug, icon: icon || '📦', color: color || '#6366f1', sortOrder: sortOrder ?? 99, isActive: true },
     })
 
     return NextResponse.json({ success: true, data: newCategory })
   } catch (error) {
+    if (error instanceof CommerceError) return apiError(error)
     console.error('Error creating category:', error)
     return NextResponse.json({ success: false, error: 'เกิดข้อผิดพลาดในการสร้างหมวดหมู่' }, { status: 500 })
   }
@@ -63,20 +75,20 @@ export async function PUT(request: Request) {
   if (!authResult.authorized) return authResult.response
 
   try {
-    const body = await request.json()
+    sameOrigin(request)
+    const body = await readJson(request)
+    validateCategory(body)
     const { id, name, slug, icon, color, sortOrder, isActive } = body
 
     if (!id || !name || !slug) {
       return NextResponse.json({ success: false, error: 'ข้อมูลไม่ครบถ้วน (id, name, slug)' }, { status: 400 })
     }
 
-    const updated = await prisma.category.update({
-      where: { id },
-      data: { name, slug, icon, color, sortOrder, isActive },
-    })
+    const updated = await updateCategory(id,{ name, slug, icon, color, sortOrder, isActive })
 
     return NextResponse.json({ success: true, data: updated })
   } catch (error) {
+    if (error instanceof CommerceError) return apiError(error)
     console.error('Error updating category:', error)
     return NextResponse.json({ success: false, error: 'เกิดข้อผิดพลาดในการแก้ไขหมวดหมู่' }, { status: 500 })
   }
@@ -91,6 +103,7 @@ export async function DELETE(request: Request) {
   if (!authResult.authorized) return authResult.response
 
   try {
+    sameOrigin(request)
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
@@ -98,30 +111,16 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: 'กรุณาระบุ Category ID' }, { status: 400 })
     }
 
-    const category = await prisma.category.findUnique({ where: { id } })
-    if (!category) {
-      return NextResponse.json({ success: false, error: 'ไม่พบหมวดหมู่ที่ต้องการลบ' }, { status: 404 })
-    }
-
-    // Check if products use this category
-    const productsUsingCat = await prisma.product.count({
-      where: {
-        OR: [
-          { categoryId: id },
-          { category: category.slug },
-        ],
-      },
+    await transaction(async tx=>{
+      const category=await tx.category.findUniqueOrThrow({where:{id}})
+      const products=await tx.product.count({where:{OR:[{categoryId:id},{category:category.slug}]}})
+      const coupons=await tx.discountCode.count({where:{applicableCategoryId:id}})
+      if(products||coupons)throw new CommerceError('หมวดหมู่ยังถูกใช้กับสินค้าหรือคูปอง ไม่สามารถลบได้',409)
+      await tx.category.delete({where:{id}})
     })
-    if (productsUsingCat > 0) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่สามารถลบได้ เนื่องจากยังมีสินค้าในหมวดหมู่นี้' },
-        { status: 400 }
-      )
-    }
-
-    await prisma.category.delete({ where: { id } })
     return NextResponse.json({ success: true, message: 'ลบหมวดหมู่เรียบร้อยแล้ว' })
   } catch (error) {
+    if (error instanceof CommerceError) return apiError(error)
     console.error('Error deleting category:', error)
     return NextResponse.json({ success: false, error: 'เกิดข้อผิดพลาดในการลบหมวดหมู่' }, { status: 500 })
   }

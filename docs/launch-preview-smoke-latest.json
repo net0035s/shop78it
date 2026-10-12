@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-12T04:51:13.796Z",
+  "url": "https://shop78it-lxcs29u7u-netnaruto0035s1-5199s-projects.vercel.app",
+  "sandboxOnly": true,
+  "productionConnected": false,
+  "realPayments": false,
+  "externalMessages": 0,
+  "checks": [
+    "online Preview returns 200 with sandbox banner and three MOCK products",
+    "admin and unauthenticated cron remain protected on the deployment",
+    "foreign origin is rejected before creating an order",
+    "deployed checkout creates and reserves only its own MOCK fixture",
+    "order number alone is denied; the scoped HttpOnly cookie can read its pending order",
+    "matching order and email show receipt metadata but never grant delivery access or claim email was sent",
+    "TrueMoney stays disabled; Stripe is either disabled or safely opens and cancels sandbox checkout"
+  ],
+  "passed": true,
+  "fixtureRemoved": true,
+  "originalCatalogPreserved": true
+}

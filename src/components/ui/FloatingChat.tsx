@@ -2,8 +2,9 @@
 
 import { MessageCircle } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { supportContact } from '@/lib/support'
 
-const CHAT_URL = process.env.NEXT_PUBLIC_LINE_URL || '#'
+const CHAT_URL = supportContact().href
 const BUTTON_SIZE = 56
 const EDGE_PADDING = 8
 const SNAP_PADDING = 24

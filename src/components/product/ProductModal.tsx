@@ -1,10 +1,11 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { X, ShoppingCart, Zap, ShieldCheck, Clock, CheckCircle2 } from 'lucide-react'
 import { Product } from '@/types'
 import { useCartStore } from '@/store/cartStore'
-import { formatPrice, getDiscountPercent } from '@/lib/products'
+import { formatPrice, getDiscountPercent, normalizeProductTags } from '@/lib/products'
 import { canOrder } from '@/lib/stock'
 import { StockBadge } from '../ui/StockBadge'
 import Image from 'next/image'
@@ -87,6 +88,16 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   const shouldShowFeatures = product.showFeatures === true
   const shouldShowInstruction = product.showInstruction === true
   const productInstruction = product.instruction?.trim() || 'ยังไม่ได้ระบุวิธีใช้งานสำหรับสินค้านี้'
+  const categoryLabel =
+    product.category === 'digital'
+      ? 'สินค้าดิจิทัล'
+      : product.category === 'subscription'
+      ? 'สมัครสมาชิกพรีเมียม'
+      : product.category === 'voucher'
+      ? 'Gift Voucher / บัตรเติมเงิน'
+      : product.category === 'physical'
+      ? 'สินค้าทั่วไป'
+      : ''
 
   const handleAddToCart = async () => {
     if (!isOrderable || isAdding) return
@@ -102,41 +113,41 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
     onClose()
   }
 
-  return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-3 sm:p-6 animate-fade-in">
       <div className="absolute inset-0 cursor-default" onClick={onClose} />
 
-      <div className="relative w-full max-w-5xl bg-surface border border-border/80 rounded-3xl overflow-hidden shadow-2xl z-10 animate-scale-up max-h-[90vh] flex flex-col">
+      <div role="dialog" aria-modal="true" aria-labelledby="product-modal-title" className="relative w-full max-w-4xl bg-surface border border-border rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl z-10 animate-scale-up max-h-[92dvh] flex flex-col">
         <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
 
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full bg-surfaceLight/80 hover:bg-surfaceLight text-textMuted hover:text-textPrimary transition-all border border-border/60 hover:scale-105 active:scale-95 z-20"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 min-h-11 min-w-11 flex items-center justify-center p-2 rounded-full bg-surfaceLight hover:bg-surfaceLight text-textMuted hover:text-textPrimary transition-all border border-border hover:scale-105 active:scale-95 z-20"
           aria-label="ปิดหน้าต่าง"
           id="close-product-modal"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="flex flex-col gap-10 overflow-y-auto flex-1">
-          <div className="relative h-64 sm:h-80 md:h-[460px] bg-gradient-to-br from-surfaceLight via-surfaceLight/70 to-background flex items-center justify-center overflow-hidden border-b border-border/40 shrink-0 w-full max-w-4xl mx-auto">
+        <div className="grid min-h-0 grid-cols-1 items-start gap-5 overflow-y-auto p-4 sm:p-6 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:gap-6 flex-1">
+          <div className="relative aspect-[4/3] md:aspect-square min-w-0 bg-gradient-to-br from-surfaceLight via-surfaceLight/70 to-background flex items-center justify-center overflow-hidden rounded-2xl border border-border w-full md:sticky md:top-0">
             <div className="absolute inset-0 bg-gradient-radial from-primary/10 to-surfaceLight z-0" />
-            <div className="relative w-full h-full p-6 flex items-center justify-center">
-              <div className="relative w-4/5 h-4/5 rounded-2xl overflow-hidden shadow-xl border border-border">
+            <div className="absolute inset-0 p-3 sm:p-4 flex items-center justify-center">
+              <div className="relative w-full h-full overflow-hidden rounded-xl">
                 <Image
                   src={imageSrc}
                   alt={product.name}
                   fill
-                  className="object-cover z-10"
-                  sizes="(max-width: 768px) 100vw, 480px"
+                  className="object-contain z-10"
+                  sizes="(max-width: 768px) calc(100vw - 56px), 370px"
                   priority
                   onError={() => setImageSrc(FALLBACK_IMAGE)}
                 />
               </div>
             </div>
 
-            <div className="absolute top-4 left-4 flex flex-col gap-2">
+            <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
               {product.isNew && (
                 <span className="text-xs font-bold px-3 py-1 rounded-lg bg-primary text-white shadow-lg shadow-primary/20 w-fit">
                   สินค้าใหม่
@@ -149,46 +160,41 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
               )}
             </div>
 
-            <div className="absolute top-4 right-14">
+            <div className="absolute bottom-4 right-4 z-20">
               <StockBadge status={product.stockStatus} size="md" />
             </div>
           </div>
 
-          <div className="w-full max-w-4xl mx-auto px-6 sm:px-10 pb-10 flex flex-col justify-between space-y-8">
-            <div className="space-y-5">
-              <span className="inline-flex w-fit items-center rounded-full bg-primary/10 px-3 py-1 text-[11px] font-extrabold text-primary uppercase tracking-wider border border-primary/20">
-                {product.category === 'digital' && 'สินค้าดิจิทัล'}
-                {product.category === 'subscription' && 'สมัครสมาชิกพรีเมียม'}
-                {product.category === 'voucher' && 'Gift Voucher / บัตรเติมเงิน'}
-                {product.category === 'physical' && 'สินค้าทั่วไป'}
-              </span>
+          <div className="min-w-0 w-full flex flex-col gap-5 md:pt-6">
+            <div className="space-y-3">
+              {categoryLabel && (
+                <span className="inline-flex w-fit items-center rounded-full bg-primary/10 px-3 py-1 text-[11px] font-extrabold text-primary uppercase tracking-wider border border-primary/20">
+                  {categoryLabel}
+                </span>
+              )}
 
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-textPrimary tracking-tight leading-relaxed">
+              <h2 id="product-modal-title" className="pr-7 text-xl sm:text-2xl font-bold text-textPrimary tracking-tight leading-snug [overflow-wrap:anywhere]">
                 {product.name}
               </h2>
 
               <div className="flex flex-wrap items-center gap-2.5">
                 {product.deliveryType === 'manual' ? (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-semibold">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 text-xs font-semibold">
                     <Clock className="w-3.5 h-3.5 shrink-0" />
                     รอดำเนินการโดยแอดมิน
                   </div>
                 ) : product.deliveryInfo ? (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
                     <Zap className="w-3.5 h-3.5 shrink-0" />
                     {product.deliveryInfo}
                   </div>
                 ) : null}
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
                   <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
                   {salesCount} ขายแล้ว
                 </span>
                 {(() => {
-                  const tagsArray = Array.isArray(product.tags)
-                    ? product.tags
-                    : typeof product.tags === 'string'
-                    ? product.tags.split(',').map(t => t.trim()).filter(Boolean)
-                    : []
+                  const tagsArray = normalizeProductTags(product.tags)
 
                   const filteredTags = product.deliveryType === 'manual'
                     ? tagsArray.filter(t => !t.includes('ออโต้') && !t.includes('คีย์'))
@@ -197,7 +203,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                   return filteredTags.map((tag) => (
                     <span
                       key={tag}
-                      className="px-2.5 py-1 bg-white/[0.03] border border-white/10 text-textMuted text-xs rounded-full font-medium"
+                      className="px-2.5 py-1 max-w-full [overflow-wrap:anywhere] bg-surfaceLight border border-border text-textMuted text-xs rounded-full font-medium"
                     >
                       #{tag}
                     </span>
@@ -207,15 +213,15 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
 
             </div>
 
-            <div className="space-y-8 pt-6 border-t border-border/50">
-              <div className="rounded-3xl bg-gradient-to-br from-surfaceLight/60 via-surfaceLight/35 to-primary/5 border border-border/50 p-5 sm:p-6 shadow-xl shadow-black/10">
+            <div className="space-y-4">
+              <div className="rounded-2xl bg-surfaceLight border border-border p-4 sm:p-5">
                 <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                 <div>
                   <span className="block text-[10px] text-textMuted font-bold uppercase tracking-wider mb-0.5">
-                    ราคาพิเศษ
+                    ราคาสินค้า
                   </span>
                   <div className="flex flex-wrap items-baseline gap-2">
-                    <span className="text-4xl sm:text-5xl font-black text-textPrimary tracking-tight">
+                    <span className="text-3xl sm:text-4xl font-bold tabular-nums text-textPrimary tracking-tight [overflow-wrap:anywhere]">
                       {formatPrice(product.price)}
                     </span>
                     {product.originalPrice && (
@@ -238,7 +244,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                 onClick={handleAddToCart}
                 disabled={!isOrderable || isAdding}
                 className={cn(
-                  'mt-5 w-full flex items-center justify-center gap-2.5 py-4 px-6 rounded-2xl font-extrabold text-sm tracking-wide transition-all duration-300 shadow-lg shadow-primary/20',
+                  'mt-4 min-h-12 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-300 shadow-lg shadow-primary/20',
                   isOrderable
                     ? isAdding
                       ? 'bg-accent/20 text-accent border border-accent/30 cursor-wait'
@@ -254,7 +260,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                   </>
                 ) : isOrderable ? (
                   <>
-                    <ShoppingCart className="w-4.5 h-4.5" />
+                    <ShoppingCart className="w-4 h-4" />
                     {quantityInCart > 0 ? `หยิบใส่ตะกร้าเพิ่มอีก (มีแล้ว ${quantityInCart})` : 'หยิบใส่ตะกร้าเลย'}
                   </>
                 ) : (
@@ -263,37 +269,37 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
               </button>
               </div>
 
-              <div className="space-y-10">
-                <section className="space-y-3">
-                  <span className="block text-xs text-textMuted font-extrabold uppercase tracking-[0.18em]">
+              <div className="space-y-4">
+                <section className="min-w-0 space-y-3 rounded-2xl border border-border bg-surfaceLight p-4 sm:p-5">
+                  <span className="block text-sm text-textPrimary font-semibold">
                     รายละเอียดสินค้า
                   </span>
-                  <p className="text-base text-textSecondary leading-8 whitespace-pre-line">
+                  <p className="text-sm text-textSecondary leading-7 whitespace-pre-line [overflow-wrap:anywhere]">
                     {product.description}
                   </p>
                 </section>
 
                 {shouldShowInstruction && (
-                  <section className="space-y-3 border-t border-border/40 pt-8">
-                    <span className="block text-xs text-textMuted font-extrabold uppercase tracking-[0.18em]">
+                  <section className="min-w-0 space-y-3 rounded-2xl border border-border bg-surfaceLight p-4 sm:p-5">
+                    <span className="block text-sm text-textPrimary font-semibold">
                       วิธีใช้งาน
                     </span>
-                    <div className="text-sm sm:text-base text-zinc-200 leading-8 whitespace-pre-line rounded-2xl bg-zinc-950/80 border border-white/10 p-5 sm:p-6 shadow-inner shadow-black/30">
+                    <div className="text-sm text-textSecondary leading-7 whitespace-pre-line [overflow-wrap:anywhere]">
                       {productInstruction}
                     </div>
                   </section>
                 )}
 
                 {shouldShowFeatures && (
-                  <section className="space-y-4 border-t border-border/40 pt-8">
-                    <span className="block text-xs text-textMuted font-extrabold uppercase tracking-[0.18em]">
+                  <section className="min-w-0 space-y-3 rounded-2xl border border-border bg-surfaceLight p-4 sm:p-5">
+                    <span className="block text-sm text-textPrimary font-semibold">
                       สิ่งที่จะได้รับ
                     </span>
                     <div>
                       {featureItems.length > 0 ? (
-                        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <ul className="grid grid-cols-1 gap-2">
                           {featureItems.map((item) => (
-                            <li key={item} className="flex gap-3 rounded-2xl bg-emerald-500/[0.06] border border-emerald-500/15 px-4 py-3 text-sm text-textSecondary leading-relaxed">
+                            <li key={item} className="flex min-w-0 gap-2.5 rounded-xl bg-emerald-500/[0.06] border border-emerald-500/15 px-3 py-2.5 text-sm text-textSecondary leading-relaxed [overflow-wrap:anywhere]">
                               <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                               <span>{item}</span>
                             </li>
@@ -312,6 +318,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

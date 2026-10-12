@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-10-12T10:34:12.884Z",
+  "sourceProject": "hddnabbhdjphjwjohvcg",
+  "productionDeployed": true,
+  "realPaymentsEnabled": false,
+  "phase": "verified",
+  "passed": true,
+  "sourceWriteGuardInstalled": true,
+  "recoveryArchive": "N:\\ทำเว็บขาย24.7 bycodex\\backups\\shop78it-transition-2026-10-12T10-34-12.882Z.enc",
+  "recoveryKeyFile": "C:\\Users\\netna\\AppData\\Local\\Shop78itRecovery\\transition-fRqsAQ\\transition.recovery-key",
+  "legacyWriterBlocked": true,
+  "moneyStockAndEncryptedBytesPreserved": true,
+  "encryptedValues": 38,
+  "originalReadableValuesPreserved": 14,
+  "unreadableTestValuesReplaced": 24,
+  "schemaDrift": "none",
+  "businessTables": 15,
+  "runtimeRoleVerified": true,
+  "migrationHistoryRecorded": true,
+  "productionDeploymentId": "dpl_9CejMLiCr4Jo9t8my3pP6UVvYntX",
+  "primaryDomainPromoted": true,
+  "deploymentVerifiedAt": "2026-10-12T11:29:32.451Z"
+}

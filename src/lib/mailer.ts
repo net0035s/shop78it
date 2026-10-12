@@ -1,3 +1,4 @@
+import { deploymentKind } from './hosting'
 import nodemailer from 'nodemailer'
 
 type EmailDeliveryItem = {
@@ -16,7 +17,19 @@ type EmailDeliveryItem = {
   deliveredContent?: string | null
 }
 
-const LINE_OA_TEXT = process.env.NEXT_PUBLIC_LINE_URL || '#'
+const LINE_OA_TEXT = process.env.NEXT_PUBLIC_LINE_URL || 'หน้าช่วยเหลือบนเว็บไซต์ร้าน'
+function mailTransport(user: string, pass: string) {
+  if (!process.env.SMTP_HOST) return nodemailer.createTransport({ service: 'gmail', auth: { user, pass }, connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000 })
+  const port = Number(process.env.SMTP_PORT || 587)
+  const host = process.env.SMTP_HOST
+  if (!/^[a-zA-Z0-9.-]+$/.test(host) || !Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Invalid SMTP configuration')
+  // Next dev compiles NODE_ENV as development, so sandbox SMTP sinks also need this path.
+  // Production and every non-loopback server continue to require encrypted transport.
+  const localTest = deploymentKind() !== 'production' &&
+    (process.env.NODE_ENV === 'test' || process.env.APP_MODE === 'sandbox') &&
+    ['127.0.0.1', 'localhost'].includes(host)
+  return nodemailer.createTransport({ host, port, secure: port === 465, requireTLS: !localTest && port !== 465, auth: { user, pass }, connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000 })
+}
 
 function escapeHtml(value: unknown): string {
   return String(value ?? '')
@@ -157,7 +170,7 @@ function buildOrderReceiptHtml(orderId: string, orderItems: EmailDeliveryItem[],
       <div style="max-width:680px;margin:0 auto;padding:22px 12px;">
         <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:20px;overflow:hidden;">
           <div style="padding:22px 20px;background:#111827;color:#ffffff;">
-            <div style="font-size:22px;font-weight:900;letter-spacing:0;">ShopAuto 24/7</div>
+            <div style="font-size:22px;font-weight:900;letter-spacing:0;">Shop78it</div>
             <div style="font-size:14px;color:#d1d5db;margin-top:6px;">${escapeHtml(title)}</div>
           </div>
 
@@ -196,10 +209,7 @@ export async function sendOrderReceiptEmail(
     return false
   }
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user, pass },
-  })
+  const transporter = mailTransport(user, pass)
 
   const subject = isUpdate
     ? `อัปเดตสถานะ: ดำเนินการจัดส่งสำเร็จ - ${orderId}`
@@ -207,14 +217,23 @@ export async function sendOrderReceiptEmail(
 
   try {
     await transporter.sendMail({
-      from: `"ShopAuto 24/7" <${user}>`,
+      from: `"Shop78it" <${user}>`,
       to: email,
       subject,
       html: buildOrderReceiptHtml(orderId, orderItems, isUpdate),
     })
     return true
   } catch (error) {
-    console.error('Error sending order receipt email:', error)
+    console.error('Order receipt email failed:', error instanceof Error ? error.name : 'unknown')
     return false
   }
+}
+
+export async function sendOrderAccessEmail(email: string, orderNumber: string, url: string): Promise<boolean> {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return false
+  try {
+    const transport = mailTransport(process.env.EMAIL_USER, process.env.EMAIL_PASS)
+    await transport.sendMail({ from: `"Shop78it" <${process.env.EMAIL_USER}>`, to: email, subject: `ยืนยันสิทธิ์ดูออเดอร์ ${orderNumber}`, html: `<p>ลิงก์นี้ใช้ได้ครั้งเดียวภายใน 15 นาที กรุณาอย่าส่งต่อ</p><p><a href="${escapeHtml(url)}">เปิดออเดอร์ ${escapeHtml(orderNumber)}</a></p><p>หากไม่ได้ขอลิงก์นี้ ไม่ต้องดำเนินการใด ๆ</p>` })
+    return true
+  } catch { return false }
 }

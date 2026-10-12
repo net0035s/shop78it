@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-11T07:14:07.872Z",
+  "source": "existing encrypted backup",
+  "backupCreatedAt": "2026-10-11T06:40:10.048Z",
+  "productionConnected": false,
+  "keysChanged": false,
+  "dataChanged": false,
+  "temporaryCopyRemoved": true,
+  "values": 38,
+  "candidates": [
+    {
+      "source": ".env",
+      "variable": "ENCRYPTION_KEY",
+      "readable": 14,
+      "unreadable": 24
+    },
+    {
+      "source": "N:/ทำเว็บขาย24.7 bycodex - Copy (3)/.env",
+      "variable": "ENCRYPTION_KEY",
+      "readable": 0,
+      "unreadable": 38
+    }
+  ],
+  "readableWithAvailableCandidates": 14,
+  "unreadable": 24
+}

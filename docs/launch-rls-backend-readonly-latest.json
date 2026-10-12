@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-11T06:45:26.511Z",
+  "readOnly": true,
+  "backend": "server Prisma",
+  "result": {
+    "products": 4,
+    "orders": 24,
+    "orderItems": 24,
+    "digitalStock": 20
+  }
+}

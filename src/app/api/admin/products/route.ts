@@ -1,4 +1,8 @@
 import prisma from '@/lib/db'
+import { transaction } from '@/lib/transactions'
+import { productData } from '@/lib/admin-product'
+import { CommerceError } from '@/lib/commerce-rules'
+import { sameOrigin, readJson, apiError } from '@/lib/server-guards'
 import { requireAdmin } from '@/lib/admin-auth'
 import { normalizeProductMoney } from '@/lib/money'
 import { jsonUtf8 } from '@/lib/json-response'
@@ -28,7 +32,7 @@ export async function GET() {
           _count: {
             select: {
               digitalStocks: {
-                where: { isSold: false }
+                where: { isSold: false, orderId: null }
               }
             }
           }
@@ -60,7 +64,7 @@ export async function GET() {
 
       return {
         ...normalizeProductMoney(p),
-        stock: p._count?.digitalStocks || 0,
+        stock: p.deliveryType === 'manual' ? p.stock : p._count?.digitalStocks || 0,
         manualSoldCount,
         realSold,
         totalSold: realSold + manualSoldCount,
@@ -77,173 +81,36 @@ export async function GET() {
   }
 }
 
-/**
- * POST /api/admin/products
- * เพิ่มสินค้าตัวใหม่ลงฐานข้อมูล
- */
-export async function POST(request: Request) {
-  const authResult = await requireAdmin()
-  if (!authResult.authorized) return authResult.response
-
-  try {
-    const body = await request.json()
-    const {
-      name,
-      description,
-      price,
-      originalPrice,
-      image,
-      category,
-      tags,
-      isNew,
-      isFeatured,
-      showFeatures,
-      features,
-      manualSoldCount,
-      showInstruction,
-      instruction,
-      deliveryInfo,
-      deliveryType,
-    } = body
-
-    if (!name || !description || !price || !category) {
-      return jsonUtf8(
-        { success: false, error: 'กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน (ชื่อ, รายละเอียด, ราคา, หมวดหมู่)' },
-        { status: 400 }
-      )
-    }
-
-    const newProduct = await prisma.product.create({
-      data: {
-        name,
-        description,
-        price: parseFloat(price),
-        originalPrice: originalPrice ? parseFloat(originalPrice) : null,
-        image: image || '/images/products/placeholder.png',
-        category,
-        stock: 0,
-        stockStatus: 'out-of-stock',
-        tags: tags || '',
-        isNew: !!isNew,
-        isFeatured: !!isFeatured,
-        showFeatures: !!showFeatures,
-        features: typeof features === 'string' ? features.trim() || null : null,
-        manualSoldCount: parseNonNegativeInt(manualSoldCount),
-        showInstruction: !!showInstruction,
-        instruction: instruction?.trim() || null,
-        deliveryInfo: deliveryInfo || 'ส่งด่วนอัตโนมัติ',
-        deliveryType: deliveryType || 'auto',
-      },
-    })
-
-    return jsonUtf8({ success: true, data: normalizeProductMoney(newProduct) })
-  } catch (error) {
-    console.error('Error creating admin product:', error)
-    return jsonUtf8(
-      { success: false, error: 'เกิดข้อผิดพลาดในการเพิ่มสินค้า' },
-      { status: 500 }
-    )
-  }
+async function save(request: Request, update: boolean) {
+ const auth = await requireAdmin(); if (!auth.authorized) return auth.response
+ try {
+  sameOrigin(request); const b = await readJson(request); const data = productData(b)
+  const product = await transaction(async tx=>{
+   const category = await tx.category.findUnique({where:{slug:data.category}})
+   if (!category) throw new CommerceError('ไม่พบหมวดหมู่')
+   if (update) {
+    const old = await tx.product.findUniqueOrThrow({where:{id:b.id}})
+    if (old.deliveryType === 'manual' && data.deliveryType === 'manual' && data.stock !== old.stock && b.expectedStock !== old.stock) throw new CommerceError('จำนวนสต็อกเปลี่ยนระหว่างแก้ไข กรุณาโหลดสินค้าใหม่',409)
+    if (old.deliveryType !== data.deliveryType && (old.stock > 0 || await tx.digitalStock.count({where:{productId:b.id,isSold:false}}) || await tx.orderItem.count({where:{productId:b.id,order:{reservationActive:true}}}))) throw new CommerceError('ต้องไม่มีสต็อกและออเดอร์ที่จองอยู่ก่อนเปลี่ยนวิธีจัดส่ง',409)
+    return tx.product.update({where:{id:b.id},data:{...data,categoryId:category.id}})
+   }
+   return tx.product.create({data:{stock:0,stockStatus:'out-of-stock',...data,categoryId:category.id}})
+  })
+  return jsonUtf8({success:true,data:normalizeProductMoney(product)})
+ } catch(e) { return apiError(e) }
 }
-
-/**
- * PUT /api/admin/products
- * แก้ไขรายละเอียดสินค้าในฐานข้อมูล
- */
-export async function PUT(request: Request) {
-  const authResult = await requireAdmin()
-  if (!authResult.authorized) return authResult.response
-
-  try {
-    const body = await request.json()
-    const {
-      id,
-      name,
-      description,
-      price,
-      originalPrice,
-      image,
-      category,
-      tags,
-      isNew,
-      isFeatured,
-      showFeatures,
-      features,
-      manualSoldCount,
-      showInstruction,
-      instruction,
-      deliveryInfo,
-      deliveryType,
-    } = body
-
-    if (!id || !name || !description || !price || !category) {
-      return jsonUtf8(
-        { success: false, error: 'ข้อมูลสำหรับแก้ไขสินค้าไม่ครบถ้วน' },
-        { status: 400 }
-      )
-    }
-
-    const updatedProduct = await prisma.product.update({
-      where: { id },
-      data: {
-        name,
-        description,
-        price: parseFloat(price),
-        originalPrice: originalPrice ? parseFloat(originalPrice) : null,
-        image: image || '/images/products/placeholder.png',
-        category,
-        tags: tags || '',
-        isNew: !!isNew,
-        isFeatured: !!isFeatured,
-        showFeatures: !!showFeatures,
-        features: typeof features === 'string' ? features.trim() || null : null,
-        manualSoldCount: parseNonNegativeInt(manualSoldCount),
-        showInstruction: !!showInstruction,
-        instruction: instruction?.trim() || null,
-        deliveryInfo: deliveryInfo || 'ส่งด่วนอัตโนมัติ',
-        deliveryType: deliveryType || 'auto',
-      },
-    })
-
-    return jsonUtf8({ success: true, data: normalizeProductMoney(updatedProduct) })
-  } catch (error) {
-    console.error('Error updating admin product:', error)
-    return jsonUtf8(
-      { success: false, error: 'เกิดข้อผิดพลาดในการแก้ไขข้อมูลสินค้า' },
-      { status: 500 }
-    )
-  }
-}
-
-/**
- * DELETE /api/admin/products?id=...
- * ลบสินค้าออกจากระบบ
- */
+export async function POST(r: Request) { return save(r,false) }
+export async function PUT(r: Request) { return save(r,true) }
 export async function DELETE(request: Request) {
-  const authResult = await requireAdmin()
-  if (!authResult.authorized) return authResult.response
-
-  try {
-    const { searchParams } = new URL(request.url)
-    const id = searchParams.get('id')
-
-    if (!id) {
-      return jsonUtf8(
-        { success: false, error: 'กรุณาระบุ Product ID เพื่อลบสินค้า' },
-        { status: 400 }
-      )
-    }
-
-    await prisma.product.delete({
-      where: { id },
-    })
-
-    return jsonUtf8({ success: true, message: 'ลบสินค้าเสร็จสิ้น' })
-  } catch (error) {
-    console.error('Error deleting admin product:', error)
-    return jsonUtf8(
-      { success: false, error: 'เกิดข้อผิดพลาดในการลบสินค้า' },
-      { status: 500 }
-    )
-  }
+ const auth = await requireAdmin(); if (!auth.authorized) return auth.response
+ try {
+  sameOrigin(request); const id = new URL(request.url).searchParams.get('id')
+  if (!id) throw new CommerceError('กรุณาระบุสินค้า')
+  await transaction(async tx=>{
+   if (await tx.orderItem.count({where:{productId:id}})) throw new CommerceError('ไม่สามารถลบสินค้าที่มีประวัติออเดอร์',409)
+   if (await tx.digitalStock.count({where:{productId:id,OR:[{isSold:true},{orderId:{not:null}}]}})) throw new CommerceError('สินค้ามีสต็อกที่ถูกใช้หรือจองอยู่',409)
+   await tx.product.delete({where:{id}})
+  })
+  return jsonUtf8({success:true})
+ } catch(e) { return apiError(e) }
 }

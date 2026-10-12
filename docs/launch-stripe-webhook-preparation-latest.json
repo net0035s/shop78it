@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-10-12T03:33:39.833Z",
+  "sandboxOnly": true,
+  "automationAccessVerified": true,
+  "alias": "shop78it-stripe-sandbox.vercel.app",
+  "targetDeploymentId": "dpl_B4ah2TEMPewN95NwB3SzatJKPAqu",
+  "primaryDomainUnchanged": true,
+  "secretPrinted": false,
+  "endpointFile": ".cache/stripe-webhook-endpoint.private.txt",
+  "webhookSigningSecretConfigured": false,
+  "stripeEnabledOnThisDeployment": false
+}

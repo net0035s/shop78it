@@ -37,6 +37,7 @@ export interface Product {
 // ============================================
 
 export interface CartItem {
+  orderItemId?: string
   product: Product
   quantity: number
 }
@@ -52,6 +53,11 @@ export interface Cart {
 // ============================================
 
 export type OrderStatus =
+  | 'refunded'
+  | 'payment_processing'
+  | 'payment_review'
+  | 'paid'
+  | 'needs_manual_delivery'
   | 'pending'        // รอชำระเงิน
   | 'verifying'      // กำลังตรวจสลิป
   | 'confirmed'      // ยืนยันแล้ว
@@ -136,6 +142,9 @@ export type DeliveryType =
   | 'license-key'    // License Key ทั่วไป
 
 export interface DeliveryItem {
+  id?: string
+  orderItemId?: string
+  stockId?: string
   type: DeliveryType
   productName: string
   // สำหรับ AI Credit
@@ -156,6 +165,14 @@ export interface DeliveryItem {
 }
 
 export interface OrderSummary {
+  paymentMethod?: string
+  subTotal?: number
+  discountAmount?: number
+  discountCode?: string
+  expiresAt?: string
+  paidAt?: string
+  deliveredContent?: string
+  emailStatus?: string
   orderNumber: string
   items: CartItem[]
   customer: CheckoutFormData

@@ -94,11 +94,12 @@ export function CartDrawer() {
 
       {/* Drawer */}
       <div
+        aria-hidden={!isOpen}
         className={cn(
           'fixed top-0 right-0 h-full w-full max-w-md z-50 flex flex-col',
           'bg-surface border-l border-border shadow-2xl',
           'transition-transform duration-300 ease-in-out',
-          isOpen ? 'translate-x-0' : 'translate-x-full'
+          isOpen ? 'translate-x-0 visible' : 'translate-x-full invisible'
         )}
       >
         {/* Header */}

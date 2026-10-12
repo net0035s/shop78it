@@ -16,8 +16,9 @@ export function DashboardOverview({ stats, manualDeliveryCount, onShowOrders }: 
   const lowStockProducts = stats?.lowStockProducts ?? []
   const recentOrders = stats?.recentOrders ?? []
   const cards = [
-    { label: 'รายได้วันนี้', value: formatPrice(stats?.todayRevenue ?? 0), icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-    { label: 'รายได้เดือนนี้', value: formatPrice(stats?.monthRevenue ?? 0), icon: TrendingUp, color: 'text-primary', bg: 'bg-primary/10' },
+    { label: 'บันทึกคืนเงินวันนี้', value: formatPrice(stats?.refundedToday ?? 0), icon: DollarSign, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+    { label: 'ยอดรับวันนี้', value: formatPrice(stats?.todayRevenue ?? 0), icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+    { label: 'ยอดรับเดือนนี้', value: formatPrice(stats?.monthRevenue ?? 0), icon: TrendingUp, color: 'text-primary', bg: 'bg-primary/10' },
     { label: 'รอดำเนินการ', value: `${stats?.pendingOrders ?? 0} รายการ`, icon: Clock, color: 'text-amber-400', bg: 'bg-amber-500/10' },
     { label: 'สต็อกใกล้หมด', value: `${lowStockProducts.length} สินค้า`, icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-500/10' },
   ]
@@ -37,7 +38,7 @@ export function DashboardOverview({ stats, manualDeliveryCount, onShowOrders }: 
         </div>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {cards.map((card) => {
           const Icon = card.icon
           return (

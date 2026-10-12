@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+
 import Link from 'next/link'
 import { ShoppingCart, Store, Menu, X, Moon, Sun, Globe } from 'lucide-react'
 import { UserButton, useUser } from '@clerk/nextjs'
@@ -69,7 +71,7 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           <Link href="/" onClick={handleLogoSecretTrigger} className="flex items-center gap-2.5 group">
             {logoUrl ? (
-              <img
+              <Image unoptimized width={160} height={80}
                 src={logoUrl}
                 alt="Shop78it"
                 className="h-10 max-w-[160px] object-contain transition-all group-hover:scale-105"

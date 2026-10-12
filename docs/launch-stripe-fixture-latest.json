@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-10-12T13:32:31.979Z",
+  "passed": 16,
+  "checks": [
+    "sandbox rejects live keys, test keys on live data and disabled Stripe; general payments stay closed",
+    "server amount in satang and order binding; repeated checkout resumes one session",
+    "unpaid or delayed completion never delivers or releases reservation",
+    "paid event and browser status concurrently fulfill once; stale expiry cannot undo paid",
+    "new orders paused after accepting a session still reconcile an existing payment",
+    "lost creation response remains locked and recovers with identical idempotency parameters",
+    "wrong amount currency mode or binding remains locked with no delivered secret",
+    "confirmed expired unpaid session releases stock exactly once and cancels expired order",
+    "cancel waits for provider expiry; payment winning the race is fulfilled instead",
+    "closed Checkout with a still-processing intent never releases stock",
+    "paid Checkout with unconfirmed intent received amount cannot deliver",
+    "manual payment waits for admin delivery and refund replay cannot expose delivery again",
+    "minimum amount and short expiry reject before provider call or payment claim",
+    "concurrent checkout creates one attempt and never two sessions",
+    "HTTP rejects foreign origin and order-number-only access before provider calls",
+    "raw webhook signature rejects tampering and oversized payloads; other-app events ignored"
+  ],
+  "sandboxOnly": true,
+  "database": "temporary-loopback",
+  "provider": "mock only",
+  "realPayments": false,
+  "externalMessages": 0,
+  "deployed": false
+}

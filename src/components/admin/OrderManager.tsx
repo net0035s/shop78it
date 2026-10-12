@@ -8,6 +8,7 @@ import type { AdminOrder } from './AdminTypes'
 
 type Props = {
   orders: AdminOrder[]
+  totalOrders: number
   manualDeliveryCount: number
   orderFilter: string
   setOrderFilter: (value: string) => void
@@ -22,6 +23,7 @@ type Props = {
 
 export function OrderManager({
   orders,
+  totalOrders,
   manualDeliveryCount,
   orderFilter,
   setOrderFilter,
@@ -33,16 +35,12 @@ export function OrderManager({
   setOrderPerPage,
   onEditOrder,
 }: Props) {
-  const filteredOrders = orders
-    .filter(order => orderFilter === 'all' || order.status === orderFilter)
-    .filter(order => order.orderNumber.toLowerCase().includes(orderSearch.toLowerCase()))
-  const totalPages = Math.ceil(filteredOrders.length / orderPerPage)
-  const startIndex = (orderPage - 1) * orderPerPage
-  const paginatedOrders = filteredOrders.slice(startIndex, startIndex + orderPerPage)
+  const totalPages = Math.ceil(totalOrders / orderPerPage)
+  const paginatedOrders = orders
 
   return (
     <div className="space-y-4">
-      <h2 className="text-base font-bold text-textPrimary">รายการออเดอร์ทั้งหมด ({orders.length})</h2>
+      <h2 className="text-base font-bold text-textPrimary">รายการออเดอร์ทั้งหมด ({totalOrders})</h2>
       {manualDeliveryCount > 0 && (
         <div className="flex items-center gap-2 p-3 bg-orange-500/10 border border-orange-500/30 rounded-xl text-sm text-orange-400 font-medium">
           <AlertTriangle className="w-4 h-4 shrink-0" />
@@ -54,9 +52,14 @@ export function OrderManager({
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
           {[
             { id: 'all', label: 'ทั้งหมด' },
+            { id: 'pending', label: 'รอชำระ' },
+            { id: 'payment_processing', label: 'กำลังตรวจเงิน' },
+            { id: 'payment_review', label: 'ต้องตรวจสอบ' },
+            { id: 'paid', label: 'รับเงินแล้ว' },
             { id: 'needs_manual_delivery', label: 'Manual' },
             { id: 'completed', label: 'สำเร็จ' },
             { id: 'cancelled', label: 'ยกเลิก' },
+            { id: 'refunded', label: 'คืนเงินแล้ว' },
           ].map(filter => (
             <button
               key={filter.id}
@@ -126,7 +129,7 @@ export function OrderManager({
           </table>
         </div>
 
-        {filteredOrders.length > 0 && (
+        {totalOrders > 0 && (
           <div className="p-4 border-t border-border/50 bg-surfaceLight/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-textMuted">
             <div className="flex items-center gap-2">
               <span>แสดง</span>

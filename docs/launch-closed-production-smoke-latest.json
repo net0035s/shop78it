@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-12T11:29:32.451Z",
+  "url": "https://shop78it.vercel.app",
+  "production": true,
+  "closed": true,
+  "groups": [
+    "storefront loads and server credentials absent from HTML",
+    "tracking checkout and customer policy pages load",
+    "admin and worker reject unauthenticated requests",
+    "new orders rejected before a business write",
+    "Stripe and TrueMoney disabled, including Stripe with a valid scoped probe grant",
+    "existing order plus email reflects database status without exposing goods or sending mail"
+  ],
+  "passed": true,
+  "realPaymentsAttempted": 0,
+  "messagesSent": 0,
+  "businessRowsUnchanged": true,
+  "rateLimitMetadataMayChange": true,
+  "orders": 26
+}

@@ -1,319 +1,102 @@
 'use client'
-
-import React, { useState, useEffect } from 'react'
-import { Search, Package, Clock, CheckCircle, XCircle, ArrowRight, Loader2, FileText, ShoppingBag, Copy, Check } from 'lucide-react'
-import { useOrderStore } from '@/store/orderStore'
-import { OrderSummary } from '@/types'
-import { formatPrice } from '@/lib/products'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useOrderStore } from '@/store/orderStore'
+import { formatPrice } from '@/lib/products'
+import type { OrderSummary } from '@/types'
 
-const LINE_URL = process.env.NEXT_PUBLIC_LINE_URL || '#'
-
-export default function TrackOrderPage() {
-  const router = useRouter()
-  const [orderNumber, setOrderNumber] = useState('')
-  const [isSearching, setIsSearching] = useState(false)
-  const [searchedOrder, setSearchedOrder] = useState<OrderSummary | null>(null)
-  const [error, setError] = useState('')
+const statuses: Record<string,string> = { refunded: 'ร้านบันทึกคืนเงินเต็มยอดแล้ว — ติดต่อร้านเพื่อดูหลักฐาน', pending: 'รอชำระเงิน', payment_processing: 'กำลังตรวจสอบการชำระเงิน — ห้ามชำระซ้ำ', payment_review: 'รอร้านค้าตรวจผลชำระเงิน — ห้ามชำระซ้ำ', paid: 'รับเงินแล้ว กำลังจัดส่ง', needs_manual_delivery: 'รับเงินแล้ว รอร้านค้าจัดส่งส่วนที่เหลือ', completed: 'จัดส่งครบแล้ว', cancelled: 'ยกเลิกออเดอร์' }
+type TrackingSummary = Pick<OrderSummary, 'orderNumber' | 'status' | 'total'> & { items: { orderItemId: string; name: string; quantity: number; unitPrice: number }[] }
+function receipt(order: OrderSummary): TrackingSummary {
+  return { orderNumber: order.orderNumber, status: order.status, total: order.total, items: order.items.map(item => ({ orderItemId: item.orderItemId || item.product.id, name: item.product.name, quantity: item.quantity, unitPrice: item.product.price })) }
+}
+export default function TrackPage() {
+  const { orderHistory, currentOrderNumber, setOrder, addOrderToHistory } = useOrderStore()
+  const [number, setNumber] = useState(''), [email, setEmail] = useState('')
+  const [order, setResult] = useState<TrackingSummary | null>(null), [authorized, setAuthorized] = useState(false)
+  const [emailAvailable, setEmailAvailable] = useState(true)
+  const [lookup, setLookup] = useState<{number: string; email: string} | null>(null)
+  const [error, setError] = useState(''), [notice, setNotice] = useState(''), [busy, setBusy] = useState(false), [needsAccess, setNeedsAccess] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [copiedId, setCopiedId] = useState('')
-  
-  const { orderHistory, setOrder } = useOrderStore()
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const handleCopy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text)
-    setCopiedId(id)
-    setTimeout(() => setCopiedId(''), 1800)
-  }
-
-  const getDeliveryLines = (item: any) => {
-    const instructionText = item.instructions || 'เปิดใช้งานสินค้าตามคำแนะนำของทางร้าน'
-
-    return [
-      item.licenseKey && { label: 'ข้อมูลสินค้า', value: item.licenseKey },
-      item.creditCode && { label: 'รหัสเครดิต', value: item.creditCode },
-      item.email && { label: 'อีเมลใช้งาน', value: item.email },
-      item.password && { label: 'รหัสผ่าน', value: item.password },
-      item.loginUrl && { label: 'ลิงก์เข้าใช้งาน', value: item.loginUrl },
-      item.showInstruction !== false && { label: 'วิธีใช้งาน', value: instructionText },
-    ].filter(Boolean) as { label: string; value: string }[]
-  }
-
-  const handleSearch = async (e?: React.FormEvent, searchVal?: string) => {
-    if (e) e.preventDefault()
-    
-    const targetOrder = (searchVal || orderNumber).trim()
-    if (!targetOrder) return
-
-    setOrderNumber(targetOrder)
-    setIsSearching(true)
-    setError('')
-    setSearchedOrder(null)
-
+  const exchangeStarted = useRef(false), requestVersion = useRef(0), refreshing = useRef(false)
+  const search = useCallback(async (value: string, lookupEmail = email, background = false) => {
+    if (background && refreshing.current) return
+    if (background) refreshing.current = true
+    const version = ++requestVersion.current, normalized = value.trim().toUpperCase()
+    if (!background) { setBusy(true); setError(''); setNotice(''); setResult(null); setNeedsAccess(false); setAuthorized(false); setLookup(null); setNumber(normalized) }
     try {
-      const res = await fetch(`/api/orders?orderNumber=${encodeURIComponent(targetOrder)}`)
-      const result = await res.json()
-
-      if (result.success) {
-        setSearchedOrder(result.data)
-      } else {
-        setError(result.error || 'ไม่พบออเดอร์ในระบบ กรุณาตรวจสอบหมายเลขอีกครั้ง')
+      let result = await (await fetch('/api/orders?orderNumber=' + encodeURIComponent(normalized), { cache: 'no-store' })).json()
+      if (version !== requestVersion.current) return
+      const hasAccess = result.success === true
+      if (!hasAccess && result.code === 'ORDER_ACCESS_REQUIRED') {
+        if (!lookupEmail.trim()) { setNeedsAccess(true); setAuthorized(false); setError('กรอกอีเมลที่ใช้สั่งซื้อเพื่อดูสถานะและรายการสินค้า'); return }
+        result = await (await fetch('/api/orders/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store', body: JSON.stringify({ orderNumber: normalized, email: lookupEmail.trim() }) })).json()
       }
-    } catch (err) {
-      setError('เกิดข้อผิดพลาดในการเชื่อมต่อระบบหลังบ้าน กรุณาลองใหม่อีกครั้ง')
-    } finally {
-      setIsSearching(false)
-    }
+      if (version !== requestVersion.current) return
+      if (!result.success) { setError(result.error); return }
+      setResult(hasAccess ? receipt(result.data) : result.data)
+      setAuthorized(hasAccess); setNeedsAccess(false); setError('')
+      if (!hasAccess) setEmailAvailable(result.accessEmailAvailable === true)
+      setLookup(previous => previous?.number === normalized && previous.email === lookupEmail.trim() ? previous : { number: normalized, email: lookupEmail.trim() })
+      addOrderToHistory(result.data.orderNumber)
+      if (hasAccess) setOrder(result.data)
+    } catch { if (version === requestVersion.current) setError('เชื่อมต่อไม่ได้ กรุณาลองใหม่') }
+    finally { if (background) refreshing.current = false; if (version === requestVersion.current) setBusy(false) }
+  }, [email, setOrder, addOrderToHistory])
+  useEffect(() => { const version = requestVersion; setMounted(true); return () => { version.current++ } }, [])
+  useEffect(() => {
+    if (!lookup) return
+    const refresh = () => { if (document.visibilityState === 'visible') void search(lookup.number, lookup.email, true) }
+    const timer = window.setInterval(refresh, 10000)
+    window.addEventListener('focus', refresh); document.addEventListener('visibilitychange', refresh)
+    return () => { window.clearInterval(timer); window.removeEventListener('focus', refresh); document.removeEventListener('visibilitychange', refresh) }
+  }, [lookup, search])
+  useEffect(() => {
+    if (!mounted || exchangeStarted.current) return
+    const token = new URLSearchParams(window.location.hash.slice(1)).get('access')
+    if (!token) return
+    exchangeStarted.current = true
+    window.history.replaceState(null, '', window.location.pathname)
+    setBusy(true)
+    fetch('/api/orders/access', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }) }).then(r => r.json()).then(result => {
+      if (!result.success) { setError(result.error); return }
+      void search(result.data.orderNumber)
+    }).catch(() => setError('ยืนยันลิงก์ไม่ได้ กรุณาขอลิงก์ใหม่')).finally(() => setBusy(false))
+  }, [mounted, search])
+  const sendLink = async () => {
+    setBusy(true); setError('')
+    try {
+      const result = await (await fetch('/api/orders/access', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderNumber: order?.orderNumber || number, email: lookup?.email || email }) })).json()
+      if (!result.success) setError(result.error); else setNotice(result.message)
+    } catch { setError('ขอลิงก์ไม่สำเร็จ กรุณาลองอีกครั้ง') }
+    finally { setBusy(false) }
   }
-
-  const renderStatus = (status: string) => {
-    switch(status) {
-      case 'completed':
-        return (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-sm font-bold border border-emerald-500/20">
-            <CheckCircle className="w-4 h-4" /> ออเดอร์สำเร็จ (ส่งแล้ว)
-          </div>
-        )
-      case 'needs_manual_delivery':
-        return (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 text-orange-500 text-sm font-bold border border-orange-500/20">
-            <Clock className="w-4 h-4" /> รอแอดมินจัดส่ง
-          </div>
-        )
-      case 'cancelled':
-        return (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 text-red-500 text-sm font-bold border border-red-500/20">
-            <XCircle className="w-4 h-4" /> ยกเลิก
-          </div>
-        )
-      default: // pending
-        return (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-bold border border-primary/20">
-            <Clock className="w-4 h-4" /> รอชำระเงิน
-          </div>
-        )
-    }
-  }
-
-  if (!mounted) {
-    return (
-      <div className="min-h-[70vh] flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-primary animate-spin" />
-      </div>
-    )
-  }
-
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-12 md:py-20 animate-fade-in">
-      <div className="text-center mb-10">
-        <div className="w-16 h-16 mx-auto bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-          <Package className="w-8 h-8 text-primary" />
-        </div>
-        <h1 className="text-3xl md:text-4xl font-extrabold text-textPrimary tracking-tight mb-4">
-          ติดตามสถานะออเดอร์
-        </h1>
-        <p className="text-textMuted text-lg">
-          กรอกหมายเลขคำสั่งซื้อของคุณ (เช่น SA-...) เพื่อตรวจสอบสถานะล่าสุด
-        </p>
-      </div>
-
-      {/* Search Box */}
-      <div className="max-w-2xl mx-auto mb-12">
-        <form onSubmit={(e) => handleSearch(e)} className="relative flex items-center">
-          <Search className="absolute left-4 w-6 h-6 text-textMuted" />
-          <input
-            type="text"
-            placeholder="ค้นหา Order ID (เช่น SA-ABCDEFG)"
-            value={orderNumber}
-            onChange={(e) => setOrderNumber(e.target.value)}
-            className="w-full pl-14 pr-32 py-4 bg-surfaceLight border border-border rounded-2xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-lg text-textPrimary uppercase transition-all"
-          />
-          <button
-            type="submit"
-            disabled={isSearching || !orderNumber.trim()}
-            className="absolute right-2 px-6 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primaryDark transition-colors disabled:opacity-50 flex items-center gap-2"
-          >
-            {isSearching ? <Loader2 className="w-5 h-5 animate-spin" /> : 'ค้นหา'}
-          </button>
-        </form>
-        {error && (
-          <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
-            <XCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-            <p className="text-red-500 text-sm font-medium">{error}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Result Section */}
-      {searchedOrder && (
-        <div className="max-w-2xl mx-auto bg-surface border border-border rounded-3xl p-6 md:p-8 shadow-xl shadow-black/5 animate-slide-up">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6 mb-6">
-            <div>
-              <p className="text-textMuted text-sm font-medium mb-1">หมายเลขคำสั่งซื้อ</p>
-              <h2 className="text-2xl font-black text-textPrimary font-mono">
-                {searchedOrder.orderNumber}
-              </h2>
-            </div>
-            <div className="text-left md:text-right">
-              {renderStatus(searchedOrder.status)}
-            </div>
-          </div>
-
-          <div className="space-y-4 mb-8">
-            <div className="flex items-center justify-between">
-              <span className="text-textSecondary">ชื่อผู้สั่งซื้อ:</span>
-              <span className="text-textPrimary font-medium">{searchedOrder.customer.name}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-textSecondary">อีเมล:</span>
-              <span className="text-textPrimary font-medium">{searchedOrder.customer.email}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-textSecondary">ยอดชำระสุทธิ:</span>
-              <span className="text-primary font-bold text-lg">{formatPrice(searchedOrder.total)}</span>
-            </div>
-          </div>
-
-          {((searchedOrder.deliveryItems?.length ?? 0) > 0 || searchedOrder.items?.some((item: any) => item.product.deliveryType === 'manual')) && (
-            <div className="space-y-4 mb-8">
-              {(searchedOrder.deliveryItems ?? []).map((item: any, idx) => {
-                const lines = getDeliveryLines(item)
-                return (
-                  <div key={`auto-${idx}`} className="p-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                      <div>
-                        <p className="font-bold text-textPrimary">{item.productName}</p>
-                        <p className="text-xs text-emerald-400 font-bold mt-1">จัดส่งแล้ว</p>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      {lines.map((line, lineIdx) => {
-                        const copyKey = `auto-${idx}-${lineIdx}`
-                        return (
-                          <div key={copyKey} className="flex flex-col sm:flex-row gap-2">
-                            <div className="flex-1">
-                              <p className="text-[11px] text-textMuted font-bold mb-1">{line.label}</p>
-                              <div className="px-3 py-2 rounded-xl bg-surfaceLight border border-border text-sm text-textPrimary whitespace-pre-wrap break-all">
-                                {line.value}
-                              </div>
-                            </div>
-                            <button
-                              onClick={() => handleCopy(line.value, copyKey)}
-                              className="sm:self-end px-3 py-2 rounded-xl bg-surfaceLight border border-border text-textPrimary hover:border-primary/50 transition-all flex items-center justify-center gap-2 text-xs font-bold"
-                            >
-                              {copiedId === copyKey ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                              {copiedId === copyKey ? 'คัดลอกแล้ว' : 'คัดลอก'}
-                            </button>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )
-              })}
-
-              {(searchedOrder.items ?? []).filter((item: any) => item.product.deliveryType === 'manual').map((item: any, idx) => {
-                const manualContent = String((searchedOrder as any).deliveredContent ?? '').trim()
-                const copyKey = `manual-${idx}`
-                return (
-                  <div key={copyKey} className={`p-4 rounded-2xl border ${searchedOrder.status === 'completed' ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-orange-500/20 bg-orange-500/5'}`}>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                      <div>
-                        <p className="font-bold text-textPrimary">{item.product.name} <span className="text-xs text-textMuted font-normal">x{item.quantity}</span></p>
-                        <p className={`text-xs font-bold mt-1 ${searchedOrder.status === 'completed' ? 'text-emerald-400' : 'text-orange-400'}`}>
-                          {searchedOrder.status === 'completed' ? 'ดำเนินการเสร็จแล้ว' : 'รอดำเนินการโดยแอดมิน'}
-                        </p>
-                      </div>
-                    </div>
-
-                    {searchedOrder.status === 'completed' && manualContent ? (
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <div className="flex-1">
-                          <p className="text-[11px] text-textMuted font-bold mb-1">ข้อมูลการจัดส่ง</p>
-                          <div className="px-3 py-2 rounded-xl bg-surfaceLight border border-border text-sm text-textPrimary whitespace-pre-wrap break-all">
-                            {manualContent}
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleCopy(manualContent, copyKey)}
-                          className="sm:self-end px-3 py-2 rounded-xl bg-surfaceLight border border-border text-textPrimary hover:border-primary/50 transition-all flex items-center justify-center gap-2 text-xs font-bold"
-                        >
-                          {copiedId === copyKey ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                          {copiedId === copyKey ? 'คัดลอกแล้ว' : 'คัดลอก'}
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="text-sm text-textSecondary leading-relaxed">
-                        สินค้าชิ้นนี้ต้องดำเนินการโดยแอดมิน โปรดติดต่อและส่งหมายเลขออเดอร์ไปที่ Line OA เพื่อดำเนินการต่อ
-                        <div className="mt-3">
-                          <a href={LINE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-[#00B900] text-white text-xs font-bold">
-                            ติดต่อ Line OA
-                          </a>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          )}
-
-          {searchedOrder.status === 'completed' && (
-            <button
-              onClick={() => {
-                setOrder(searchedOrder)
-                router.push('/thank-you')
-              }}
-              className="w-full py-4 rounded-xl bg-primary-gradient text-white font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
-            >
-              ดูข้อมูลสินค้าที่ได้รับ <ArrowRight className="w-5 h-5" />
-            </button>
-          )}
-
-          {searchedOrder.status === 'pending' && (
-            <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl text-center">
-              <p className="text-orange-500 text-sm font-medium mb-3">
-                ออเดอร์นี้ยังไม่ได้รับการยืนยันการชำระเงิน หรือรอแอดมินตรวจสอบสลิป
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Recent Orders from LocalStorage */}
-      {!searchedOrder && orderHistory.length > 0 && (
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center gap-2 mb-4">
-            <FileText className="w-5 h-5 text-textMuted" />
-            <h3 className="text-lg font-bold text-textPrimary">ประวัติการสั่งซื้อล่าสุดของคุณ</h3>
-          </div>
-          <div className="space-y-3">
-            {orderHistory.map((id) => (
-              <button
-                key={id}
-                onClick={() => handleSearch(undefined, id)}
-                className="w-full flex items-center justify-between p-4 bg-surfaceLight border border-border hover:border-primary/50 rounded-2xl transition-all group text-left"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-surface rounded-xl flex items-center justify-center border border-border">
-                    <ShoppingBag className="w-5 h-5 text-textMuted group-hover:text-primary transition-colors" />
-                  </div>
-                  <div>
-                    <p className="font-mono font-bold text-textPrimary">{id}</p>
-                    <p className="text-xs text-textMuted">แตะเพื่อตรวจสอบสถานะ</p>
-                  </div>
-                </div>
-                <ArrowRight className="w-5 h-5 text-textMuted group-hover:text-primary transition-transform group-hover:translate-x-1" />
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  )
+  return <div className="max-w-3xl mx-auto px-4 py-12 space-y-6">
+    <h1 className="text-3xl font-bold">ติดตามและรับสินค้า</h1>
+    <p className="text-textMuted">กรอกเลขออเดอร์และอีเมลเพื่อดูสถานะและรายการสินค้าได้ทันที ข้อมูลจัดส่งเปิดได้จากเครื่องที่ซื้อหรือหลังยืนยันอีเมล</p>
+    <form className="space-y-3" onSubmit={e => { e.preventDefault(); void search(number) }}>
+      <label htmlFor="track-number" className="block">หมายเลขออเดอร์</label>
+      <input id="track-number" value={number} onChange={e => setNumber(e.target.value)} required maxLength={100} className="w-full rounded-xl border border-border bg-surfaceLight p-3" placeholder="SA-..." />
+      <label htmlFor="track-email" className="block">อีเมลที่ใช้สั่งซื้อ</label>
+      <input id="track-email" type="email" value={email} onChange={e => setEmail(e.target.value)} maxLength={254} className="w-full rounded-xl border border-border bg-surfaceLight p-3" placeholder="กรอกอีเมลเมื่อค้นหาจากเครื่องอื่น" />
+      <button disabled={busy || !number.trim()} className="rounded-xl bg-primary px-5 py-3 text-white disabled:opacity-50">{busy ? 'กำลังตรวจสอบ…' : 'ค้นหาออเดอร์'}</button>
+    </form>
+    {error && <p role="alert" className="text-rose-400">{error}</p>}
+    {notice && <p role="status" className="text-emerald-400">{notice}</p>}
+    {order && <section className="rounded-2xl border border-border p-5 space-y-4">
+      <h2 className="font-mono break-all font-bold">{order.orderNumber}</h2><p role="status" className="text-primary font-bold">{statuses[order.status] || 'กำลังดำเนินการ'}</p>
+      <p>ยอดสุทธิ {formatPrice(order.total)}</p>
+      <ul className="space-y-2">{order.items.map(item => <li key={item.orderItemId}>{item.name} × {item.quantity} — {formatPrice(item.unitPrice * item.quantity)}</li>)}</ul>
+      {authorized && order.status === 'pending' && <Link href={'/checkout?order=' + encodeURIComponent(order.orderNumber)} className="block text-primary">ชำระบิลนี้ต่อ</Link>}
+      {authorized && ['completed', 'needs_manual_delivery', 'paid'].includes(order.status) && <Link href="/thank-you" className="block text-primary">เปิดข้อมูลสินค้าที่ได้รับ</Link>}
+      <p className="text-textMuted text-sm">อัปเดตสถานะอัตโนมัติทุก 10 วินาทีขณะเปิดหน้านี้</p>
+      <button onClick={() => void search(order.orderNumber, lookup?.email || email)} disabled={busy} className="text-primary">อัปเดตสถานะ</button>
+    </section>}
+    {(needsAccess || (order && !authorized && ['paid', 'completed', 'needs_manual_delivery'].includes(order.status))) && <section className="space-y-3 p-5 rounded-xl border border-border">
+      <p>คีย์สินค้า รหัสผ่าน และข้อความจัดส่งต้องยืนยันสิทธิ์เพิ่มเติม หากเปิดจากเครื่องที่ซื้อจะรับสินค้าได้ทันที</p>
+      {emailAvailable ? <button onClick={() => void sendLink()} disabled={busy || !email.trim()} className="text-primary">ส่งลิงก์ยืนยันเพื่อเปิดข้อมูลจัดส่ง</button>
+        : <p className="text-textMuted">เว็บทดสอบยังปิดการส่งอีเมล กรุณาเปิดข้อมูลจัดส่งจากหน้าออเดอร์ในเครื่องที่ซื้อ</p>}
+    </section>}
+    {mounted && !order && <section className="space-y-3"><h2 className="font-bold">ออเดอร์ล่าสุดในเครื่องนี้</h2>{Array.from(new Set([currentOrderNumber, ...orderHistory].filter(Boolean))).map(id => <button key={id} onClick={() => void search(id!)} className="block w-full text-left rounded-xl border border-border bg-surface p-3 font-mono break-all">{id}</button>)}</section>}
+  </div>
 }

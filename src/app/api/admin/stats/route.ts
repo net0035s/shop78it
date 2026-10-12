@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { bangkokDay, PAID_STATUSES } from '@/lib/commerce-rules'
 import { requireAdmin } from '@/lib/admin-auth'
 import { moneyToNumber, normalizeOrderMoney, normalizeProductMoney } from '@/lib/money'
 
@@ -19,16 +20,17 @@ export async function GET() {
 
   try {
     const now = new Date()
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const startOfToday = bangkokDay(now)
+    const revenueStatuses = [...PAID_STATUSES, 'refunded']
+    const local = new Date(now.getTime() + 7 * 3600000)
+    const startOfMonth = new Date(Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), 1) - 7 * 3600000)
 
     const last7DayRanges = Array.from({ length: 7 }, (_, index) => {
-      const day = new Date(now)
-      day.setDate(day.getDate() - (6 - index))
-      const dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate())
-      const dayEnd = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1)
-      const monthLabel = String(day.getMonth() + 1).padStart(2, '0')
-      const dateLabel = String(day.getDate()).padStart(2, '0')
+      const dayStart = new Date(startOfToday.getTime() - (6-index)*86400000)
+      const dayEnd = new Date(dayStart.getTime()+86400000)
+      const day = new Date(dayStart.getTime()+7*3600000)
+      const monthLabel = String(day.getUTCMonth()+1).padStart(2,'0')
+      const dateLabel = String(day.getUTCDate()).padStart(2,'0')
 
       return {
         dayStart,
@@ -52,21 +54,21 @@ export async function GET() {
     ] = await Promise.all([
       prisma.order.aggregate({
         where: {
-          status: 'completed',
-          createdAt: { gte: startOfToday },
+          status: { in: revenueStatuses },
+          paidAt: { gte: startOfToday },
         },
         _sum: { total: true },
       }),
       prisma.order.aggregate({
         where: {
-          status: 'completed',
-          createdAt: { gte: startOfMonth },
+          status: { in: revenueStatuses },
+          paidAt: { gte: startOfMonth },
         },
         _sum: { total: true },
       }),
       prisma.order.count({
         where: {
-          status: { in: ['pending', 'needs_manual_delivery'] },
+          status: { in: ['pending', 'payment_processing', 'payment_review'] },
         },
       }),
       prisma.order.count({
@@ -79,7 +81,7 @@ export async function GET() {
       prisma.product.findMany(),
       prisma.digitalStock.groupBy({
         by: ['productId'],
-        where: { isSold: false },
+        where: { isSold: false, orderId: null },
         _count: { productId: true },
       }),
       prisma.order.findMany({
@@ -99,8 +101,8 @@ export async function GET() {
             }),
             prisma.order.aggregate({
               where: {
-                status: 'completed',
-                createdAt: {
+                status: { in: revenueStatuses },
+                paidAt: {
                   gte: range.dayStart,
                   lt: range.dayEnd,
                 },
@@ -126,14 +128,19 @@ export async function GET() {
     const lowStockProducts = allProducts
       .map((product: any) => ({
         ...normalizeProductMoney(product),
-        unsoldCount: unsoldCountByProductId.get(product.id) ?? 0,
+        unsoldCount: product.deliveryType === 'manual' ? product.stock : unsoldCountByProductId.get(product.id) ?? 0,
       }))
       .filter((product: any) => product.unsoldCount <= 5)
       .sort((a: any, b: any) => a.unsoldCount - b.unsoldCount)
 
+    const refundEvents = await prisma.orderAuditEvent.findMany({ where: { action: 'external_refund_recorded', createdAt: { gte: startOfToday } }, select: { note: true } })
+    const refundedToday = refundEvents.reduce((total, event) => {
+      try { const amount = Number(JSON.parse(event.note || '{}').amount); return total + (Number.isFinite(amount) && amount > 0 ? amount : 0) } catch { return total }
+    }, 0)
     return NextResponse.json({
       success: true,
       data: {
+        refundedToday,
         todayRevenue: sumValue(todayRevenueAgg._sum.total),
         monthRevenue: sumValue(monthRevenueAgg._sum.total),
         pendingOrders,

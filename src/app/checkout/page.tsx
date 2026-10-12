@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, Suspense } from 'react'
+import React, { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CreditCard, ArrowLeft, ShieldCheck, Check, ShoppingBag, Tag, Loader2, X, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
@@ -12,15 +12,15 @@ import CustomerForm from '@/components/checkout/CustomerForm'
 import { CheckoutFormData, OrderSummary } from '@/types'
 import Image from 'next/image'
 import { useLanguage } from '@/lib/i18n'
-import { QRCodeCanvas } from 'qrcode.react'
+import StripePayment from '@/components/checkout/StripePayment'
 
 const FALLBACK_IMAGE = '/images/products/placeholder.png'
 const PROMPTPAY_EXPIRY_SECONDS = 60 * 60
 
-type PaymentChannel = 'truemoney' | 'promptpay'
+type PaymentChannel = 'truemoney' | 'stripe'
 
-function getPromptPaySecondsRemaining(createdAt: string) {
-  const expiresAt = new Date(createdAt).getTime() + PROMPTPAY_EXPIRY_SECONDS * 1000
+function getPromptPaySecondsRemaining(createdAt: string, serverExpiry?: string) {
+  const expiresAt = serverExpiry ? new Date(serverExpiry).getTime() : new Date(createdAt).getTime() + PROMPTPAY_EXPIRY_SECONDS * 1000
   const remainingSeconds = Math.floor((expiresAt - Date.now()) / 1000)
 
   return Math.max(0, remainingSeconds)
@@ -69,24 +69,58 @@ function CheckoutContent() {
   const clearCart = useCartStore((s) => s.clearCart)
   const applyDiscount = useCartStore((s) => s.applyDiscount)
   const removeDiscount = useCartStore((s) => s.removeDiscount)
-  const { setOrder, addOrderToHistory } = useOrderStore()
+  const { setOrder, addOrderToHistory, currentOrderNumber } = useOrderStore()
 
   const [step, setStep] = useState<'info' | 'payment'>('info')
   const [customerInfo, setCustomerInfo] = useState<CheckoutFormData | null>(null)
   const [createdOrder, setCreatedOrder] = useState<OrderSummary | null>(null)
   const [isCreatingOrder, setIsCreatingOrder] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [isRestoring, setIsRestoring] = useState(true)
+  const [restoreError, setRestoreError] = useState('')
   const [voucherLink, setVoucherLink] = useState('')
   const [paymentChannel, setPaymentChannel] = useState<PaymentChannel>('truemoney')
-  const [promptPayPayload, setPromptPayPayload] = useState('')
-  const [promptPayError, setPromptPayError] = useState('')
-  const [isLoadingPromptPay, setIsLoadingPromptPay] = useState(false)
-  const [slipFile, setSlipFile] = useState<File | null>(null)
-  const [slipError, setSlipError] = useState('')
-  const [isSubmittingSlip, setIsSubmittingSlip] = useState(false)
+  const [isStripeBusy, setIsStripeBusy] = useState(false)
   const [promptPayTimeRemaining, setPromptPayTimeRemaining] = useState(PROMPTPAY_EXPIRY_SECONDS)
   const [isSubmittingVoucher, setIsSubmittingVoucher] = useState(false)
   const [stockErrorMessage, setStockErrorMessage] = useState('')
+  const createdInThisPage = useRef<string | null>(null)
+
+  const resumeNumber = searchParams.get('order') || currentOrderNumber
+  useEffect(() => {
+    if (!mounted) return
+    if (!resumeNumber) { setIsRestoring(false); return }
+    // The submit response already supplied this order. Restoring it during navigation
+    // could mistake a newly completed free order for an old order and clear it.
+    if (resumeNumber === createdInThisPage.current) { setIsRestoring(false); return }
+    let cancelled = false
+    setIsRestoring(true)
+    fetch('/api/orders?orderNumber=' + encodeURIComponent(resumeNumber)).then(r=>r.json()).then(result=>{
+      if (cancelled) return
+      if (!result.success) { setRestoreError(result.error || 'เปิดออเดอร์เดิมไม่ได้ กรุณายืนยันผ่านหน้าติดตาม'); return }
+      const order = result.data as OrderSummary
+      const explicitOrder = searchParams.get('order')
+      const stripePending = order.paymentMethod === 'stripe' && ['payment_processing', 'payment_review'].includes(order.status)
+      // A paid/manual-delivery order is history, not the next purchase. Explicit
+      // order links still restore it, including Stripe returns and tracking links.
+      if (!explicitOrder && order.status !== 'pending' && !stripePending) {
+        useOrderStore.getState().addOrderToHistory(order.orderNumber)
+        useOrderStore.getState().clearOrder()
+        setCreatedOrder(null); setCustomerInfo(null); setStep('info'); setRestoreError('')
+        return
+      }
+      if (order.status === 'cancelled' || (order.expiresAt && new Date(order.expiresAt).getTime()<=Date.now() && order.status === 'pending')) {
+        if (explicitOrder) setRestoreError('ออเดอร์หมดอายุแล้ว กรุณาเลือกสินค้าเพื่อสร้างบิลใหม่')
+        else { useOrderStore.getState().clearOrder(); setCreatedOrder(null); setCustomerInfo(null); setStep('info') }
+        return
+      }
+      setOrder(order)
+      if (order.status !== 'pending' && !stripePending) { router.replace('/thank-you'); return }
+      if (stripePending) setPaymentChannel('stripe')
+      setCreatedOrder(order); setCustomerInfo(order.customer); setStep('payment')
+    }).catch(()=>{ if (!cancelled) setRestoreError('ตรวจออเดอร์เดิมไม่ได้ กรุณาลองใหม่ผ่านหน้าติดตามออเดอร์') }).finally(()=>{ if (!cancelled) setIsRestoring(false) })
+    return ()=>{ cancelled = true }
+  }, [mounted, resumeNumber, router, searchParams, setOrder])
 
   // Discount UI State
   const [discountCodeInput, setDiscountCodeInput] = useState('')
@@ -133,59 +167,13 @@ function CheckoutContent() {
   }, [])
 
   useEffect(() => {
-    if (!createdOrder || step !== 'payment' || paymentChannel !== 'promptpay') return
-
-    let cancelled = false
-
-    const loadPromptPayQr = async () => {
-      setIsLoadingPromptPay(true)
-      setPromptPayError('')
-
-      try {
-        const response = await fetch('/api/payment/promptpay', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-          },
-          body: JSON.stringify({
-            orderId: createdOrder.orderNumber,
-          }),
-        })
-
-        const result = await response.json()
-        if (cancelled) return
-
-        if (result.success && result.data?.payload) {
-          setPromptPayPayload(result.data.payload)
-        } else {
-          setPromptPayPayload('')
-          setPromptPayError(result.error || 'ไม่สามารถสร้าง QR PromptPay ได้')
-        }
-      } catch (error) {
-        if (cancelled) return
-        console.error('Error loading PromptPay QR:', error)
-        setPromptPayPayload('')
-        setPromptPayError('ไม่สามารถโหลด QR PromptPay ได้ กรุณาลองใหม่อีกครั้ง')
-      } finally {
-        if (!cancelled) setIsLoadingPromptPay(false)
-      }
-    }
-
-    loadPromptPayQr()
-
-    return () => {
-      cancelled = true
-    }
-  }, [createdOrder, step, paymentChannel])
-
-  useEffect(() => {
-    if (!createdOrder || step !== 'payment' || paymentChannel !== 'promptpay') {
+    if (!createdOrder || step !== 'payment') {
       setPromptPayTimeRemaining(PROMPTPAY_EXPIRY_SECONDS)
       return
     }
 
     const updateRemainingTime = () => {
-      setPromptPayTimeRemaining(getPromptPaySecondsRemaining(createdOrder.createdAt))
+      setPromptPayTimeRemaining(getPromptPaySecondsRemaining(createdOrder.createdAt, createdOrder.expiresAt))
     }
 
     updateRemainingTime()
@@ -196,7 +184,7 @@ function CheckoutContent() {
     }
   }, [createdOrder, step, paymentChannel])
 
-  if (!mounted) {
+  if (!mounted || isRestoring) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-16 flex items-center justify-center min-h-[50vh]">
         <div className="text-center space-y-4">
@@ -208,11 +196,13 @@ function CheckoutContent() {
   }
 
   // Calculate pricing — always derived from store (never hardcoded)
-  const subtotal = getSubTotal()
-  const discountAmount = getDiscountAmount()
-  const totalAmount = getTotal()
-  const isPromptPayExpired = step === 'payment' && paymentChannel === 'promptpay' && promptPayTimeRemaining <= 0
+  const summaryItems = step === 'payment' && createdOrder ? createdOrder.items : items
+  const subtotal = step === 'payment' && createdOrder ? createdOrder.subTotal ?? createdOrder.total : getSubTotal()
+  const discountAmount = step === 'payment' && createdOrder ? createdOrder.discountAmount ?? 0 : getDiscountAmount()
+  const totalAmount = step === 'payment' && createdOrder ? createdOrder.total : getTotal()
+  const isPromptPayExpired = step === 'payment' && promptPayTimeRemaining <= 0
   const promptPayCountdown = formatCountdown(promptPayTimeRemaining)
+  if (restoreError) return <div className="max-w-xl mx-auto p-8 space-y-4"><p role="alert">{restoreError}</p><Link href="/track" className="text-primary">ยืนยันสิทธิ์และดูสถานะออเดอร์</Link><button className="block text-primary" onClick={()=>{ useOrderStore.getState().clearOrder(); setRestoreError(''); router.replace('/checkout') }}>เริ่มสั่งซื้อใหม่</button></div>
 
   // If no items in cart and not in payment step, redirect or show empty state
   if (items.length === 0 && step === 'info') {
@@ -259,23 +249,15 @@ function CheckoutContent() {
       const result = await response.json()
 
       if (result.success) {
-        const orderData: OrderSummary = {
-          orderNumber: result.data.orderNumber,
-          items,
-          customer: formData,
-          total: result.data.total,
-          status: 'pending',
-          createdAt: result.data.createdAt,
-        }
-
+        const orderData: OrderSummary = result.data
+        createdInThisPage.current = orderData.orderNumber
         setCreatedOrder(orderData)
-        setOrder(orderData) // save to client store
+        setOrder(orderData)
+        addOrderToHistory(orderData.orderNumber)
+        if (orderData.status !== 'pending') { clearCart(); router.push('/thank-you'); return }
+        router.replace('/checkout?order=' + encodeURIComponent(orderData.orderNumber))
         setPaymentChannel('truemoney')
         setVoucherLink('')
-        setPromptPayPayload('')
-        setPromptPayError('')
-        setSlipFile(null)
-        setSlipError('')
         setStockErrorMessage('')
         setStep('payment')
       } else {
@@ -294,7 +276,7 @@ function CheckoutContent() {
   }
 
   const handleTrueMoneyPayment = async () => {
-    if (!createdOrder) return
+    if (!createdOrder || isSubmittingVoucher || isStripeBusy || isPromptPayExpired) return
 
     const trimmedVoucherLink = voucherLink.trim()
 
@@ -321,7 +303,7 @@ function CheckoutContent() {
       if (result.success) {
         const completedOrder: OrderSummary = {
           ...createdOrder,
-          status: result.data?.status === 'completed' ? 'completed' : 'processing',
+          status: result.data?.status || 'payment_review',
           deliveryItems: result.data?.deliveryItems || [],
         }
 
@@ -329,88 +311,20 @@ function CheckoutContent() {
         addOrderToHistory(completedOrder.orderNumber)
         clearCart()
 
-        toast.success('ชำระเงินสำเร็จ ระบบกำลังพาไปหน้ารับสินค้า')
+        toast(result.warning ? 'กำลังตรวจสอบผลชำระเงิน กรุณาอย่าจ่ายซ้ำ' : 'ยืนยันรายการแล้ว กำลังเปิดข้อมูลออเดอร์')
         router.push('/thank-you')
       } else {
         toast.error(result.error || 'ไม่สามารถตรวจสอบซองอั่งเปาได้ กรุณาลองใหม่')
       }
     } catch (error) {
       console.error('Error redeeming TrueMoney voucher:', error)
-      toast.error('เกิดข้อผิดพลาดในการยืนยันซองอั่งเปา กรุณาลองใหม่อีกครั้ง')
+      toast.error('การเชื่อมต่อขัดข้อง กรุณาตรวจสถานะออเดอร์ก่อน ห้ามชำระซ้ำ')
+      router.push('/track')
     } finally {
       setIsSubmittingVoucher(false)
     }
   }
 
-  const handleSlipOkPayment = async () => {
-    if (!createdOrder) return
-
-    if (getPromptPaySecondsRemaining(createdOrder.createdAt) <= 0) {
-      const errorMessage = 'หมดเวลาชำระเงินสำหรับออเดอร์นี้แล้ว กรุณากลับไปทำรายการสั่งซื้อใหม่'
-      setSlipError(errorMessage)
-      toast.error(errorMessage)
-      return
-    }
-
-    if (!slipFile) {
-      setSlipError('กรุณาอัปโหลดรูปสลิปก่อนยืนยันการชำระเงิน')
-      return
-    }
-
-    setIsSubmittingSlip(true)
-    setSlipError('')
-
-    try {
-      const paymentForm = new FormData()
-      paymentForm.append('orderId', createdOrder.orderNumber)
-      paymentForm.append('files', slipFile)
-
-      const response = await fetch('/api/payment/slipok', {
-        method: 'POST',
-        body: paymentForm,
-      })
-
-      const responseText = await response.text()
-      let result: any = null
-
-      try {
-        result = responseText ? JSON.parse(responseText) : null
-      } catch {
-        result = null
-      }
-
-      if (result?.success) {
-        const completedOrder: OrderSummary = {
-          ...createdOrder,
-          status: result.data?.status === 'completed' ? 'completed' : 'processing',
-          deliveryItems: result.data?.deliveryItems || [],
-        }
-
-        setOrder(completedOrder)
-        addOrderToHistory(completedOrder.orderNumber)
-        clearCart()
-
-        toast.success('ตรวจสลิปสำเร็จ ระบบกำลังพาไปหน้ารับสินค้า')
-        router.push('/thank-you')
-      } else {
-        const errorMessage =
-          result?.error ||
-          result?.message ||
-          (response.status === 404
-            ? 'ไม่พบ API ตรวจสลิป กรุณาติดต่อแอดมินเพื่อตรวจสอบระบบ'
-            : 'ตรวจสอบสลิปไม่สำเร็จ กรุณาลองใหม่')
-        setSlipError(errorMessage)
-        toast.error(errorMessage)
-      }
-    } catch (error) {
-      console.error('Error verifying SlipOK payment:', error)
-      const errorMessage = 'เกิดข้อผิดพลาดในการตรวจสอบสลิป กรุณาลองใหม่อีกครั้ง'
-      setSlipError(errorMessage)
-      toast.error(errorMessage)
-    } finally {
-      setIsSubmittingSlip(false)
-    }
-  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-fade-in">
@@ -447,17 +361,11 @@ function CheckoutContent() {
 
       {/* Back Button */}
       <Link
-        href={step === 'payment' ? '#' : '/cart'}
-        onClick={(e) => {
-          if (step === 'payment') {
-            e.preventDefault()
-            setStep('info')
-          }
-        }}
+        href={step === 'payment' ? '/track' : '/cart'}
         className="inline-flex items-center gap-2 text-textMuted hover:text-primary transition-colors text-sm mb-8 font-medium"
       >
         <ArrowLeft className="w-4 h-4" />
-        {step === 'payment' ? 'ย้อนกลับไปแก้ไขข้อมูลผู้ซื้อ' : 'กลับไปยังตะกร้าสินค้า'}
+        {step === 'payment' ? 'กลับหน้าติดตามออเดอร์' : 'กลับไปยังตะกร้าสินค้า'}
       </Link>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
@@ -468,7 +376,7 @@ function CheckoutContent() {
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-textPrimary tracking-tight">ชำระเงิน</h1>
             <p className="text-xs sm:text-sm text-textMuted mt-0.5">
-              {step === 'info' ? 'กรอกรายละเอียดสำหรับรับสินค้า' : 'เลือกช่องทางชำระเงินและรับสินค้าอัตโนมัติ'}
+              {step === 'info' ? 'กรอกรายละเอียดสำหรับรับสินค้า' : 'เลือกช่องทางชำระเงินตามยอดในบิล'}
             </p>
           </div>
         </div>
@@ -528,19 +436,19 @@ function CheckoutContent() {
                     เลือกช่องทางชำระเงิน
                   </div>
                   <h2 className="text-xl sm:text-2xl font-extrabold text-textPrimary tracking-tight">
-                    ชำระเงินและรับสินค้าทันที
+                    ยืนยันการชำระเงิน
                   </h2>
                   <p className="text-sm text-textMuted leading-relaxed">
-                    เลือกชำระผ่านซองอั่งเปาทรูมันนี่ หรือสแกน QR PromptPay แล้วอัปโหลดสลิปให้ระบบตรวจสอบอัตโนมัติ
+                    เลือกชำระผ่านซองทรูมันนี่ หรือบัตรและ PromptPay ผ่าน Stripe
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     type="button"
+                    disabled={isStripeBusy || isSubmittingVoucher || createdOrder.status !== 'pending'}
                     onClick={() => {
                       setPaymentChannel('truemoney')
-                      setSlipError('')
                     }}
                     className={`rounded-2xl border px-4 py-3 text-left transition-all ${
                       paymentChannel === 'truemoney'
@@ -554,17 +462,17 @@ function CheckoutContent() {
                   <button
                     type="button"
                     onClick={() => {
-                      setPaymentChannel('promptpay')
-                      setPromptPayError('')
+                      if (isSubmittingVoucher || isStripeBusy) return
+                      setPaymentChannel('stripe')
                     }}
                     className={`rounded-2xl border px-4 py-3 text-left transition-all ${
-                      paymentChannel === 'promptpay'
+                      paymentChannel === 'stripe'
                         ? 'border-primary/70 bg-primary/10 shadow-lg shadow-primary/10'
                         : 'border-border bg-surfaceLight/30 hover:border-primary/40'
                     }`}
                   >
-                    <span className="block text-sm font-extrabold text-textPrimary">💳 สแกน QR โอนเงิน</span>
-                    <span className="mt-1 block text-xs text-textMuted">สร้าง QR PromptPay และตรวจสลิปด้วย SlipOK</span>
+                    <span className="block text-sm font-extrabold text-textPrimary">💳 บัตร / PromptPay</span>
+                    <span className="mt-1 block text-xs text-textMuted">ชำระผ่านหน้าของ Stripe ไม่ต้องแนบสลิป</span>
                   </button>
                 </div>
 
@@ -574,11 +482,12 @@ function CheckoutContent() {
                       <p className="text-xs text-textMuted font-medium">ยอดที่ต้องชำระ</p>
                       <p className="text-2xl font-extrabold text-primary-light mt-1">
                         {formatPrice(createdOrder.total)}
+                        <span className="block text-xs mt-2">เหลือเวลาชำระ {promptPayCountdown}</span>
                       </p>
                     </div>
-                    <div className="text-right">
+                    <div className="min-w-0 text-right">
                       <p className="text-xs text-textMuted font-medium">เลขออเดอร์</p>
-                      <p className="text-sm font-mono font-bold text-textPrimary mt-1">
+                      <p className="break-all text-sm font-mono font-bold text-textPrimary mt-1">
                         {createdOrder.orderNumber}
                       </p>
                     </div>
@@ -600,14 +509,14 @@ function CheckoutContent() {
                         disabled={isSubmittingVoucher}
                       />
                       <p className="text-xs text-textMuted leading-relaxed">
-                        เพื่อความปลอดภัย ระบบจะรับชำระเฉพาะซองที่มียอดเท่ากับหรือมากกว่ายอดออเดอร์เท่านั้น
+                        ใช้ซองสำหรับ 1 คน และยอดตรงกับออเดอร์เท่านั้น ไม่รับยอดเกินหรือขาด
                       </p>
                     </div>
 
                     <button
                       type="button"
                       onClick={handleTrueMoneyPayment}
-                      disabled={isSubmittingVoucher || !voucherLink.trim()}
+                      disabled={isSubmittingVoucher || isStripeBusy || createdOrder.status !== 'pending' || !voucherLink.trim() || isPromptPayExpired}
                       className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary-gradient px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-primary/20 transition-all hover:opacity-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isSubmittingVoucher ? (
@@ -621,114 +530,7 @@ function CheckoutContent() {
                     </button>
                   </>
                 ) : (
-                  <div className="space-y-5">
-                    {isPromptPayExpired ? (
-                      <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-5 py-6 text-center">
-                        <p className="text-base font-extrabold text-rose-300">
-                          ⏳ หมดเวลาชำระเงินสำหรับออเดอร์นี้แล้ว กรุณากลับไปทำรายการสั่งซื้อใหม่
-                        </p>
-                        <Link
-                          href="/cart"
-                          className="mt-4 inline-flex items-center justify-center rounded-xl border border-rose-400/30 px-4 py-2 text-sm font-bold text-rose-200 transition-colors hover:bg-rose-500/10"
-                        >
-                          กลับไปที่ตะกร้าสินค้า
-                        </Link>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="rounded-2xl border border-border/60 bg-surfaceLight/30 p-5">
-                          <div className="flex flex-col lg:flex-row items-center gap-5">
-                            <div className="flex flex-col items-center gap-3">
-                              <div className="flex h-64 w-64 items-center justify-center rounded-2xl bg-white p-4 shadow-inner">
-                                {isLoadingPromptPay ? (
-                                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                                ) : promptPayPayload ? (
-                                  <div className="relative inline-block">
-                                    <QRCodeCanvas
-                                      value={promptPayPayload}
-                                      size={224}
-                                      includeMargin
-                                      className="rounded-xl"
-                                    />
-                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-                                      <span className="-rotate-45 whitespace-nowrap text-center text-lg font-black text-red-600 opacity-45 drop-shadow-sm">
-                                        สำหรับชำระเงินร้าน shop78it เท่านั้น
-                                      </span>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <p className="px-4 text-center text-sm font-semibold text-slate-500">
-                                    ไม่สามารถสร้าง QR ได้
-                                  </p>
-                                )}
-                              </div>
-                              <p className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-extrabold text-amber-300">
-                                เหลือเวลาชำระเงิน {promptPayCountdown}
-                              </p>
-                            </div>
-                            <div className="flex-1 space-y-3 text-center lg:text-left">
-                              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-bold text-primary-light">
-                                PromptPay QR
-                              </div>
-                              <h3 className="text-lg font-extrabold text-textPrimary">
-                                สแกน QR ตามยอดคำสั่งซื้อ
-                              </h3>
-                              <p className="text-sm leading-relaxed text-textMuted">
-                                หลังโอนเงินแล้วให้อัปโหลดรูปสลิปด้านล่าง ระบบ SlipOK จะตรวจยอดเงินและบัญชีผู้รับก่อนจัดส่งสินค้าอัตโนมัติ
-                              </p>
-                              {promptPayError && (
-                                <p className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-300">
-                                  {promptPayError}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="space-y-3">
-                          <label className="block text-sm font-bold text-textPrimary">
-                            อัปโหลดรูปสลิปโอนเงิน
-                          </label>
-                          <input
-                            type="file"
-                            accept="image/png,image/jpeg,image/jpg,image/webp"
-                            onChange={(event) => {
-                              setSlipFile(event.target.files?.[0] || null)
-                              setSlipError('')
-                            }}
-                            className="block w-full cursor-pointer rounded-xl border border-border/60 bg-surfaceLight/50 text-sm text-textSecondary file:mr-4 file:border-0 file:bg-primary file:px-4 file:py-3 file:text-sm file:font-bold file:text-white hover:file:bg-primary-light"
-                            disabled={isSubmittingSlip}
-                          />
-                          {slipFile && (
-                            <p className="text-xs text-emerald-400">
-                              เลือกไฟล์แล้ว: {slipFile.name}
-                            </p>
-                          )}
-                          {slipError && (
-                            <p className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-300">
-                              {slipError}
-                            </p>
-                          )}
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={handleSlipOkPayment}
-                          disabled={isSubmittingSlip || !slipFile || !promptPayPayload || isPromptPayExpired}
-                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary-gradient px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-primary/20 transition-all hover:opacity-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          {isSubmittingSlip ? (
-                            <>
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              กำลังอัปโหลดและตรวจสลิป...
-                            </>
-                          ) : (
-                            'ยืนยันการชำระเงิน'
-                          )}
-                        </button>
-                      </>
-                    )}
-                  </div>
+                  <StripePayment order={createdOrder} onBusyChange={setIsStripeBusy} onChange={order => { setCreatedOrder(order); setOrder(order); if (order.status === 'cancelled') setRestoreError('ออเดอร์หมดอายุแล้ว กรุณาเลือกสินค้าเพื่อสร้างบิลใหม่'); if (['paid','completed','needs_manual_delivery'].includes(order.status)) { clearCart(); router.replace('/thank-you') } }} />
                 )}
               </div>
             )
@@ -740,12 +542,12 @@ function CheckoutContent() {
           <div className="bg-surface border border-border shadow-sm rounded-2xl p-5 sm:p-6 space-y-4">
             <h2 className="text-base font-bold text-textPrimary border-b border-border/50 pb-3 flex items-center gap-2">
               <ShoppingBag className="w-4 h-4 text-primary" />
-              สรุปคำสั่งซื้อ ({items.length} รายการ)
+              สรุปคำสั่งซื้อ ({summaryItems.length} รายการ)
             </h2>
 
             {/* Product items mini list */}
             <div className="max-h-56 overflow-y-auto divide-y divide-border/40 pr-1 space-y-3.5">
-              {items.map((item) => (
+              {summaryItems.map((item) => (
                 <div key={item.product.id} className="flex gap-3 pt-3 first:pt-0 items-start">
                   <CheckoutItemImage src={item.product.image} alt={item.product.name} />
                   <div className="min-w-0 flex-1">
@@ -774,7 +576,7 @@ function CheckoutContent() {
 
             {/* Discount Code */}
             <div className="pt-4 border-t border-border/50">
-              {discount ? (
+              {step === 'payment' ? <p className="text-xs text-textMuted">ยอดและส่วนลดตามบิลที่ยืนยันแล้ว</p> : discount ? (
                 <div className="flex items-center justify-between p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
                   <div className="flex items-center gap-2">
                     <Tag className="w-4 h-4 text-emerald-400" />
@@ -828,9 +630,9 @@ function CheckoutContent() {
                 <span>ราคารวม</span>
                 <span className="font-semibold text-textPrimary">{formatPrice(subtotal)}</span>
               </div>
-              {discount && discountAmount > 0 && (
+              {discountAmount > 0 && (
                 <div className="flex justify-between text-textSecondary">
-                  <span>ส่วนลดคูปอง ({discount.code})</span>
+                  <span>ส่วนลดคูปอง ({createdOrder?.discountCode || discount?.code})</span>
                   <span className="font-semibold text-emerald-400">-{formatPrice(discountAmount)}</span>
                 </div>
               )}
@@ -849,7 +651,7 @@ function CheckoutContent() {
             <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
             <div className="text-[11px] text-textSecondary leading-normal">
               <strong className="text-textPrimary block mb-0.5">รับประกันสินค้าดิจิทัลและการจัดส่ง</strong>
-              จัดส่งอัตโนมัติ 24 ชั่วโมงหลังชำระเงินสำเร็จ หากข้อมูลสินค้าใช้งานไม่ได้ กรุณาติดต่อแอดมินพร้อมเลขออเดอร์เพื่อรับการช่วยเหลือตามเงื่อนไขร้าน
+              สินค้าจัดส่งอัตโนมัติจะพร้อมรับหลังยืนยันชำระเงิน ส่วนสินค้าจัดส่งโดยแอดมินจะแสดงสถานะรอดำเนินการ หากข้อมูลสินค้าใช้งานไม่ได้ กรุณาติดต่อแอดมินพร้อมเลขออเดอร์เพื่อรับการช่วยเหลือตามเงื่อนไขร้าน
             </div>
           </div>
         </div>

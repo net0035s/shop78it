@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-11T05:40:08.703Z",
+  "readOnly": true,
+  "keysChanged": false,
+  "values": 38,
+  "readableWithAvailableCandidates": 14,
+  "unreadable": 24,
+  "candidates": [
+    {
+      "source": ".env",
+      "variable": "ENCRYPTION_KEY",
+      "readable": 14,
+      "unreadable": 24
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "checkedAt": "2026-10-11T06:02:30.935Z",
+  "sandboxOnly": true,
+  "externalRequestsRestrictedToClerkTestInstance": true,
+  "adminLoginVerified": false,
+  "checks": [
+    {
+      "page": "/help",
+      "width": 390,
+      "heading": true,
+      "horizontalOverflow": false
+    },
+    {
+      "page": "/track",
+      "width": 390,
+      "heading": true,
+      "horizontalOverflow": false
+    },
+    {
+      "page": "/help",
+      "width": 1280,
+      "heading": true,
+      "horizontalOverflow": false
+    },
+    {
+      "page": "/track",
+      "width": 1280,
+      "heading": true,
+      "horizontalOverflow": false
+    }
+  ]
+}

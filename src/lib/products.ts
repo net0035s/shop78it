@@ -111,7 +111,7 @@ export function formatPrice(price: number): string {
     style: 'currency',
     currency: 'THB',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(price)
 }
 
@@ -120,4 +120,20 @@ export function formatPrice(price: number): string {
  */
 export function getDiscountPercent(price: number, originalPrice: number): number {
   return Math.round(((originalPrice - price) / originalPrice) * 100)
+}
+
+/** Accept both saved JSON tags and comma-separated tags from the editor. */
+export function normalizeProductTags(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return [...new Set(value.filter((item): item is string => typeof item === 'string').map(item => item.trim()).filter(Boolean))]
+  }
+  if (typeof value !== 'string' || !value.trim()) return []
+  const text = value.trim()
+  if (text.startsWith('[')) {
+    try {
+      const parsed: unknown = JSON.parse(text)
+      if (Array.isArray(parsed)) return normalizeProductTags(parsed)
+    } catch { /* Older tags may be plain text starting with a bracket. */ }
+  }
+  return normalizeProductTags(text.split(','))
 }

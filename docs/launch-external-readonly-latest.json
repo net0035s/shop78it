@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-10-12T05:25:07.080Z",
+  "readOnly": true,
+  "messagesSent": 0,
+  "paymentRequests": 0,
+  "browserAdminLoginVerified": false,
+  "clerk": {
+    "connected": true,
+    "instance": "test",
+    "matchingUsers": 1,
+    "verifiedPrimaryAdmins": 1
+  },
+  "smtp": {
+    "authenticated": true,
+    "deliveryVerified": false
+  },
+  "telegram": {
+    "tokenVerified": true,
+    "deliveryVerified": false
+  }
+}

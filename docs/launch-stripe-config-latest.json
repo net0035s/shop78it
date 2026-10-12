@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-10-12T03:41:33.574Z",
+  "present": true,
+  "keyKind": "test-server",
+  "testKeyFormatValid": true,
+  "webhookSecretConfigured": true,
+  "apiRequestSent": true,
+  "accountReadStatus": 200,
+  "country": "TH",
+  "realPayments": false,
+  "deployed": false
+}

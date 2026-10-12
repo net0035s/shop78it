@@ -1,0 +1,31 @@
+{
+  "checkedAt": "2026-10-11T08:39:18.138Z",
+  "sandboxOnly": true,
+  "deployed": false,
+  "checks": [
+    {
+      "width": 390,
+      "noPageOverflow": true,
+      "alignedCards": null,
+      "modalWithinViewport": true,
+      "addToCartPassed": true
+    },
+    {
+      "width": 768,
+      "noPageOverflow": true,
+      "alignedCards": null,
+      "modalWithinViewport": true,
+      "addToCartPassed": true
+    },
+    {
+      "width": 1280,
+      "noPageOverflow": true,
+      "alignedCards": true,
+      "modalWithinViewport": true,
+      "addToCartPassed": true
+    }
+  ],
+  "lightThemePassed": true,
+  "searchAndSortPassed": true,
+  "closeModalPassed": true
+}

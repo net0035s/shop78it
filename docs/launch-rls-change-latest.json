@@ -1,0 +1,201 @@
+{
+  "checkedAt": "2026-10-11T06:45:01.908Z",
+  "project": "hddnabbhdjphjwjohvcg",
+  "authorization": "User explicitly approved fresh backup and RLS/public privilege changes in this chat",
+  "productionRlsApplied": true,
+  "codeDeployed": false,
+  "commerceSchemaMigrationApplied": false,
+  "encryptionKeyChanged": false,
+  "realPaymentsTested": false,
+  "migration": {
+    "version": "20261011064132",
+    "name": "lock_down_shop_data_api"
+  },
+  "postconditions": [
+    {
+      "table_name": "Category",
+      "rls_enabled": true,
+      "force_rls": false,
+      "anon_access": false,
+      "authenticated_access": false,
+      "public_access": false,
+      "backend_read_access": true
+    },
+    {
+      "table_name": "DeliveryItem",
+      "rls_enabled": true,
+      "force_rls": false,
+      "anon_access": false,
+      "authenticated_access": false,
+      "public_access": false,
+      "backend_read_access": true
+    },
+    {
+      "table_name": "DigitalKey",
+      "rls_enabled": true,
+      "force_rls": false,
+      "anon_access": false,
+      "authenticated_access": false,
+      "public_access": false,
+      "backend_read_access": true
+    },
+    {
+      "table_name": "DigitalStock",
+      "rls_enabled": true,
+      "force_rls": false,
+      "anon_access": false,
+      "authenticated_access": false,
+      "public_access": false,
+      "backend_read_access": true
+    },
+    {
+      "table_name": "DiscountCode",
+      "rls_enabled": true,
+      "force_rls": false,
+      "anon_access": false,
+      "authenticated_access": false,
+      "public_access": false,
+      "backend_read_access": true
+    },
+    {
+      "table_name": "Order",
+      "rls_enabled": true,
+      "force_rls": false,
+      "anon_access": false,
+      "authenticated_access": false,
+      "public_access": false,
+      "backend_read_access": true
+    },
+    {
+      "table_name": "OrderItem",
+      "rls_enabled": true,
+      "force_rls": false,
+      "anon_access": false,
+      "authenticated_access": false,
+      "public_access": false,
+      "backend_read_access": true
+    },
+    {
+      "table_name": "Product",
+      "rls_enabled": true,
+      "force_rls": false,
+      "anon_access": false,
+      "authenticated_access": false,
+      "public_access": false,
+      "backend_read_access": true
+    },
+    {
+      "table_name": "StoreSettings",
+      "rls_enabled": true,
+      "force_rls": false,
+      "anon_access": false,
+      "authenticated_access": false,
+      "public_access": false,
+      "backend_read_access": true
+    }
+  ],
+  "advisors": [
+    {
+      "name": "rls_enabled_no_policy",
+      "level": "INFO",
+      "count": 9,
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+    }
+  ],
+  "rowIntegrity": {
+    "allNineTablesMatch": true,
+    "before": {
+      "Category": {
+        "count": 1,
+        "digest": "35111eab14f43ae6aa61acd264513e833faca32f8ab5123378dfda09c8f8313a"
+      },
+      "DeliveryItem": {
+        "count": 6,
+        "digest": "71a0910d5cb551aa838dd8ead415f29bc7451dd70470e603d1c05d08f3fe3354"
+      },
+      "DigitalKey": {
+        "count": 0,
+        "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "DigitalStock": {
+        "count": 20,
+        "digest": "1f9e8707405dd219d4d0c64dd8713a2466b3c11f18c8e5cfc4ebdf000f4b9da8"
+      },
+      "DiscountCode": {
+        "count": 1,
+        "digest": "00f4d75109ef515561aa79d1bc439ae324cfb3d56bb223e97b176d5d50f614cc"
+      },
+      "Order": {
+        "count": 24,
+        "digest": "e806e5207ae0ca13522a5df3f692b046b93f72e71b975cb1fbee0a70f899f4a7"
+      },
+      "OrderItem": {
+        "count": 24,
+        "digest": "f59cfeab8ebcecbafd8cda18c674a4f7d8f279253a544b709f3025b44ddb46ef"
+      },
+      "Product": {
+        "count": 4,
+        "digest": "4ae37db031b1d1cc6f015ee9f5ba0531e43b067efa1f47fe347bbf4b02c3d026"
+      },
+      "StoreSettings": {
+        "count": 0,
+        "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "after": {
+      "Category": {
+        "count": 1,
+        "digest": "35111eab14f43ae6aa61acd264513e833faca32f8ab5123378dfda09c8f8313a"
+      },
+      "DeliveryItem": {
+        "count": 6,
+        "digest": "71a0910d5cb551aa838dd8ead415f29bc7451dd70470e603d1c05d08f3fe3354"
+      },
+      "DigitalKey": {
+        "count": 0,
+        "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "DigitalStock": {
+        "count": 20,
+        "digest": "1f9e8707405dd219d4d0c64dd8713a2466b3c11f18c8e5cfc4ebdf000f4b9da8"
+      },
+      "DiscountCode": {
+        "count": 1,
+        "digest": "00f4d75109ef515561aa79d1bc439ae324cfb3d56bb223e97b176d5d50f614cc"
+      },
+      "Order": {
+        "count": 24,
+        "digest": "e806e5207ae0ca13522a5df3f692b046b93f72e71b975cb1fbee0a70f899f4a7"
+      },
+      "OrderItem": {
+        "count": 24,
+        "digest": "f59cfeab8ebcecbafd8cda18c674a4f7d8f279253a544b709f3025b44ddb46ef"
+      },
+      "Product": {
+        "count": 4,
+        "digest": "4ae37db031b1d1cc6f015ee9f5ba0531e43b067efa1f47fe347bbf4b02c3d026"
+      },
+      "StoreSettings": {
+        "count": 0,
+        "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "backendReadOnly": {
+    "checkedAt": "2026-10-11T06:45:26.511Z",
+    "readOnly": true,
+    "backend": "server Prisma",
+    "result": {
+      "products": 4,
+      "orders": 24,
+      "orderItems": 24,
+      "digitalStock": 20
+    }
+  },
+  "backup": {
+    "permissionsAfter": "launch-data-api-after-rls-latest.json",
+    "report": "launch-backup-rehearsal-latest.json",
+    "freshRestoreVerified": true,
+    "permissionsBefore": "launch-data-api-before-rls-latest.json"
+  }
+}

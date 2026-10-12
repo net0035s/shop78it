@@ -17,6 +17,7 @@ export async function sendTelegramNotify(text: string): Promise<boolean> {
       `https://api.telegram.org/bot${token}/sendMessage`,
       {
         method: 'POST',
+        signal: AbortSignal.timeout(10000),
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chat_id: chatId,

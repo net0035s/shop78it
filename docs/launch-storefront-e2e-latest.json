@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-10-12T04:45:01.397Z",
+  "passed": true,
+  "sandboxOnly": true,
+  "database": "temporary-loopback",
+  "deployed": false,
+  "realPayments": false,
+  "externalEmailsSent": 0,
+  "clerkInstance": "test",
+  "loginMethod": "official Clerk Playwright helper with real test sessions",
+  "checks": [
+    "anonymous admin API denied and foreign-origin order creates no data",
+    "Clerk verified-primary test admin accepted and ordinary customer denied",
+    "browser checkout reserves automatic stock; real payment endpoint stays disabled",
+    "checkout shows exactly TrueMoney and Stripe; unconfigured Stripe cannot charge",
+    "completed order remains in history while the same browser creates a new purchase",
+    "mock-confirmed automatic order delivers once and displays key after reload",
+    "paid manual-delivery order does not redirect the next purchase to its old bill",
+    "admin completion updates both the open tracking page and delivery page without reload",
+    "manual order stays pending delivery until authenticated admin supplies content",
+    "cross-device order access needs email link; browser exchange is single-use",
+    "order number and email show fresh receipt metadata without an email link or delivery access",
+    "coupon checkout and authenticated maintenance release expired holds exactly once",
+    "100 percent coupon completes a browser purchase without any provider",
+    "mobile account delivery masks password and downloads only visible instructions"
+  ],
+  "syntheticUsersRemoved": true,
+  "fixtureDatabaseClosed": true,
+  "localSmtpMessages": 6
+}

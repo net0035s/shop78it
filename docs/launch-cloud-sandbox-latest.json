@@ -1,0 +1,38 @@
+{
+  "checkedAt": "2026-10-11T08:11:22.13Z",
+  "projectId": "acocmsdnkpjfggycsxro",
+  "projectName": "shop78it-sandbox",
+  "organization": "november",
+  "productionProjectId": "hddnabbhdjphjwjohvcg",
+  "isolated": true,
+  "productionChanged": false,
+  "deployed": false,
+  "realPaymentReceived": false,
+  "tables": 15,
+  "rlsEnabledTables": 15,
+  "publicAccessTables": 0,
+  "seed": {
+    "categories": 1,
+    "products": 3,
+    "encryptedStock": 6,
+    "coupons": 1,
+    "orders": 0,
+    "allSynthetic": true,
+    "decryptionVerified": 6,
+    "remoteCiphertextChecksumMatches": true
+  },
+  "securityAdvisors": {
+    "errors": 0,
+    "warnings": 0,
+    "info": "RLS enabled without policies for 15 server-only business tables and protected Prisma migration metadata; rechecked after history resolution",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+  },
+  "schemaMigration": "bootstrap_shop_sandbox via Supabase MCP; both existing Prisma migrations resolved after no-drift and unchanged-data checks",
+  "migrationHistoryReport": "launch-cloud-sandbox-history-latest.json",
+  "localConfiguration": ".env.sandbox.local (ignored by Git)",
+  "connectionConfigured": true,
+  "appEndToEndVerified": false,
+  "prismaConnectionVerified": true,
+  "schemaDrift": "none",
+  "commerceRollbackTestsPassed": 5
+}

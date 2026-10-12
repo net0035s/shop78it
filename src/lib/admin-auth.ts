@@ -1,5 +1,6 @@
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
+import { verifiedAdminEmail } from './admin-identity'
 
 export type AdminAuthResult =
   | { authorized: true; userId: string; email: string }
@@ -26,10 +27,7 @@ export async function requireAdmin(): Promise<AdminAuthResult> {
 
     const client = await clerkClient()
     const user = await client.users.getUser(userId)
-    const primaryEmail = user.emailAddresses.find(
-      (e) => e.id === user.primaryEmailAddressId
-    )
-    const email = (primaryEmail?.emailAddress || '').trim().toLowerCase()
+    const email = verifiedAdminEmail(user, adminEmails.join(','))
 
     if (!email || !adminEmails.includes(email)) {
       return {
@@ -43,7 +41,7 @@ export async function requireAdmin(): Promise<AdminAuthResult> {
 
     return { authorized: true, userId, email }
   } catch (error) {
-    console.error('Admin auth check failed:', error)
+    console.error('Admin auth check failed:', error instanceof Error ? error.name : 'unknown')
     return {
       authorized: false,
       response: NextResponse.json(

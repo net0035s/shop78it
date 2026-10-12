@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-10-11T14:57:11.676Z",
+  "projectId": "acocmsdnkpjfggycsxro",
+  "productionConnected": false,
+  "apply": false,
+  "schemaDrift": "none",
+  "businessRowsUnchanged": true,
+  "metadataRlsEnabled": true,
+  "history": [
+    "202609050001_baseline",
+    "202609050002_commerce_safety"
+  ],
+  "passed": true
+}

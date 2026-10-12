@@ -1,0 +1,3707 @@
+{
+  "checkedAt": "2026-10-11T06:39:51.474Z",
+  "readOnly": true,
+  "productionChangesApplied": false,
+  "backend": {
+    "role": {
+      "name": "postgres",
+      "bypass_rls": true,
+      "superuser": false
+    },
+    "assessment": {
+      "safe": false,
+      "tablesChecked": 9,
+      "unsafeTables": [
+        "Category",
+        "DeliveryItem",
+        "DigitalKey",
+        "DigitalStock",
+        "DiscountCode",
+        "Order",
+        "OrderItem",
+        "Product",
+        "StoreSettings"
+      ],
+      "missingBaseline": []
+    },
+    "tables": [
+      {
+        "table_name": "Category",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "table_name": "DeliveryItem",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "table_name": "DigitalKey",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "table_name": "DigitalStock",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "table_name": "DiscountCode",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "table_name": "Order",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "table_name": "OrderItem",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "table_name": "Product",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "table_name": "StoreSettings",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      }
+    ],
+    "grants": [
+      {
+        "table_name": "Category",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      }
+    ],
+    "policies": [],
+    "defaultPrivileges": [
+      {
+        "creator": "postgres",
+        "defaclobjtype": "r",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "creator": "postgres",
+        "defaclobjtype": "f",
+        "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+      },
+      {
+        "creator": "postgres",
+        "defaclobjtype": "S",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "creator": "supabase_admin",
+        "defaclobjtype": "S",
+        "acl": "{postgres=rwU/supabase_admin,anon=rwU/supabase_admin,authenticated=rwU/supabase_admin,service_role=rwU/supabase_admin}"
+      },
+      {
+        "creator": "supabase_admin",
+        "defaclobjtype": "r",
+        "acl": "{postgres=arwdDxtm/supabase_admin,anon=arwdDxtm/supabase_admin,authenticated=arwdDxtm/supabase_admin,service_role=arwdDxtm/supabase_admin}"
+      },
+      {
+        "creator": "supabase_admin",
+        "defaclobjtype": "f",
+        "acl": "{postgres=X/supabase_admin,anon=X/supabase_admin,authenticated=X/supabase_admin,service_role=X/supabase_admin}"
+      }
+    ]
+  },
+  "direct": {
+    "role": {
+      "name": "postgres",
+      "bypass_rls": true,
+      "superuser": false
+    },
+    "assessment": {
+      "safe": false,
+      "tablesChecked": 9,
+      "unsafeTables": [
+        "Category",
+        "DeliveryItem",
+        "DigitalKey",
+        "DigitalStock",
+        "DiscountCode",
+        "Order",
+        "OrderItem",
+        "Product",
+        "StoreSettings"
+      ],
+      "missingBaseline": []
+    },
+    "tables": [
+      {
+        "table_name": "Category",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "table_name": "DeliveryItem",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "table_name": "DigitalKey",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "table_name": "DigitalStock",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "table_name": "DiscountCode",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "table_name": "Order",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "table_name": "OrderItem",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "table_name": "Product",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "table_name": "StoreSettings",
+        "owner": "postgres",
+        "rls_enabled": false,
+        "force_rls": false,
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      }
+    ],
+    "grants": [
+      {
+        "table_name": "Category",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Category",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DeliveryItem",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalKey",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DigitalStock",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "DiscountCode",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Order",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "OrderItem",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "Product",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "postgres",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "postgres",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "postgres",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "postgres",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "postgres",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "postgres",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "postgres",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "postgres",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "anon",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "anon",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "anon",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "anon",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "anon",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "anon",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "anon",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "anon",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "authenticated",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "authenticated",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "authenticated",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "authenticated",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "authenticated",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "authenticated",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "authenticated",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "authenticated",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "service_role",
+        "privilege_type": "DELETE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "service_role",
+        "privilege_type": "INSERT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "service_role",
+        "privilege_type": "MAINTAIN",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "service_role",
+        "privilege_type": "REFERENCES",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "service_role",
+        "privilege_type": "SELECT",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "service_role",
+        "privilege_type": "TRIGGER",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "service_role",
+        "privilege_type": "TRUNCATE",
+        "is_grantable": false
+      },
+      {
+        "table_name": "StoreSettings",
+        "grantee": "service_role",
+        "privilege_type": "UPDATE",
+        "is_grantable": false
+      }
+    ],
+    "policies": [],
+    "defaultPrivileges": [
+      {
+        "creator": "postgres",
+        "defaclobjtype": "r",
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "creator": "postgres",
+        "defaclobjtype": "f",
+        "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+      },
+      {
+        "creator": "postgres",
+        "defaclobjtype": "S",
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}"
+      },
+      {
+        "creator": "supabase_admin",
+        "defaclobjtype": "S",
+        "acl": "{postgres=rwU/supabase_admin,anon=rwU/supabase_admin,authenticated=rwU/supabase_admin,service_role=rwU/supabase_admin}"
+      },
+      {
+        "creator": "supabase_admin",
+        "defaclobjtype": "r",
+        "acl": "{postgres=arwdDxtm/supabase_admin,anon=arwdDxtm/supabase_admin,authenticated=arwdDxtm/supabase_admin,service_role=arwdDxtm/supabase_admin}"
+      },
+      {
+        "creator": "supabase_admin",
+        "defaclobjtype": "f",
+        "acl": "{postgres=X/supabase_admin,anon=X/supabase_admin,authenticated=X/supabase_admin,service_role=X/supabase_admin}"
+      }
+    ]
+  }
+}

@@ -1,4 +1,6 @@
-﻿'use client'
+'use client'
+
+import Image from 'next/image'
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -9,8 +11,12 @@ import {
 import { formatPrice } from '@/lib/products'
 import { formatDateWithTime } from '@/lib/utils'
 import { DashboardOverview } from '@/components/admin/DashboardOverview'
+import { LaunchReadiness } from '@/components/admin/LaunchReadiness'
 import { ProductManager } from '@/components/admin/ProductManager'
 import { StockManager } from '@/components/admin/StockManager'
+import { STATUS_CONFIG } from '@/components/admin/AdminShared'
+import { PaymentReview } from '@/components/admin/PaymentReview'
+import { RefundRecord } from '@/components/admin/RefundRecord'
 import { OrderManager } from '@/components/admin/OrderManager'
 import { CategoryManager } from '@/components/admin/CategoryManager'
 
@@ -28,6 +34,8 @@ export default function AdminDashboardPage() {
   // Data states
   const [products, setProducts] = useState<any[]>([])
   const [orders, setOrders] = useState<any[]>([])
+  const [totalOrders, setTotalOrders] = useState(0)
+  const fetchVersion = React.useRef(0)
   const [categories, setCategories] = useState<any[]>([])
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -49,7 +57,7 @@ export default function AdminDashboardPage() {
   const [productForm, setProductForm] = useState({
     name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png',
     category: 'subscription', categoryId: '', tags: '', isNew: false, isFeatured: false,
-    showFeatures: false, features: '', manualSoldCount: '0', showInstruction: false, instruction: '',
+    showFeatures: false, features: '', manualSoldCount: '0', stock: '0', showInstruction: false, instruction: '',
     deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto'
   })
 
@@ -215,22 +223,23 @@ export default function AdminDashboardPage() {
   }
 
   const fetchAll = useCallback(async () => {
-    setIsLoading(true)
+    const version = ++fetchVersion.current
     try {
       const [pRes, oRes, cRes, sRes] = await Promise.all([
         fetch('/api/admin/products'),
-        fetch('/api/admin/orders'),
+        fetch('/api/admin/orders?' + new URLSearchParams({page:String(orderPage),limit:String(orderPerPage),search:orderSearch,status:orderFilter})),
         fetch('/api/admin/categories'),
         fetch('/api/admin/stats'),
       ])
       const [pData, oData, cData, sData] = await Promise.all([pRes.json(), oRes.json(), cRes.json(), sRes.json()])
+      if (version !== fetchVersion.current) return
       if (pData.success) setProducts(pData.data)
-      if (oData.success) setOrders(oData.data)
+      if (oData.success) { setOrders(oData.data); setTotalOrders(oData.total) }
       if (cData.success) setCategories(cData.data)
       if (sData.success) setStats(sData.data)
     } catch (e) { console.error('Fetch error:', e) }
-    finally { setIsLoading(false) }
-  }, [])
+    finally { if (version === fetchVersion.current) setIsLoading(false) }
+  }, [orderPage,orderPerPage,orderSearch,orderFilter])
 
   useEffect(() => {
     setMounted(true)
@@ -249,13 +258,13 @@ export default function AdminDashboardPage() {
   // ---- Product Handlers ----
   const openAddProduct = () => {
     setEditingProduct(null)
-    setProductForm({ name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png', category: categories[0]?.slug || 'subscription', categoryId: categories[0]?.id || '', tags: '', isNew: false, isFeatured: false, showFeatures: false, features: '', manualSoldCount: '0', showInstruction: false, instruction: '', deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto' })
+    setProductForm({ name: '', description: '', price: '', originalPrice: '', image: '/images/products/placeholder.png', category: categories[0]?.slug || 'subscription', categoryId: categories[0]?.id || '', tags: '', isNew: false, isFeatured: false, showFeatures: false, features: '', manualSoldCount: '0', stock: '0', showInstruction: false, instruction: '', deliveryInfo: 'ส่งด่วนอัตโนมัติ', deliveryType: 'auto' })
     setIsProductModalOpen(true)
   }
 
   const openEditProduct = (p: any) => {
     setEditingProduct(p)
-    setProductForm({ name: p.name, description: p.description, price: p.price.toString(), originalPrice: p.originalPrice?.toString() || '', image: p.image, category: p.category, categoryId: p.categoryId || '', tags: p.tags || '', isNew: p.isNew, isFeatured: p.isFeatured, showFeatures: !!p.showFeatures, features: p.features || '', manualSoldCount: String(p.manualSoldCount ?? 0), showInstruction: !!p.showInstruction, instruction: p.instruction || '', deliveryInfo: p.deliveryInfo || 'ส่งด่วนอัตโนมัติ', deliveryType: p.deliveryType || 'auto' })
+    setProductForm({ name: p.name, description: p.description, price: p.price.toString(), originalPrice: p.originalPrice?.toString() || '', image: p.image, category: p.category, categoryId: p.categoryId || '', tags: p.tags || '', isNew: p.isNew, isFeatured: p.isFeatured, showFeatures: !!p.showFeatures, features: p.features || '', manualSoldCount: String(p.manualSoldCount ?? 0), stock: String(p.stock ?? 0), showInstruction: !!p.showInstruction, instruction: p.instruction || '', deliveryInfo: p.deliveryInfo || 'ส่งด่วนอัตโนมัติ', deliveryType: p.deliveryType || 'auto' })
     setIsProductModalOpen(true)
   }
 
@@ -263,7 +272,7 @@ export default function AdminDashboardPage() {
     e.preventDefault()
     const url = '/api/admin/products'
     const method = editingProduct ? 'PUT' : 'POST'
-    const payload = editingProduct ? { ...productForm, id: editingProduct.id } : productForm
+    const payload = editingProduct ? { ...productForm, id: editingProduct.id, expectedStock: editingProduct.stock } : productForm
     const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     const result = await res.json()
     if (result.success) { setIsProductModalOpen(false); fetchAll() }
@@ -373,7 +382,7 @@ export default function AdminDashboardPage() {
     { id: 'categories' as AdminTab, label: 'หมวดหมู่', icon: Tag },
   ]
 
-  const manualDeliveryCount = orders.filter(o => o.status === 'needs_manual_delivery').length
+  const manualDeliveryCount = stats?.manualDeliveryOrders ?? 0
 
   // =========================================================
   return (
@@ -427,7 +436,7 @@ export default function AdminDashboardPage() {
         <div className="sticky top-0 z-10 bg-[#060609]/90 backdrop-blur border-b border-border/40 px-6 py-3 flex items-center justify-between">
           <div>
             <h1 className="font-bold text-textPrimary text-base capitalize">{tabs.find(t => t.id === activeTab)?.label}</h1>
-            <p className="text-[11px] text-textMuted">ระบบจัดการร้านค้า ShopAuto 24/7</p>
+            <p className="text-[11px] text-textMuted">ระบบจัดการร้านค้า Shop78it</p>
           </div>
           <button onClick={fetchAll} className="flex items-center gap-1.5 text-xs text-textMuted hover:text-primary transition-colors px-3 py-1.5 rounded-lg hover:bg-primary/10">
             <RefreshCw className="w-3.5 h-3.5" /><span>รีเฟรชข้อมูล</span>
@@ -444,6 +453,7 @@ export default function AdminDashboardPage() {
             </div>
           ) : (
             <>
+              {activeTab === 'overview' && <LaunchReadiness />}
               {activeTab === 'overview' && (
                 <DashboardOverview
                   stats={stats}
@@ -519,6 +529,7 @@ export default function AdminDashboardPage() {
               {activeTab === 'orders' && (
                 <OrderManager
                   orders={orders}
+                  totalOrders={totalOrders}
                   manualDeliveryCount={manualDeliveryCount}
                   orderFilter={orderFilter}
                   setOrderFilter={setOrderFilter}
@@ -562,6 +573,7 @@ export default function AdminDashboardPage() {
                 { label: 'ราคาปัจจุบัน (฿)', key: 'price', type: 'number', required: true },
                 { label: 'ราคาก่อนลด (฿)', key: 'originalPrice', type: 'number' },
                 { label: 'ยอดขายตั้งต้น (บวกเพิ่มจากยอดจริง)', key: 'manualSoldCount', type: 'number' },
+                ...(productForm.deliveryType === 'manual' ? [{ label: 'สต็อกพร้อมขาย (ไม่รวมที่จองแล้ว)', key: 'stock', type: 'number' }] : []),
                 { label: 'แท็ก (คั่นด้วย ,)', key: 'tags', type: 'text' },
                 { label: 'ข้อมูลการส่ง', key: 'deliveryInfo', type: 'text' },
               ].map(field => (
@@ -593,7 +605,7 @@ export default function AdminDashboardPage() {
                   onChange={e => setProductForm(f => ({ ...f, deliveryType: e.target.value }))}
                   className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-sm text-textPrimary focus:outline-none focus:border-primary/60">
                   <option value="auto">จัดส่งอัตโนมัติ 24/7 (เช็กคลัง DigitalStock)</option>
-                  <option value="manual">แอดมินจัดส่งเอง (ไม่เช็กคลัง, โอนแล้วรอดำเนินการ)</option>
+                  <option value="manual">แอดมินจัดส่งเอง (จองและหักจำนวนสต็อก)</option>
                 </select>
               </div>
               <div>
@@ -733,6 +745,13 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
                 
+                <div className="space-y-2">
+                  <p className="font-bold">รายการที่สั่งซื้อ</p>
+                  {selectedOrder.orderItems?.map((item:any)=><p key={item.id}>{item.productName || item.product?.name} × {item.quantity} — {formatPrice(item.price)} ต่อชิ้น</p>)}
+                </div>
+                <RefundRecord order={selectedOrder} onUpdated={() => {setSelectedOrder(null); fetchAll()}} />
+                <PaymentReview order={selectedOrder} onUpdated={() => {setSelectedOrder(null); fetchAll()}} />
+                <p className="text-textMuted">สถานะอีเมล: {selectedOrder.notifications?.filter((n:any)=>n.kind==='receipt').map((n:any)=>n.status).join(', ') || 'ยังไม่มีคิว'}</p>
                 {/* Delivery Items */}
                 {selectedOrder.deliveryItems?.length > 0 && (
                   <div className="mt-2">
@@ -754,7 +773,7 @@ export default function AdminDashboardPage() {
                   <div className="mt-2">
                     <p className="text-textMuted mb-1">สลิปโอนเงิน:</p>
                     <a href={selectedOrder.slipUrl} target="_blank" rel="noreferrer" className="block w-24 h-32 bg-surfaceLight/50 rounded-lg border border-border overflow-hidden hover:opacity-80 transition-opacity">
-                      <img src={selectedOrder.slipUrl} alt="Slip" className="w-full h-full object-cover" />
+                      <Image unoptimized width={160} height={80} src={selectedOrder.slipUrl} alt="Slip" className="w-full h-full object-cover" />
                     </a>
                   </div>
                 )}
@@ -781,10 +800,9 @@ export default function AdminDashboardPage() {
                       onChange={e => setEditOrderForm({ ...editOrderForm, status: e.target.value })}
                       className="w-full px-3 py-2 bg-surfaceLight/40 border border-border rounded-xl text-textPrimary focus:outline-none focus:border-primary/60"
                     >
-                      <option value="pending">รอชำระเงิน (Pending)</option>
-                      <option value="completed">สำเร็จ (Completed)</option>
-                      <option value="needs_manual_delivery">รอดำเนินการโดยแอดมิน (Manual)</option>
-                      <option value="cancelled">ยกเลิก (Cancelled)</option>
+                      <option value={selectedOrder.status}>{STATUS_CONFIG[selectedOrder.status]?.label || selectedOrder.status}</option>
+                      {selectedOrder.status === 'pending' && <option value="cancelled">ยกเลิก</option>}
+                      {['paid','needs_manual_delivery'].includes(selectedOrder.status) && <option value="completed">จัดส่งครบแล้ว</option>}
                     </select>
                   </div>
                 </div>
@@ -803,10 +821,10 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* 3. Manual Fulfillment */}
-              {(editOrderForm.status === 'needs_manual_delivery' || selectedOrder.status === 'needs_manual_delivery') && (
+              {(['paid','needs_manual_delivery','completed'].includes(selectedOrder.status)) && (
                 <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl space-y-3">
                   <h4 className="font-bold text-orange-400 mb-1">จัดส่ง Manual</h4>
-                  <p className="text-[10px] text-textMuted mb-2">กรอกข้อมูลสินค้าหรือรายละเอียดที่ต้องการส่งให้ลูกค้าผ่านระบบตรงนี้ เมื่อเปลี่ยนสถานะเป็น "สำเร็จ" ข้อมูลนี้จะแสดงในหน้าตรวจออเดอร์ของลูกค้า</p>
+                  <p className="text-[10px] text-textMuted mb-2">กรอกข้อมูลสินค้าหรือรายละเอียดที่ต้องการส่งให้ลูกค้าผ่านระบบตรงนี้ เมื่อเปลี่ยนสถานะเป็น &quot;สำเร็จ&quot; ข้อมูลนี้จะแสดงในหน้าตรวจออเดอร์ของลูกค้า</p>
                   <textarea 
                     rows={3}
                     value={editOrderForm.deliveredContent} 

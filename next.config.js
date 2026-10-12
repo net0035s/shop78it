@@ -1,5 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    SHOP_HOSTING_PROVIDER: process.env.NETLIFY === 'true' ? 'netlify' : '',
+    SHOP_DEPLOYMENT_ENV: process.env.NETLIFY === 'true'
+      ? (process.env.CONTEXT === 'production' && process.env.APP_MODE !== 'sandbox' ? 'production' : 'preview') : '',
+    SHOP_DEPLOYMENT_URL: process.env.NETLIFY === 'true'
+      ? (process.env.CONTEXT === 'production' ? process.env.URL : process.env.DEPLOY_PRIME_URL) || '' : '',
+  },
   images: {
     remotePatterns: [
       {

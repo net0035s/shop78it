@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-10-11T08:02:37.175Z",
+  "sender": "shop78it@gmail.com",
+  "recipient": "shop78it@gmail.com",
+  "subject": "Shop78it — ทดสอบระบบส่งอีเมล",
+  "attempts": 1,
+  "smtpAccepted": true,
+  "inboxReceiptConfirmed": true,
+  "productionDataChanged": false,
+  "vercelEnvironmentChanged": false,
+  "messageId": "<e057090d-9508-aa14-7079-c74b69c4ef41@gmail.com>",
+  "receiptEvidence": "Owner-provided Gmail screenshot shows the matching test message and Inbox label",
+  "receiptConfirmedAt": "2026-10-11T08:03:24.8209397Z"
+}

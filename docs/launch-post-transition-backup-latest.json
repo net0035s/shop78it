@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-10-12T10:38:09.196Z",
+  "sourceReadOnly": true,
+  "scope": "public business tables, migration history, private write guard schema; excludes Auth/Storage and global role passwords",
+  "encryptedArchive": "N:\\ทำเว็บขาย24.7 bycodex\\backups\\shop78it-post-transition-2026-10-12T10-38-09.196Z.enc",
+  "recoveryKeyFile": "C:\\Users\\netna\\AppData\\Local\\Shop78itRecovery\\post-transition-fuKEZf\\backup.recovery-key",
+  "businessTables": 15,
+  "orders": 26,
+  "privateSchemas": [
+    "shop78it_ops"
+  ],
+  "requiredRoles": [
+    "shop78it_runtime_v2"
+  ],
+  "restoreVerified": true,
+  "temporaryCopyRemoved": true
+}

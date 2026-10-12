@@ -1,0 +1,16 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NEXT_TELEMETRY_DISABLED = "1"
+  CLERK_TELEMETRY_DISABLED = "1"
+  # Runtime flags and credentials belong in the dashboard, never in Git.
+  # Missing runtime flags fail closed in the app.
+
+[functions]
+  directory = "netlify/functions"
+
+[functions."shop-maintenance"]
+  schedule = "*/5 * * * *"

@@ -343,7 +343,7 @@ export default function CartPage() {
             {/* Trust Badges */}
             <div className="pt-2 border-t border-border/40 text-center space-y-2">
               <span className="text-[10px] text-textMuted font-medium block">
-                ระบบชำระเงินปลอดภัยและคุ้มครองข้อมูลด้วยการเข้ารหัส
+                ตรวจยอดชำระและอีเมลรับสินค้าให้ถูกต้องก่อนยืนยัน
               </span>
               <div className="flex justify-center gap-4 opacity-40 text-textMuted">
                 {/* Simulated payment badges */}

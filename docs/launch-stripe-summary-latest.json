@@ -1,0 +1,56 @@
+{
+  "checkedAt": "2026-10-12T04:52:15.9841444Z",
+  "paymentChannels": [
+    "truemoney-voucher",
+    "stripe-checkout"
+  ],
+  "stripeMethods": [
+    "card",
+    "promptpay"
+  ],
+  "currency": "thb",
+  "billing": "one-time",
+  "sdkVersion": "23.0.0",
+  "productionDatabaseChanged": false,
+  "productionEncryptionKeyChanged": false,
+  "schemaChanged": false,
+  "realPayments": false,
+  "externalMessages": 0,
+  "deployed": true,
+  "validation": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "isolatedBuild": "passed",
+    "stripeFixtureGroups": 16,
+    "stripeMultiConnectionPostgresGroups": 16,
+    "browserE2eGroups": 14,
+    "browserUsesTemporaryDatabaseAndClerkTestHelper": true,
+    "syntheticClerkUsersRemoved": true,
+    "commerceGroups": 28,
+    "launchGroups": 9,
+    "rlsGroups": 7,
+    "backupRestoreAndMigration": "passed",
+    "runtimeAuditVulnerabilities": 0,
+    "fullAuditHighEntries": 7,
+    "fullCiAuditGate": "still failing; unchanged"
+  },
+  "provider": {
+    "configuredKeyKind": "test-server",
+    "testKeyValid": true,
+    "apiRequestSent": true,
+    "checkoutCreationAgainstStripeVerified": true,
+    "testCardPaymentVerified": true,
+    "promptpayPaymentVerified": true,
+    "webhookFromStripeVerified": true,
+    "webhookSecretConfigured": true,
+    "blockedReason": null
+  },
+  "nextSteps": [
+    "verify manual fulfillment and notification delivery before launch",
+    "complete existing live-hosting/migration/backup launch plan before any real deployment"
+  ],
+  "runbook": "stripe-integration.md",
+  "deploymentTarget": "preview",
+  "previewUrl": "https://shop78it-lxcs29u7u-netnaruto0035s1-5199s-projects.vercel.app",
+  "deployedHttpSmokeGroups": 7
+}

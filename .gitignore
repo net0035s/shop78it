@@ -14,3 +14,21 @@ next-env.d.ts
 .env
 .vercel
 .env*.local
+backups/
+backup/
+*.backup
+*.bak
+*.dump
+*.sql
+*.sql.gz
+# Local package cache and isolated verification artifacts
+.cache/
+
+# Versioned migrations contain schema changes only, never database backups.
+!prisma/migrations/**/migration.sql
+# Reviewed SQL contains permissions only, never backups or customer rows.
+!scripts/sql/lock-down-data-api.sql
+
+# Encrypted recovery archives and private recovery keys
+*.enc
+*.recovery-key

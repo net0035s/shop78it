@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, CheckCircle2, ImageIcon, Loader2, Save, Store, XCircle } from 'lucide-react'
@@ -155,7 +157,7 @@ export default function AdminStoreSettingsPage() {
 
             <div className="rounded-2xl border border-border bg-background/60 p-5 min-h-[160px] flex items-center justify-center">
               {previewUrl ? (
-                <img
+                <Image unoptimized width={160} height={80}
                   src={previewUrl}
                   alt="Store logo preview"
                   className="max-h-20 max-w-full object-contain"

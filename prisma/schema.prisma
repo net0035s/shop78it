@@ -107,6 +107,20 @@ model Order {
   claimedStocks  DigitalStock[]
   digitalKeys    DigitalKey[]
   orderItems     OrderItem[]
+  expiresAt      DateTime?
+  paidAt         DateTime?
+  paidAtEstimated Boolean @default(false)
+  reservationActive Boolean @default(false)
+  discountReserved Boolean @default(false)
+  paymentAttempts PaymentAttempt[]
+  accessSessions OrderAccessSession[]
+  accessChallenges OrderAccessChallenge[]
+  notifications NotificationJob[]
+  auditEvents OrderAuditEvent[]
+
+  @@index([status, expiresAt])
+  @@index([paidAt])
+  @@index([customerEmail])
 }
 
 // ============================================
@@ -120,6 +134,12 @@ model OrderItem {
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int     @default(1)
   price     Decimal @db.Decimal(12, 2)
+  productName String?
+  productImage String?
+  deliveryType String?
+  deliveryItems DeliveryItem[]
+
+  @@index([orderId])
 }
 
 // ============================================
@@ -144,6 +164,79 @@ model DeliveryItem {
   expiresAt    String?
   showInstruction Boolean @default(true)
   instructions String?
+  orderItemId String?
+  orderItem OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+  stockId String? @unique
+
+  @@index([orderId])
+}
+
+model PaymentAttempt {
+  id String @id @default(uuid())
+  orderId String
+  order Order @relation(fields: [orderId], references: [id])
+  method String
+  status String @default("started")
+  requestKey String @unique
+  reference String? @unique
+  expectedAmount Decimal @db.Decimal(12, 2)
+  receivedAmount Decimal? @db.Decimal(12, 2)
+  note String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([orderId, status])
+}
+
+model OrderAccessSession {
+  id String @id @default(uuid())
+  orderId String
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tokenHash String @unique
+  expiresAt DateTime
+  @@index([orderId])
+}
+
+model OrderAccessChallenge {
+  id String @id @default(uuid())
+  orderId String
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tokenHash String @unique
+  expiresAt DateTime
+  usedAt DateTime?
+}
+
+model NotificationJob {
+  id String @id @default(uuid())
+  orderId String
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  dedupKey String @unique
+  kind String
+  payload String @db.Text
+  status String @default("queued")
+  attempts Int @default(0)
+  nextAttemptAt DateTime @default(now())
+  lockedAt DateTime?
+  sentAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([status, nextAttemptAt])
+}
+
+model OrderAuditEvent {
+  id String @id @default(uuid())
+  orderId String
+  order Order @relation(fields: [orderId], references: [id])
+  actor String
+  action String
+  note String?
+  createdAt DateTime @default(now())
+  @@index([orderId, createdAt])
+}
+
+model RateLimitBucket {
+  key String @id
+  count Int @default(1)
+  expiresAt DateTime
+  @@index([expiresAt])
 }
 
 // ============================================

@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-10-12T10:32:26.442Z",
+  "readOnly": true,
+  "sourceProject": "hddnabbhdjphjwjohvcg",
+  "businessTables": 9,
+  "orders": 26,
+  "backupMatches": true,
+  "schemaDrift": "none",
+  "rekeyValues": 38,
+  "privateCheckpointExists": false,
+  "primaryProductionId": "dpl_BYRSgyBPXEAmcYAte9PeqjZUxPqU",
+  "passed": true
+}

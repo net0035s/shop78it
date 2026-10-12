@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { Product } from '@/types'
 import { ProductCard } from './ProductCard'
+import { normalizeProductTags } from '@/lib/products'
 import { Search, SlidersHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -41,11 +42,7 @@ export function ProductGrid({ products, categories }: ProductGridProps) {
       const q = searchQuery.toLowerCase()
       result = result.filter(
         (p) => {
-          const tagsArray = Array.isArray(p.tags) 
-            ? p.tags 
-            : typeof p.tags === 'string' 
-            ? p.tags.split(',') 
-            : []
+          const tagsArray = normalizeProductTags(p.tags)
             
           return p.name.toLowerCase().includes(q) ||
             p.description.toLowerCase().includes(q) ||
@@ -87,7 +84,7 @@ export function ProductGrid({ products, categories }: ProductGridProps) {
   )
 
   return (
-    <section id="products" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <section id="products" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-14 scroll-mt-24">
       {/* Section Header */}
       <div className="mb-8">
         <h2 className="text-2xl sm:text-3xl font-bold text-textPrimary mb-1">สินค้าทั้งหมด</h2>
@@ -95,27 +92,27 @@ export function ProductGrid({ products, categories }: ProductGridProps) {
       </div>
 
       {/* Filters Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5 rounded-2xl border border-border bg-surface p-3 sm:p-4">
         {/* Search */}
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative min-w-0 flex-1 sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-textMuted" />
           <input
             type="text"
             placeholder="ค้นหาสินค้า..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-surfaceLight border border-border rounded-xl text-sm text-textPrimary placeholder:text-textMuted focus:outline-none focus:border-primary/60 transition-colors"
+            className="w-full pl-9 pr-4 py-2.5 bg-surfaceLight border border-border rounded-xl text-sm text-textPrimary placeholder:text-textMuted focus:outline-none focus:border-primary transition-colors"
             id="product-search"
           />
         </div>
 
         {/* Sort */}
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <SlidersHorizontal className="w-4 h-4 text-textMuted flex-shrink-0" />
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="bg-surfaceLight border border-border rounded-xl text-sm text-textPrimary px-3 py-2.5 focus:outline-none focus:border-primary/60 transition-colors cursor-pointer"
+            className="min-w-0 flex-1 bg-surfaceLight border border-border rounded-xl text-sm text-textPrimary px-3 py-2.5 focus:outline-none focus:border-primary transition-colors cursor-pointer"
             id="product-sort"
           >
             <option value="default">เรียงตามค่าเริ่มต้น</option>
@@ -135,7 +132,7 @@ export function ProductGrid({ products, categories }: ProductGridProps) {
             'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200',
             activeSlug === 'all'
               ? 'bg-primary text-white shadow-lg shadow-primary/25'
-              : 'bg-surfaceLight text-textSecondary border border-border hover:border-primary/40 hover:text-textPrimary'
+              : 'bg-surfaceLight text-textSecondary border border-border hover:border-primary hover:text-textPrimary'
           )}
           id="category-all"
         >
@@ -167,7 +164,7 @@ export function ProductGrid({ products, categories }: ProductGridProps) {
 
       {/* Product Grid */}
       {filteredProducts.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch gap-5 sm:gap-6 animate-fade-in">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

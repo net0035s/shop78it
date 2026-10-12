@@ -21,7 +21,7 @@ export default async function StorefrontPage() {
         _count: {
           select: {
             digitalStocks: {
-              where: { isSold: false }
+              where: { isSold: false, orderId: null }
             }
           }
         }
@@ -47,7 +47,7 @@ export default async function StorefrontPage() {
   // Debug: ตรวจสอบค่าที่ดึงมาใน Terminal
   // คำนวณสต๊อกจากจำนวน DigitalStock ที่ยังพร้อมส่ง (isSold = false)
   const products: Product[] = rawProducts.map(p => {
-    const currentStock = p._count?.digitalStocks || 0
+    const currentStock = p.deliveryType === 'manual' ? p.stock : p._count?.digitalStocks || 0
     const realSold = realSoldByProductId.get(p.id) ?? 0
     const manualSoldCount = p.manualSoldCount ?? 0
     const stockStatus: Product['stockStatus'] =
@@ -152,16 +152,16 @@ export default async function StorefrontPage() {
             {/* Stats */}
             <div className="flex flex-wrap gap-6 mt-14 animate-slide-up" style={{ animationDelay: '0.4s' }}>
               {[
-                { icon: Star, value: '500+', label: 'hero.feature1', color: 'text-amber-400' },
-                { icon: ShieldCheck, value: '100%', label: 'hero.feature2', color: 'text-emerald-400' },
-                { icon: Clock, value: '24/7', label: 'hero.feature3', color: 'text-primary' },
+                { icon: Star, value: 'hero.value1', label: 'hero.feature1', color: 'text-amber-400' },
+                { icon: ShieldCheck, value: 'hero.value2', label: 'hero.feature2', color: 'text-emerald-400' },
+                { icon: Clock, value: 'hero.value3', label: 'hero.feature3', color: 'text-primary' },
               ].map(({ icon: Icon, value, label, color }) => (
                 <div key={label} className="flex items-center gap-3">
                   <div className={`${color} opacity-80`}>
                     <Icon className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className={`font-bold text-xl ${color}`}>{value}</div>
+                    <div className={`font-bold text-xl ${color}`}><Translate tKey={value} /></div>
                     <div className="text-textMuted text-sm"><Translate tKey={label} /></div>
                   </div>
                 </div>
@@ -178,9 +178,9 @@ export default async function StorefrontPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
             {[
-              { icon: Zap, text: 'ส่งสินค้าทันที' },
-              { icon: ShieldCheck, text: 'ชำระเงินปลอดภัย' },
-              { icon: Clock, text: 'บริการ 24 ชม.' },
+              { icon: Zap, text: 'ตรวจชนิดการจัดส่งก่อนซื้อ' },
+              { icon: ShieldCheck, text: 'ยืนยันยอดก่อนรับสินค้า' },
+              { icon: Clock, text: 'ติดตามสถานะออเดอร์' },
               { icon: Star, text: 'มีบริการหลังการขาย' },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-2 text-textMuted text-sm">
@@ -204,10 +204,10 @@ export default async function StorefrontPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-textPrimary mb-3">
-              ซื้อง่าย ได้เร็ว อัตโนมัติ 100%
+              ขั้นตอนสั่งซื้อและรับสินค้า
             </h2>
             <p className="text-textMuted">
-              เพียง 3 ขั้นตอน ก็ได้สินค้าแล้ว
+              ตรวจรายละเอียดสินค้าและสถานะออเดอร์ในแต่ละขั้นตอน
             </p>
           </div>
 
@@ -228,8 +228,8 @@ export default async function StorefrontPage() {
               {
                 step: '03',
                 icon: '⚡',
-                title: 'รับสินค้าทันที',
-                desc: 'ระบบตรวจสลิปอัตโนมัติ ยืนยันแล้วส่งสินค้าให้ทันที ไม่ต้องรอแอดมิน',
+                title: 'ติดตามและรับสินค้า',
+                desc: 'หลังยืนยันยอดรับเงิน ระบบแสดงข้อมูลสินค้าที่จัดส่งอัตโนมัติ ส่วนสินค้าที่ร้านจัดส่งเองให้รอตามเวลาที่แจ้ง',
               },
             ].map(({ step, icon, title, desc }) => (
               <div

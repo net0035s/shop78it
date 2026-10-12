@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-12T02:07:56.567Z",
+  "projectId": "acocmsdnkpjfggycsxro",
+  "productionConnected": false,
+  "realPayments": false,
+  "messagesSent": 0,
+  "tests": [
+    "Real payment blocked",
+    "Shop database fingerprint rejected",
+    "Reserve/cancel/idempotency and rollback: MOCK Account",
+    "Reserve/cancel/idempotency and rollback: MOCK License",
+    "Reserve/cancel/idempotency and rollback: MOCK Manual Delivery"
+  ],
+  "originalRowsRestored": true,
+  "passed": true
+}

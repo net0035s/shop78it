@@ -1,7 +1,8 @@
 import { Store, Zap, Shield, Clock, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
+import { supportContact } from '@/lib/support'
 
-const LINE_URL = process.env.NEXT_PUBLIC_LINE_URL || '#'
+const LINE_URL = supportContact().href
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -21,14 +22,14 @@ export function Footer() {
               </span>
             </div>
             <p className="text-textMuted text-sm leading-relaxed">
-              ร้านค้าออนไลน์ที่ทำงานให้คุณตลอด 24 ชั่วโมง ไม่มีวันหยุด
-              สั่งซื้อ ชำระเงิน และรับสินค้าได้ทันที
+              เลือกซื้อสินค้าดิจิทัลและติดตามออเดอร์บนเว็บไซต์
+              ตรวจชนิดและเวลาจัดส่งของสินค้าก่อนสั่งซื้อ
             </p>
             <div className="flex gap-3">
               {[
-                { icon: Shield, label: 'ปลอดภัย 100%' },
-                { icon: Clock, label: '24/7' },
-                { icon: Zap, label: 'ส่งทันที' },
+                { icon: Shield, label: 'ยืนยันก่อนรับสินค้า' },
+                { icon: Clock, label: 'ติดตามออเดอร์' },
+                { icon: Zap, label: 'อัตโนมัติ / ร้านจัดส่ง' },
               ].map(({ icon: Icon, label }) => (
                 <div
                   key={label}
@@ -52,6 +53,8 @@ export function Footer() {
                 { href: '/#products', label: 'สินค้าทั้งหมด' },
                 { href: '/cart', label: 'ตะกร้าสินค้า' },
                 { href: '/checkout', label: 'ชำระเงิน' },
+                { href: '/track', label: 'ติดตามออเดอร์' },
+                { href: '/help', label: 'วิธีซื้อและรับสินค้า' },
                 { href: '/slip-verify', label: 'ตรวจสอบสลิป' },
               ].filter((item) => item.href !== '/slip-verify').map((item) => (
                 <li key={item.href}>
@@ -79,12 +82,10 @@ export function Footer() {
                 className="flex items-center gap-2 text-sm text-textMuted hover:text-primary transition-colors group"
               >
                 <MessageCircle className="w-4 h-4 text-green-400 group-hover:scale-110 transition-transform" />
-                LINE: @shop78it
+                ติดต่อร้าน / วิธีรับสินค้า
               </a>
               <p className="text-xs text-textMuted bg-surfaceLight rounded-lg p-3 border border-border/50">
-                💡 ระบบตอบอัตโนมัติตลอด 24/7
-                <br />
-                ทีมงานพร้อมช่วยเหลือ 09:00 – 22:00 น.
+                เก็บเลขออเดอร์ไว้สำหรับติดต่อร้าน ตรวจเวลาตอบและจัดส่งจากรายละเอียดสินค้า
               </p>
             </div>
           </div>

@@ -1,0 +1,83 @@
+{
+  "checkedAt": "2026-10-12T04:39:39.344Z",
+  "sandboxOnly": true,
+  "databaseReadOnly": true,
+  "realPayments": false,
+  "externalMessages": 0,
+  "checkedOrders": 3,
+  "cardPaymentVerified": true,
+  "promptPayPaymentVerified": true,
+  "checks": [
+    {
+      "paymentMethod": "promptpay",
+      "amountTHB": 40,
+      "providerSandboxPaidVerified": true,
+      "orderStatus": "completed",
+      "paidAtRecorded": true,
+      "orderPaidStateValid": true,
+      "automaticQuantity": 1,
+      "deliveryCount": 1,
+      "deliveryComplete": true,
+      "notificationStates": [
+        {
+          "kind": "receipt",
+          "status": "failed"
+        },
+        {
+          "kind": "telegram",
+          "status": "failed"
+        },
+        {
+          "kind": "receipt",
+          "status": "failed"
+        }
+      ]
+    },
+    {
+      "paymentMethod": "card",
+      "amountTHB": 50,
+      "providerSandboxPaidVerified": true,
+      "orderStatus": "completed",
+      "paidAtRecorded": true,
+      "orderPaidStateValid": true,
+      "automaticQuantity": 1,
+      "deliveryCount": 1,
+      "deliveryComplete": true,
+      "notificationStates": [
+        {
+          "kind": "receipt",
+          "status": "failed"
+        },
+        {
+          "kind": "receipt",
+          "status": "failed"
+        },
+        {
+          "kind": "telegram",
+          "status": "failed"
+        },
+        {
+          "kind": "access",
+          "status": "failed"
+        }
+      ]
+    },
+    {
+      "paymentMethod": "card",
+      "amountTHB": 20,
+      "providerSandboxPaidVerified": true,
+      "orderStatus": "completed",
+      "paidAtRecorded": true,
+      "orderPaidStateValid": true,
+      "automaticQuantity": 1,
+      "deliveryCount": 1,
+      "deliveryComplete": true,
+      "notificationStates": [
+        {
+          "kind": "receipt",
+          "status": "queued"
+        }
+      ]
+    }
+  ]
+}

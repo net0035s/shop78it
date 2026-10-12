@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-12T03:19:01.289Z",
+  "sandboxOnly": true,
+  "productionConnected": false,
+  "deployed": false,
+  "realPayments": false,
+  "externalMessages": 0,
+  "providerContacted": true,
+  "passed": true,
+  "checkoutCreated": true,
+  "sessionReused": true,
+  "sessionExpired": true,
+  "fixtureClosed": true,
+  "cardOrPromptPayPaidTested": false,
+  "webhookFromStripeTested": false
+}

@@ -1,0 +1,31 @@
+{
+  "checkedAt": "2026-10-11T06:02:31.456Z",
+  "sandboxOnly": true,
+  "realPayments": false,
+  "checks": [
+    {
+      "check": "public /help",
+      "status": "pass"
+    },
+    {
+      "check": "public /refund",
+      "status": "pass"
+    },
+    {
+      "check": "public /terms",
+      "status": "pass"
+    },
+    {
+      "check": "unauthenticated admin API",
+      "status": "pass"
+    },
+    {
+      "check": "order number alone cannot read an order",
+      "status": "pass"
+    },
+    {
+      "check": "sandbox order creation and scoped cookie access",
+      "status": "pass"
+    }
+  ]
+}

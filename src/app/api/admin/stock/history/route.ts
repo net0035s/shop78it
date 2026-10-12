@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { CommerceError } from '@/lib/commerce-rules'
+import { apiError } from '@/lib/server-guards'
 import { requireAdmin } from '@/lib/admin-auth'
 import { decryptText } from '@/lib/encryption'
 
@@ -11,15 +13,17 @@ export async function GET(request: Request) {
 
   try {
     const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') || '1', 10)
-    const limit = parseInt(searchParams.get('limit') || '50', 10)
+    const page = Number(searchParams.get('page') || '1')
+    const limit = Number(searchParams.get('limit') || '50')
     
+    if (!Number.isSafeInteger(page)||page<1||!Number.isSafeInteger(limit)||limit<1||limit>100) throw new CommerceError('เลขหน้าหรือจำนวนรายการไม่ถูกต้อง')
     const skip = (page - 1) * limit
 
     const [stocks, total] = await Promise.all([
       prisma.digitalStock.findMany({
         skip,
         take: limit,
+        orderBy: { id: 'desc' },
         include: {
           product: {
             select: {
@@ -49,10 +53,6 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     })
   } catch (error: any) {
-    console.error('Error fetching digital stock history:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch digital stock history', details: error.message },
-      { status: 500 }
-    )
+    return apiError(error)
   }
 }

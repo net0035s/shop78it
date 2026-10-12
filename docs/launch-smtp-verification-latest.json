@@ -1,0 +1,10 @@
+{
+  "checkedAt": "2026-10-11T08:01:07.798Z",
+  "scope": "local configuration; SMTP connection and authentication only",
+  "expectedSender": "shop78it@gmail.com",
+  "senderMatches": true,
+  "passwordPresent": true,
+  "authenticated": true,
+  "emailSent": false,
+  "vercelEnvironmentChanged": false
+}

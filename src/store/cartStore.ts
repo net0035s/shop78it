@@ -7,6 +7,7 @@ export interface DiscountState {
   type: 'PERCENT' | 'FIXED'
   value: number
   minPurchaseAmount?: number
+  amount?: number
 }
 
 interface CartStore {
@@ -36,11 +37,7 @@ interface CartStore {
 }
 
 function getCartStockLimit(product: Product): number {
-  if (product.deliveryType === 'manual') {
-    return product.stock && product.stock > 0 ? product.stock : Number.POSITIVE_INFINITY
-  }
-
-  return product.stock || 0
+  return Math.max(0, Math.min(product.stock || 0, 100))
 }
 
 function getSubTotalFromItems(items: CartItem[]): number {
@@ -48,13 +45,7 @@ function getSubTotalFromItems(items: CartItem[]): number {
 }
 
 function clearInvalidDiscount(items: CartItem[], discount: DiscountState | null) {
-  const minPurchaseAmount = discount?.minPurchaseAmount ?? 0
-  if (discount && minPurchaseAmount > 0 && getSubTotalFromItems(items) < minPurchaseAmount) {
-    return {
-      discount: null,
-      discountRemovalReason: 'คูปองถูกยกเลิกเนื่องจากยอดซื้อไม่ถึงขั้นต่ำ',
-    }
-  }
+  if (discount) return { discount: null, discountRemovalReason: 'ตะกร้าเปลี่ยนแล้ว กรุณาใช้คูปองอีกครั้งเพื่อตรวจสิทธิ์ล่าสุด' }
 
   return { discount, discountRemovalReason: null }
 }
@@ -68,11 +59,13 @@ export const useCartStore = create<CartStore>()(
       discountRemovalReason: null,
 
       addItem: (product, quantity = 1) => {
+        if (!Number.isSafeInteger(quantity) || quantity < 1 || getCartStockLimit(product) === 0) return
         set((state) => {
           const existing = state.items.find((i) => i.product.id === product.id)
           const stock = getCartStockLimit(product)
           if (existing) {
             return {
+              ...clearInvalidDiscount(state.items, state.discount),
               items: state.items.map((i) =>
                 i.product.id === product.id
                   ? { ...i, quantity: Math.min(i.quantity + quantity, stock), product }
@@ -80,7 +73,7 @@ export const useCartStore = create<CartStore>()(
               ),
             }
           }
-          return { items: [...state.items, { product, quantity: Math.min(quantity, stock) }] }
+          return { items: [...state.items, { product, quantity: Math.min(quantity, stock) }], ...clearInvalidDiscount(state.items, state.discount) }
         })
       },
 
@@ -95,6 +88,7 @@ export const useCartStore = create<CartStore>()(
       },
 
       updateQuantity: (productId, quantity) => {
+        if (!Number.isSafeInteger(quantity)) return
         if (quantity <= 0) {
           get().removeItem(productId)
           return
@@ -136,11 +130,7 @@ export const useCartStore = create<CartStore>()(
         const subTotal = get().getSubTotal()
         const discount = get().discount
         if (!discount) return 0
-        if (discount.type === 'PERCENT') {
-          const percent = Math.min(Math.max(discount.value, 0), 100)
-          return Math.round(subTotal * (percent / 100))
-        }
-        return Math.min(Math.max(discount.value, 0), subTotal)
+        return Math.min(Math.max(discount.amount || 0, 0), subTotal)
       },
 
       getTotal: () => {

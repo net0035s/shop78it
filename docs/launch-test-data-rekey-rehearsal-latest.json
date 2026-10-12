@@ -1,0 +1,34 @@
+{
+  "checkedAt": "2026-10-12T05:07:05.871Z",
+  "backupCreatedAt": "2026-10-12T05:05:43.813Z",
+  "scope": "local restored copy only; all source commerce data confirmed test by owner",
+  "productionConnected": false,
+  "productionKeyChanged": false,
+  "productionDataChanged": false,
+  "newKeyPersisted": false,
+  "temporaryCopyRemoved": true,
+  "passed": true,
+  "restoreVerified": true,
+  "plan": {
+    "originalValuesPreserved": 14,
+    "unreadableTestValuesReplaced": 24,
+    "totalEncryptedValues": 38,
+    "tableCounts": {
+      "Category": 1,
+      "DeliveryItem": 6,
+      "DigitalKey": 0,
+      "DigitalStock": 20,
+      "DiscountCode": 1,
+      "Order": 26,
+      "OrderItem": 26,
+      "Product": 4,
+      "StoreSettings": 0
+    }
+  },
+  "rollbackVerified": true,
+  "newKeyReadable": 38,
+  "originalReadablePlaintextPreserved": true,
+  "allNonSecretColumnsAndRowsUnchanged": true,
+  "soldFlagsOrderLinksMoneyStatusesPreserved": true,
+  "stockOrderRelationsValid": true
+}

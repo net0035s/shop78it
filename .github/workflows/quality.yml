@@ -1,0 +1,47 @@
+name: Quality checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: sandbox_only
+          POSTGRES_DB: shop_sandbox
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run test:commerce
+        env:
+          CI: "true"
+          SANDBOX_POSTGRES_URL: postgresql://postgres:sandbox_only@127.0.0.1:5432/shop_sandbox
+      - run: npm run test:launch
+        env:
+          CI: "true"
+          SANDBOX_POSTGRES_URL: postgresql://postgres:sandbox_only@127.0.0.1:5432/shop_sandbox
+      - run: npm run test:data-api
+        env:
+          SANDBOX_POSTGRES_URL: postgresql://postgres:sandbox_only@127.0.0.1:5432/shop_sandbox
+      - run: npm run test:stripe
+        env:
+          CI: "true"
+          SANDBOX_POSTGRES_URL: postgresql://postgres:sandbox_only@127.0.0.1:5432/shop_sandbox
+      - run: npm run build:sandbox
+      - run: npm audit --audit-level=moderate

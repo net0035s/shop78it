@@ -1,0 +1,31 @@
+{
+  "checkedAt": "2026-10-12T10:15:06.553Z",
+  "sourceReadOnly": true,
+  "scope": "public business schema; excludes Supabase Auth, Storage and project configuration",
+  "encryptedBackup": "N:\\ทำเว็บขาย24.7 bycodex\\backups\\shop78it-2026-10-12T10-15-06.553Z.enc",
+  "recoveryKeyFile": "C:\\Users\\netna\\AppData\\Local\\Shop78itRecovery\\backup-yopH6U\\backup.recovery-key",
+  "tables": {
+    "Category": 1,
+    "DeliveryItem": 6,
+    "DigitalKey": 0,
+    "DigitalStock": 20,
+    "DiscountCode": 1,
+    "Order": 26,
+    "OrderItem": 26,
+    "Product": 4,
+    "StoreSettings": 0
+  },
+  "restoreVerified": true,
+  "migrationRehearsal": "schema passed; launch blocked by pre-existing unreadable encryption",
+  "productionMigrationApplied": false,
+  "encryptionKeyChanged": false,
+  "baselineDrift": "none",
+  "preservedMoneyStockAndEncryptedBytes": true,
+  "encryption": {
+    "values": 38,
+    "readable": 14,
+    "unreadable": 24
+  },
+  "tableCountAfterMigration": 15,
+  "temporaryCopyRemoved": true
+}

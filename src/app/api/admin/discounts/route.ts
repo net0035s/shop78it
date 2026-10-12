@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { transaction } from '@/lib/transactions'
+import { sameOrigin, readJson, apiError } from '@/lib/server-guards'
+import { CommerceError } from '@/lib/commerce-rules'
 import { requireAdmin } from '@/lib/admin-auth'
 import { normalizeDiscountMoney } from '@/lib/money'
 
@@ -29,6 +32,12 @@ function buildDiscountData(body: any) {
   const applicableType = ['auto', 'manual'].includes(body.applicableType) ? body.applicableType : null
   const applicableCategoryId = body.applicableCategoryId || null
 
+  if (!/^[A-Z0-9_-]{1,50}$/.test(code) || !['FIXED','PERCENT'].includes(body.discountType) ||
+    !Number.isFinite(discountValue) || discountValue <= 0 || discountValue > 99999999 ||
+    (discountType === 'PERCENT' && discountValue > 100) ||
+    !Number.isFinite(Number(body.minPurchaseAmount ?? 0)) || Number(body.minPurchaseAmount ?? 0) < 0 ||
+    (body.maxUses !== undefined && body.maxUses !== null && body.maxUses !== '' && (maxUses === null || !Number.isSafeInteger(maxUses) || maxUses < 1)) ||
+    (body.expiresAt && !expiresAt)) throw new CommerceError('ข้อมูลส่วนลด จำนวนสิทธิ์ หรือวันหมดอายุไม่ถูกต้อง')
   return {
     code,
     discountType,
@@ -62,16 +71,19 @@ export async function POST(request: Request) {
   if (!authResult.authorized) return authResult.response
 
   try {
-    const body = await request.json()
+    sameOrigin(request)
+    const body = await readJson(request)
     const data = buildDiscountData(body)
 
     if (!data.code || !data.discountValue || data.discountValue <= 0) {
       return NextResponse.json({ success: false, error: 'กรุณากรอกโค้ดและยอดส่วนลดให้ถูกต้อง' }, { status: 400 })
     }
 
+    if (data.applicableCategoryId && !await prisma.category.findUnique({ where: { id: data.applicableCategoryId } })) throw new CommerceError('ไม่พบหมวดหมู่')
     const created = await prisma.discountCode.create({ data })
     return NextResponse.json({ success: true, data: normalizeDiscountMoney(created) })
   } catch (error: any) {
+    if (error instanceof CommerceError) return apiError(error)
     console.error('Error creating discount:', error)
     if (error?.code === 'P2002') {
       return NextResponse.json({ success: false, error: 'โค้ดนี้มีอยู่แล้ว' }, { status: 400 })
@@ -85,7 +97,8 @@ export async function PUT(request: Request) {
   if (!authResult.authorized) return authResult.response
 
   try {
-    const body = await request.json()
+    sameOrigin(request)
+    const body = await readJson(request)
     const id = typeof body.id === 'string' ? body.id : ''
     const data = buildDiscountData(body)
 
@@ -93,12 +106,16 @@ export async function PUT(request: Request) {
       return NextResponse.json({ success: false, error: 'ข้อมูลคูปองไม่ครบถ้วน' }, { status: 400 })
     }
 
-    const updated = await prisma.discountCode.update({
-      where: { id },
-      data,
+    const updated = await transaction(async tx => {
+      const old = await tx.discountCode.findUniqueOrThrow({ where: { id } })
+      if (old.usedCount > 0 && old.code !== data.code) throw new CommerceError('คูปองมีประวัติใช้งานแล้ว ไม่สามารถเปลี่ยนโค้ด',409)
+      if (data.maxUses !== null && data.maxUses < old.usedCount) throw new CommerceError('จำนวนสิทธิ์ต่ำกว่ายอดใช้และจองปัจจุบัน',409)
+      if (data.applicableCategoryId && !await tx.category.findUnique({ where: { id: data.applicableCategoryId } })) throw new CommerceError('ไม่พบหมวดหมู่')
+      return tx.discountCode.update({ where: { id }, data })
     })
     return NextResponse.json({ success: true, data: normalizeDiscountMoney(updated) })
   } catch (error: any) {
+    if (error instanceof CommerceError) return apiError(error)
     console.error('Error updating discount:', error)
     if (error?.code === 'P2002') {
       return NextResponse.json({ success: false, error: 'โค้ดนี้มีอยู่แล้ว' }, { status: 400 })
@@ -112,6 +129,7 @@ export async function DELETE(request: Request) {
   if (!authResult.authorized) return authResult.response
 
   try {
+    sameOrigin(request)
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
@@ -119,9 +137,14 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: 'กรุณาระบุคูปองที่ต้องการลบ' }, { status: 400 })
     }
 
-    await prisma.discountCode.delete({ where: { id } })
+    await transaction(async tx => {
+      const old = await tx.discountCode.findUniqueOrThrow({ where: { id } })
+      if (old.usedCount > 0) throw new CommerceError('คูปองมีการใช้หรือจองแล้ว กรุณาปิดใช้งานแทนการลบ',409)
+      await tx.discountCode.delete({ where: { id } })
+    })
     return NextResponse.json({ success: true, message: 'ลบคูปองเรียบร้อยแล้ว' })
   } catch (error) {
+    if (error instanceof CommerceError) return apiError(error)
     console.error('Error deleting discount:', error)
     return NextResponse.json({ success: false, error: 'ลบคูปองไม่สำเร็จ' }, { status: 500 })
   }
