@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-10-12T16:57:04.561Z",
+  "url": "https://shop78it.netlify.app",
+  "deploymentId": "6acd0ea6db7caef51d006991",
+  "passed": true,
+  "groups": [
+    "deployed Stripe configuration enabled in test mode",
+    "two new orders have distinct Stripe sessions; retry uses same session",
+    "Stripe confirms THB, card and PromptPay, test mode and Netlify return URLs",
+    "webhook rejects invalid signatures",
+    "dedicated test webhook active; signed unrelated event accepted without changing orders",
+    "test sessions expired, fixture orders cancelled and reserved stock restored"
+  ],
+  "testOrders": 2,
+  "realPaymentsEnabled": false,
+  "externalMessagesSent": 0,
+  "stockRestored": true,
+  "actualStripePaymentCompleted": false
+}
