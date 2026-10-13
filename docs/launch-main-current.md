@@ -2,7 +2,11 @@
 
 เว็บที่กำลังเตรียมเปิดร้าน: **https://shop78it.netlify.app** บน Netlify Free ตามที่เจ้าของเลือก `2fa-go` ไม่ได้เปลี่ยน
 
-ขณะนี้เป็น sandbox แยกฐาน ทดลอง Stripe ด้วย test key และ webhook ของ sandbox รับออเดอร์ทดลองได้ แต่ **PAYMENTS_ENABLED=false / LAUNCH_APPROVED=false** ไม่มีการเปิดเงินจริง SMTP/Telegram ยังปิด
+ขณะนี้เป็น sandbox แยกฐาน ทดลอง Stripe ด้วย test key และ webhook ของ sandbox รับออเดอร์ทดลองได้ แต่ **PAYMENTS_ENABLED=false / LAUNCH_APPROVED=false** ไม่มีการเปิดเงินจริง เจ้าของตั้ง Gmail ใน Netlify แล้ว ตรวจ SMTP authentication และ deployed email configuration ผ่าน ยังรออนุญาตส่ง/ยืนยันรับเมลทดสอบจริง Telegram ยังปิด ดู [รายงานอีเมล](netlify-email-latest.json)
+
+เจ้าของจัดการ Manual ทั้ง 3 รายการแล้ว: completed 2 รายการ มีข้อมูลจัดส่งเข้ารหัสอ่านได้ และ refunded 1 รายการ หน้าติดตามสะท้อนตรงกับฐานทั้งหมด รอจัดส่ง Manual เหลือ 0 ดู [ผลตรวจ Manual](netlify-manual-delivery-latest.json)
+
+ค่าการส่งอีเมลล่าสุดอยู่ใน Netlify ที่เจ้าของตั้งเอง ไฟล์ environment ในเครื่องอาจยังมีค่าว่างเดิม ห้าม import ไฟล์เก่าทับทั้งชุดขณะ redeploy ให้ build โดยใช้ environment ปัจจุบันของ Netlify
 
 รายละเอียดอ้างอิง [deployment ล่าสุด](netlify-deployment-latest.json) และ [รายงานฝั่งผู้พัฒนา](netlify-developer-readiness-latest.json) สิ่งที่ต้องใช้ข้อมูลร้าน/บัญชีเจ้าของดู [งานส่งต่อ](launch-owner-handoff.md)
 

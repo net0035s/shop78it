@@ -1,0 +1,81 @@
+{
+  "checkedAt": "2026-10-13T05:20:33.424Z",
+  "url": "https://shop78it.netlify.app",
+  "sandboxOnly": true,
+  "externalMessagesSent": 0,
+  "orders": [
+    {
+      "orderNumber": "SA-8150CDD7285B42709689360179DEFDDA",
+      "status": "completed",
+      "paid": true,
+      "manualContentPresent": true,
+      "manualContentEncrypted": true,
+      "manualContentReadable": true,
+      "automaticDeliveryItems": 1,
+      "updatedAt": "2026-10-13T05:17:55.402Z",
+      "trackingHTTP": 200,
+      "trackingStatus": "completed",
+      "trackingMatches": true,
+      "audits": [
+        {
+          "action": "needs_manual_delivery->completed",
+          "createdAt": "2026-10-13T05:17:56.939Z"
+        },
+        {
+          "action": "needs_manual_delivery",
+          "createdAt": "2026-10-13T03:02:15.936Z"
+        }
+      ]
+    },
+    {
+      "orderNumber": "SA-16EDCD6C71044FA093B11A63394B48BD",
+      "status": "completed",
+      "paid": true,
+      "manualContentPresent": true,
+      "manualContentEncrypted": true,
+      "manualContentReadable": true,
+      "automaticDeliveryItems": 0,
+      "updatedAt": "2026-10-13T05:18:19.900Z",
+      "trackingHTTP": 200,
+      "trackingStatus": "completed",
+      "trackingMatches": true,
+      "audits": [
+        {
+          "action": "needs_manual_delivery->completed",
+          "createdAt": "2026-10-13T05:18:21.414Z"
+        },
+        {
+          "action": "needs_manual_delivery",
+          "createdAt": "2026-10-13T02:33:27.608Z"
+        }
+      ]
+    },
+    {
+      "orderNumber": "SA-8862F5CF4CB94F8BAB4F6C5438B3AE74",
+      "status": "refunded",
+      "paid": true,
+      "manualContentPresent": false,
+      "manualContentEncrypted": false,
+      "manualContentReadable": false,
+      "automaticDeliveryItems": 0,
+      "updatedAt": "2026-10-13T05:18:57.784Z",
+      "trackingHTTP": 200,
+      "trackingStatus": "refunded",
+      "trackingMatches": true,
+      "audits": [
+        {
+          "action": "needs_manual_delivery",
+          "createdAt": "2026-10-13T02:31:56.703Z"
+        }
+      ]
+    }
+  ],
+  "remainingManualOrders": 0,
+  "passed": true,
+  "customerReceiptBrowserVerified": false,
+  "businessDataWrites": 0,
+  "completedManualOrders": 2,
+  "refundedOrders": 1,
+  "allThreeCompleted": false,
+  "allTrackingMatches": true
+}
