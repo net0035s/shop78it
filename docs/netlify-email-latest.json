@@ -3,7 +3,7 @@
   "url": "https://shop78it.netlify.app",
   "sandboxOnly": true,
   "configurationPresent": true,
-  "messagesSent": 0,
+  "messagesSent": 1,
   "smtpAuthenticated": true,
   "deliveryVerified": false,
   "deploymentId": "6acdd15d2b685acfdefec02e",
@@ -11,5 +11,12 @@
   "deployedEmailConfigurationVerified": true,
   "pagesChecked": 4,
   "assetsChecked": 19,
-  "allAssetsReachable": true
+  "allAssetsReachable": true,
+  "testAt": "2026-10-13T10:07:17.876Z",
+  "testOrderSuffix": "FDDA",
+  "testHTTP": 202,
+  "requestedTestMessages": 1,
+  "testJobsCreated": 1,
+  "providerAccepted": true,
+  "receiptConfirmationPending": true
 }
