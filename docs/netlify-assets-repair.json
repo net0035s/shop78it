@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-13T02:59:11.146Z",
+  "url": "https://shop78it.netlify.app",
+  "deploymentId": "6acd9ac6056b23ca6c2c3cb3",
+  "pagesChecked": 4,
+  "assetsChecked": 19,
+  "allAssetsReachable": true,
+  "serverHandlerPresent": true,
+  "stripeTestEnabled": true,
+  "webhookRejectsInvalidSignatures": true,
+  "realPaymentsEnabled": false,
+  "paidOrdersPreserved": true,
+  "completedTestPaymentMethods": [
+    "card",
+    "promptpay"
+  ],
+  "paidManualOrdersVerified": 2,
+  "cause": "raw no-build deployment published .next instead of Next.js adapter static output",
+  "fix": "full build through Netlify Next.js adapter"
+}

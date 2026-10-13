@@ -5,6 +5,7 @@ import { resolve, join } from 'node:path'
 import Stripe from 'stripe'
 import { cloudSandboxEnvironment } from './cloud-sandbox-config'
 import { previewIsIsolated } from '../src/lib/launch-readiness'
+import { verifyNetlifyAssets } from './netlify-asset-check'
 
 async function main(){
  assert.ok(process.argv.includes('--sandbox-only') || process.argv.includes('--preflight'))
@@ -42,11 +43,14 @@ async function main(){
  const run=(args:string[])=>execFileSync(process.execPath,[cli,...args],{cwd:stage,encoding:'utf8',stdio:['ignore','pipe','pipe'],env:{...process.env,NEXT_TELEMETRY_DISABLED:'1'}})
  const site=JSON.parse(run(['api','getSite','--data',JSON.stringify({site_id:current.siteId})]));assert.equal(site.name,'shop78it');assert.equal(site.account_slug,'november-3-cr7mw')
  run(['env:import',resolve('.env.netlify.local'),'--site',current.siteId])
- console.log('Imported isolated Stripe test configuration; redeploying existing verified artifacts')
- run(['deploy','--site',current.siteId,'--no-build','--prod','--json'])
+ console.log('Imported isolated Stripe test configuration; building assets and server functions')
+ // Build invokes the Next.js adapter to publish assets AND server functions.
+ // Raw no-build deploys resolve .next from TOML and lose /_next static assets.
+ run(['deploy','--site',current.siteId,'--context','production','--prod','--json'])
  const final=JSON.parse(run(['api','getSite','--data',JSON.stringify({site_id:current.siteId})]));assert.equal(final.published_deploy.state,'ready')
  const deployment=JSON.parse(run(['api','getDeploy','--data',JSON.stringify({deploy_id:final.published_deploy.id})]));assert.ok(deployment.available_functions.some((f:{n:string})=>f.n==='___netlify-server-handler'))
  const configuration=await fetch(current.url+'/api/payment/stripe',{signal:AbortSignal.timeout(30000)}).then(r=>r.json());assert.equal(configuration.data.enabled,true);assert.equal(configuration.data.testMode,true)
+ await verifyNetlifyAssets(current.url)
  Object.assign(current,{deploymentId:final.published_deploy.id,ordersEnabled:true,stripeTestEnabled:true,realPaymentsEnabled:false,webhookId:hookId,updatedAt:new Date().toISOString()})
  writeFileSync('docs/netlify-deployment-latest.json',JSON.stringify(current,null,2))
  console.log(JSON.stringify({url:current.url,deploymentId:current.deploymentId,ordersEnabled:true,stripeMode:'test',realPaymentsEnabled:false,webhookConfigured:true,messagesEnabled:false}))

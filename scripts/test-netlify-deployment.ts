@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { PrismaClient } from '@prisma/client'
 import { previewIsIsolated } from '../src/lib/launch-readiness'
+import { verifyNetlifyAssets } from './netlify-asset-check'
 
 async function main(){
  const report=JSON.parse(readFileSync('docs/netlify-deployment-latest.json','utf8'))
@@ -18,6 +19,7 @@ async function main(){
  try{
   const before=await counts()
   for(const path of ['/','/checkout','/track','/help','/privacy','/terms','/refund']){const r=await request(path);assert.equal(r.status,200,path)}
+  await verifyNetlifyAssets(report.url)
   passed.push('public pages reachable without login; no server secrets')
   const settings=await request('/api/settings');assert.equal(settings.status,200);assert.equal(JSON.parse(settings.body).success,true)
   const missing=await request('/api/orders/track',{method:'POST',headers:{'content-type':'application/json',origin:report.url},body:JSON.stringify({orderNumber:'NETLIFY-NONEXISTENT',email:'netlify-check@example.invalid'})})

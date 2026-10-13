@@ -10,9 +10,11 @@
   "messagesEnabled": false,
   "otherProjectsChanged": false,
   "deployed": true,
-  "deploymentId": "6acd0ea6db7caef51d006991",
+  "deploymentId": "6acd9ac6056b23ca6c2c3cb3",
   "finishedAt": "2026-10-12T16:09:30.300Z",
   "stripeTestEnabled": true,
   "webhookId": "we_1UPmF71BqCzYsUBmT9WNBBC4",
-  "updatedAt": "2026-10-12T16:51:33.332Z"
+  "updatedAt": "2026-10-12T16:51:33.332Z",
+  "assetRepairAt": "2026-10-13T02:59:11.144Z",
+  "clientAssetsVerified": true
 }

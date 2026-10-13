@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client'
 import Stripe from 'stripe'
 import { previewIsIsolated } from '../src/lib/launch-readiness'
 import { cancelPendingOrder } from '../src/lib/inventory'
+import { verifyNetlifyAssets } from './netlify-asset-check'
 
 async function main() {
   const report = JSON.parse(readFileSync('docs/netlify-deployment-latest.json', 'utf8'))
@@ -28,6 +29,8 @@ async function main() {
     return {json:JSON.parse(raw),cookie:res.headers.get('set-cookie')?.split(';')[0]}
   }
   try {
+    await verifyNetlifyAssets(report.url)
+    groups.push('storefront checkout receipt and tracking client assets reachable')
     // Recover only this verifier's expired, unpaid fixtures from interrupted runs.
     const interrupted=await db.order.findMany({where:{customerName:'MOCK Netlify verification',customerEmail:'netlify-check@example.invalid',status:'pending'},include:{paymentAttempts:true}})
     for(const order of interrupted) {
