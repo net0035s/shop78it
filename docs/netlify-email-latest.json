@@ -5,7 +5,7 @@
   "configurationPresent": true,
   "messagesSent": 1,
   "smtpAuthenticated": true,
-  "deliveryVerified": false,
+  "deliveryVerified": true,
   "deploymentId": "6acdd15d2b685acfdefec02e",
   "deployed": true,
   "deployedEmailConfigurationVerified": true,
@@ -18,5 +18,9 @@
   "requestedTestMessages": 1,
   "testJobsCreated": 1,
   "providerAccepted": true,
-  "receiptConfirmationPending": true
+  "receiptConfirmationPending": false,
+  "ownerConfirmedReceived": true,
+  "ownerConfirmedGoodsAccessible": true,
+  "ownerConfirmationRecordedAt": "2026-10-13T10:12:29.344Z",
+  "confirmationSource": "Explicit owner message: received email and opened product details"
 }
