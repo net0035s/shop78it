@@ -57,6 +57,9 @@ export async function runPg(binary: string, args: string[], url: string, input?:
       else if (/password authentication failed/i.test(message)) diagnostic = 'authentication'
       else if (/could not connect|connection refused/i.test(message)) diagnostic = 'connection'
       else if (/snapshot/i.test(message)) diagnostic = 'snapshot'
+      else if (/role .* does not exist/i.test(message)) diagnostic = 'missing-role'
+      else if (/schema .* does not exist/i.test(message)) diagnostic = 'missing-schema'
+      else if (/function .* does not exist/i.test(message)) diagnostic = 'missing-function'
       else if (/server version|version mismatch/i.test(message)) diagnostic = 'version'
       // Whitelisted categories only: raw stderr may contain customer data or credentials.
     })

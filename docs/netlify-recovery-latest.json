@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-10-13T04:29:30.742Z",
+  "sandboxOnly": true,
+  "runtimeBackup": "N:\\ทำเว็บขาย24.7 bycodex\\backups\\netlify\\runtime-2026-10-13T04-29-30.735Z.enc",
+  "recoveryKeyFile": "C:\\Users\\netna\\AppData\\Local\\Shop78itRecovery\\netlify-EgoNa1\\netlify.recovery-key",
+  "runtimeDecryptVerified": true,
+  "archiveSha256": "455aa3571d18260e015467a54dab98fe7f2361d0ece4c78da5ff9a17a6e4a7e7",
+  "databaseBackupCreated": true,
+  "databaseRestoreVerified": true,
+  "offDeviceBackupConfirmed": false,
+  "sourceDataChanged": false,
+  "databaseBackup": "N:\\ทำเว็บขาย24.7 bycodex\\backups\\netlify\\database-2026-10-13T04-29-30.735Z.enc",
+  "databaseTables": 15,
+  "orders": 13,
+  "temporaryRestoreRemoved": true,
+  "restoredEncryptedValuesReadable": 39,
+  "restoreCheckedAt": "2026-10-13T04:36:34.662Z"
+}

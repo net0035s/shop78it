@@ -10,12 +10,17 @@
   "messagesEnabled": false,
   "otherProjectsChanged": false,
   "deployed": true,
-  "deploymentId": "6acda44103db34aa2309ef23",
-  "finishedAt": "2026-10-12T16:09:30.300Z",
+  "deploymentId": "6acdb78a5ca371614a8f20e0",
+  "finishedAt": "2026-10-13T04:49:35.483Z",
   "stripeTestEnabled": true,
   "webhookId": "we_1UPmF71BqCzYsUBmT9WNBBC4",
-  "updatedAt": "2026-10-12T16:51:33.332Z",
+  "updatedAt": "2026-10-13T04:51:39.477Z",
   "assetRepairAt": "2026-10-13T02:59:11.144Z",
   "clientAssetsVerified": true,
-  "checkoutAdminFixAt": "2026-10-13T03:28:49.873Z"
+  "checkoutAdminFixAt": "2026-10-13T03:28:49.873Z",
+  "maintenanceConfiguredAt": "2026-10-13T04:49:35.483Z",
+  "maintenanceEnabled": true,
+  "transactionPoolEnabled": true,
+  "clientAssetsVerifiedAt": "2026-10-13T04:51:39.477Z",
+  "maintenanceVerifiedAt": "2026-10-13T04:51:39.477Z"
 }
