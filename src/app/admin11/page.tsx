@@ -38,6 +38,9 @@ export default function AdminDashboardPage() {
   const fetchVersion = React.useRef(0)
   const [categories, setCategories] = useState<any[]>([])
   const [stats, setStats] = useState<any>(null)
+  const [statsError, setStatsError] = useState('')
+  const [orderCounts, setOrderCounts] = useState<{manualDeliveryOrders:number;actionableOrders:number} | null>(null)
+  const statsInFlight = React.useRef(false)
   const [isLoading, setIsLoading] = useState(true)
 
   // Order List States
@@ -222,30 +225,48 @@ export default function AdminDashboardPage() {
     }
   }
 
+  const refreshStats = useCallback(async () => {
+    if (statsInFlight.current) return
+    statsInFlight.current = true
+    try {
+      const response = await fetch('/api/admin/stats', { cache: 'no-store' })
+      const data = await response.json()
+      if (!response.ok || !data.success) throw new Error(data.error || 'โหลดสถิติไม่สำเร็จ')
+      setStats(data.data); setStatsError('')
+    } catch { setStatsError('โหลดสถิติไม่สำเร็จ กรุณากดรีเฟรช ระบบจะลองอัปเดตอีกครั้งอัตโนมัติ') }
+    finally { statsInFlight.current = false }
+  }, [])
+
   const fetchAll = useCallback(async () => {
     const version = ++fetchVersion.current
     try {
-      const [pRes, oRes, cRes, sRes] = await Promise.all([
-        fetch('/api/admin/products'),
-        fetch('/api/admin/orders?' + new URLSearchParams({page:String(orderPage),limit:String(orderPerPage),search:orderSearch,status:orderFilter})),
-        fetch('/api/admin/categories'),
-        fetch('/api/admin/stats'),
+      const [pRes, oRes, cRes] = await Promise.all([
+        fetch('/api/admin/products', { cache: 'no-store' }),
+        fetch('/api/admin/orders?' + new URLSearchParams({page:String(orderPage),limit:String(orderPerPage),search:orderSearch,status:orderFilter}), { cache: 'no-store' }),
+        fetch('/api/admin/categories', { cache: 'no-store' }),
+        refreshStats(),
       ])
-      const [pData, oData, cData, sData] = await Promise.all([pRes.json(), oRes.json(), cRes.json(), sRes.json()])
+      const [pData, oData, cData] = await Promise.all([pRes.json(), oRes.json(), cRes.json()])
       if (version !== fetchVersion.current) return
       if (pData.success) setProducts(pData.data)
-      if (oData.success) { setOrders(oData.data); setTotalOrders(oData.total) }
+      if (oData.success) { setOrders(oData.data); setTotalOrders(oData.total); if(oData.summary) setOrderCounts(oData.summary) }
       if (cData.success) setCategories(cData.data)
-      if (sData.success) setStats(sData.data)
     } catch (e) { console.error('Fetch error:', e) }
     finally { if (version === fetchVersion.current) setIsLoading(false) }
-  }, [orderPage,orderPerPage,orderSearch,orderFilter])
+  }, [orderPage,orderPerPage,orderSearch,orderFilter,refreshStats])
 
   useEffect(() => {
     setMounted(true)
     if (typeof window !== 'undefined') {
       fetchAll()
     }
+  }, [fetchAll])
+
+  useEffect(() => {
+    const refresh = () => { if (document.visibilityState === 'visible') void fetchAll() }
+    const timer = window.setInterval(refresh, 15000)
+    window.addEventListener('focus', refresh)
+    return () => { window.clearInterval(timer); window.removeEventListener('focus', refresh) }
   }, [fetchAll])
 
   if (!mounted) return null
@@ -382,7 +403,8 @@ export default function AdminDashboardPage() {
     { id: 'categories' as AdminTab, label: 'หมวดหมู่', icon: Tag },
   ]
 
-  const manualDeliveryCount = stats?.manualDeliveryOrders ?? 0
+  const manualDeliveryCount = orderCounts?.manualDeliveryOrders ?? stats?.manualDeliveryOrders ?? 0
+  const actionableCount = orderCounts?.actionableOrders ?? manualDeliveryCount
 
   // =========================================================
   return (
@@ -397,9 +419,9 @@ export default function AdminDashboardPage() {
           {tabs.map(tab => {
             const Icon = tab.icon
             const isActive = activeTab === tab.id
-            const badge = tab.id === 'orders' && manualDeliveryCount > 0 ? manualDeliveryCount : null
+            const badge = tab.id === 'orders' && actionableCount > 0 ? actionableCount : null
             return (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} aria-label={badge ? `${tab.label} รอดำเนินการ ${badge} รายการ` : tab.label}
                 className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive ? 'bg-primary/15 text-primary border border-primary/25' : 'text-textMuted hover:text-textPrimary hover:bg-surfaceLight/40'}`}>
                 <Icon className="w-4 h-4 shrink-0" />
                 <span>{tab.label}</span>
@@ -444,6 +466,7 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className="p-6">
+          {statsError && <p role="alert" className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-400">{statsError}</p>}
           {isLoading ? (
             <div className="flex items-center justify-center min-h-[40vh]">
               <div className="text-center space-y-4">

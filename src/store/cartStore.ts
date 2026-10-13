@@ -15,12 +15,14 @@ interface CartStore {
   isOpen: boolean
   discount: DiscountState | null
   discountRemovalReason: string | null
+  settledOrders: string[]
 
   // Actions
   addItem: (product: Product, quantity?: number) => void
   removeItem: (productId: string) => void
   updateQuantity: (productId: string, quantity: number) => void
   clearCart: () => void
+  completeOrder: (orderNumber: string, items: { product: { id: string }; quantity: number }[]) => void
   toggleCart: () => void
   openCart: () => void
   closeCart: () => void
@@ -57,6 +59,7 @@ export const useCartStore = create<CartStore>()(
       isOpen: false,
       discount: null,
       discountRemovalReason: null,
+      settledOrders: [],
 
       addItem: (product, quantity = 1) => {
         if (!Number.isSafeInteger(quantity) || quantity < 1 || getCartStockLimit(product) === 0) return
@@ -110,6 +113,13 @@ export const useCartStore = create<CartStore>()(
       },
 
       clearCart: () => set({ items: [], discount: null, discountRemovalReason: null }),
+      completeOrder: (orderNumber, purchased) => set(state => {
+        if (state.settledOrders.includes(orderNumber)) return state
+        const quantities = new Map(purchased.map(item => [item.product.id, item.quantity]))
+        const items = state.items.map(item => ({ ...item, quantity: Math.max(0, item.quantity - (quantities.get(item.product.id) || 0)) })).filter(item => item.quantity > 0)
+        const changed = state.items.some(item => (quantities.get(item.product.id) || 0) > 0)
+        return { items, discount: changed ? null : state.discount, discountRemovalReason: changed ? null : state.discountRemovalReason, settledOrders: [orderNumber, ...state.settledOrders].slice(0, 100) }
+      }),
 
       toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
       openCart: () => set({ isOpen: true }),
@@ -155,6 +165,7 @@ export const useCartStore = create<CartStore>()(
         items: state.items,
         isOpen: state.isOpen,
         discount: state.discount,
+        settledOrders: state.settledOrders,
       }),
     }
   )

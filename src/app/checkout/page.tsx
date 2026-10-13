@@ -67,6 +67,7 @@ function CheckoutContent() {
   const getDiscountAmount = useCartStore((s) => s.getDiscountAmount)
   const getTotal = useCartStore((s) => s.getTotal)
   const clearCart = useCartStore((s) => s.clearCart)
+  const completeOrder = useCartStore((s) => s.completeOrder)
   const applyDiscount = useCartStore((s) => s.applyDiscount)
   const removeDiscount = useCartStore((s) => s.removeDiscount)
   const { setOrder, addOrderToHistory, currentOrderNumber } = useOrderStore()
@@ -115,12 +116,15 @@ function CheckoutContent() {
         return
       }
       setOrder(order)
-      if (order.status !== 'pending' && !stripePending) { router.replace('/thank-you'); return }
+      if (order.status !== 'pending' && !stripePending) {
+        if (['paid', 'completed', 'needs_manual_delivery'].includes(order.status)) completeOrder(order.orderNumber, order.items)
+        router.replace('/thank-you'); return
+      }
       if (stripePending) setPaymentChannel('stripe')
       setCreatedOrder(order); setCustomerInfo(order.customer); setStep('payment')
     }).catch(()=>{ if (!cancelled) setRestoreError('ตรวจออเดอร์เดิมไม่ได้ กรุณาลองใหม่ผ่านหน้าติดตามออเดอร์') }).finally(()=>{ if (!cancelled) setIsRestoring(false) })
     return ()=>{ cancelled = true }
-  }, [mounted, resumeNumber, router, searchParams, setOrder])
+  }, [mounted, resumeNumber, router, searchParams, setOrder, completeOrder])
 
   // Discount UI State
   const [discountCodeInput, setDiscountCodeInput] = useState('')
@@ -254,7 +258,7 @@ function CheckoutContent() {
         setCreatedOrder(orderData)
         setOrder(orderData)
         addOrderToHistory(orderData.orderNumber)
-        if (orderData.status !== 'pending') { clearCart(); router.push('/thank-you'); return }
+        if (orderData.status !== 'pending') { completeOrder(orderData.orderNumber, orderData.items); router.push('/thank-you'); return }
         router.replace('/checkout?order=' + encodeURIComponent(orderData.orderNumber))
         setPaymentChannel('truemoney')
         setVoucherLink('')
@@ -530,7 +534,7 @@ function CheckoutContent() {
                     </button>
                   </>
                 ) : (
-                  <StripePayment order={createdOrder} onBusyChange={setIsStripeBusy} onChange={order => { setCreatedOrder(order); setOrder(order); if (order.status === 'cancelled') setRestoreError('ออเดอร์หมดอายุแล้ว กรุณาเลือกสินค้าเพื่อสร้างบิลใหม่'); if (['paid','completed','needs_manual_delivery'].includes(order.status)) { clearCart(); router.replace('/thank-you') } }} />
+                  <StripePayment order={createdOrder} onBusyChange={setIsStripeBusy} onChange={order => { setCreatedOrder(order); setOrder(order); if (order.status === 'cancelled') setRestoreError('ออเดอร์หมดอายุแล้ว กรุณาเลือกสินค้าเพื่อสร้างบิลใหม่'); if (['paid','completed','needs_manual_delivery'].includes(order.status)) { completeOrder(order.orderNumber, order.items); router.replace('/thank-you') } }} />
                 )}
               </div>
             )

@@ -2,7 +2,7 @@
 
 ## Current deployment
 
-Public test sandbox: https://shop78it.netlify.app. Netlify site ID `1d1c3222-a3ce-4ad2-a38c-bae6a324f56c`, team `november-3-cr7mw`, Free credit plan, automatic top-ups off. Deployment `6acd9ac6056b23ca6c2c3cb3` enables sandbox orders and Stripe test payments with a dedicated Netlify test webhook. Real payments, launch approval, external messages and maintenance remain disabled. The original closed deployment passed seven HTTP groups in `netlify-smoke-latest.json`; that report records the earlier closed phase, not the current order gate.
+Public test sandbox: https://shop78it.netlify.app. Netlify site ID `1d1c3222-a3ce-4ad2-a38c-bae6a324f56c`, team `november-3-cr7mw`, Free credit plan, automatic top-ups off. Deployment `6acda44103db34aa2309ef23` enables sandbox orders and Stripe test payments with a dedicated Netlify test webhook. Real payments, launch approval, external messages and maintenance remain disabled. The original closed deployment passed seven HTTP groups in `netlify-smoke-latest.json`; that report records the earlier closed phase, not the current order gate.
 
 This was deployed through the authorized official CLI, not automatic GitHub deployment. `main` and Vercel Production were not changed. Connecting GitHub automatic deployments remains a separate step; use the reviewed branch, never the stale main branch.
 
@@ -31,3 +31,5 @@ Validate actual deployed storefront/admin/lookup isolation and payment closures 
 Do not modify 2fa-go. Team credits are shared; monitor remaining usage before publishing. Never delete an existing project or change team billing as part of this migration.
 
 Local checks are separate from deployed Netlify verification. The recorded deployment is public and verified; no external notifications have been delivered during these checks.
+
+13 October checkout/admin fixes: paid receipt reconciliation removes purchased cart quantities once per order and preserves later purchases, including after browser reload. Order numbers display in full with a clipboard button. Manual-delivery counts and actionable-order badges come from an unfiltered orders summary, independently of dashboard-statistics availability. The admin page refreshes every 15 seconds while visible and on focus, and reports statistics errors instead of silently displaying zero. Statistics queries use bounded batches to avoid exhausting database connections. Browser regression checks passed seven cases; commerce tests passed 28; deployed storefront assets (19) and admin assets (7) were reachable. The isolated database confirmed three manual-delivery/actionable orders at verification time. See netlify-checkout-admin-fixes.json.

@@ -5,6 +5,7 @@ import { formatPrice } from '@/lib/products'
 import { formatDateWithTime } from '@/lib/utils'
 import { EmptyState, STATUS_CONFIG } from './AdminShared'
 import type { AdminOrder } from './AdminTypes'
+import { OrderNumber } from '@/components/OrderNumber'
 
 type Props = {
   orders: AdminOrder[]
@@ -103,7 +104,7 @@ export function OrderManager({
                 return (
                   <tr key={order.id} className={`hover:bg-surfaceLight/20 transition-colors ${order.status === 'needs_manual_delivery' ? 'bg-orange-500/5' : ''}`}>
                     <td className="px-4 py-3">
-                      <div className="font-bold text-xs text-textPrimary">{order.orderNumber}</div>
+                      <div className="text-xs"><OrderNumber value={order.orderNumber} /></div>
                       <div className="text-[10px] text-textMuted">{formatDateWithTime(order.createdAt)}</div>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">

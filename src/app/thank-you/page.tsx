@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2, Copy, Check, Download, ShoppingBag, ArrowRight, ExternalLink, Key, Mail, ShieldAlert, Cpu, Clock, Eye, EyeOff } from 'lucide-react'
 import { useOrderStore } from '@/store/orderStore'
+import { useCartStore } from '@/store/cartStore'
+import { OrderNumber } from '@/components/OrderNumber'
 import { formatPrice } from '@/lib/products'
 import { formatDateWithTime } from '@/lib/utils'
 import Link from 'next/link'
@@ -13,6 +15,7 @@ const LINE_URL = process.env.NEXT_PUBLIC_LINE_URL || '#'
 export default function ThankYouPage() {
   const router = useRouter()
   const { currentOrder, currentOrderNumber, clearOrder, setOrder } = useOrderStore()
+  const completeOrder = useCartStore(state => state.completeOrder)
   const [loadError, setLoadError] = useState('')
   const [synced, setSynced] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -28,7 +31,10 @@ export default function ThankYouPage() {
       try {
         const result = await (await fetch('/api/orders?orderNumber=' + encodeURIComponent(currentOrderNumber), { cache: 'no-store' })).json()
         if (cancelled) return
-        if (result.success) { setOrder(result.data); setLoadError('') }
+        if (result.success) {
+          setOrder(result.data); setLoadError('')
+          if (['paid', 'completed', 'needs_manual_delivery'].includes(result.data.status)) completeOrder(result.data.orderNumber, result.data.items)
+        }
         else setLoadError(result.error || 'กรุณายืนยันสิทธิ์ผ่านหน้าติดตามออเดอร์')
       } catch { if (!cancelled) setLoadError('ตรวจสถานะล่าสุดไม่สำเร็จ กรุณาลองอีกครั้ง') }
       finally { if (!cancelled) setSynced(true) }
@@ -36,7 +42,7 @@ export default function ThankYouPage() {
     void refresh()
     const timer = window.setInterval(refresh, 10000)
     return () => { cancelled = true; window.clearInterval(timer) }
-  }, [mounted, currentOrderNumber, setOrder])
+  }, [mounted, currentOrderNumber, setOrder, completeOrder])
 
 
 
@@ -174,7 +180,7 @@ export default function ThankYouPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-surfaceLight/30 border border-border/60 rounded-2xl text-xs max-w-2xl mx-auto text-left">
           <div>
             <span className="text-textMuted block">เลขที่ออเดอร์</span>
-            <span className="font-mono font-bold text-textPrimary truncate block mt-0.5">{currentOrder.orderNumber}</span>
+            <OrderNumber value={currentOrder.orderNumber} />
           </div>
           <div>
             <span className="text-textMuted block">ยอดชำระสุทธิ</span>

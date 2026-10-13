@@ -3,6 +3,7 @@ import prisma from '@/lib/db'
 import { bangkokDay, PAID_STATUSES } from '@/lib/commerce-rules'
 import { requireAdmin } from '@/lib/admin-auth'
 import { moneyToNumber, normalizeOrderMoney, normalizeProductMoney } from '@/lib/money'
+import { statsQueryBatch } from '@/lib/stats-query-batch'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,6 +41,11 @@ export async function GET() {
       }
     })
 
+    const readUnsoldStockGroups = () => prisma.digitalStock.groupBy({
+      by: ['productId'],
+      where: { isSold: false, orderId: null },
+      _count: { productId: true },
+    })
     const [
       todayRevenueAgg,
       monthRevenueAgg,
@@ -51,45 +57,41 @@ export async function GET() {
       unsoldStockGroups,
       recentOrders,
       last7DaysRaw,
-    ] = await Promise.all([
-      prisma.order.aggregate({
+    ] = await statsQueryBatch([
+      () => prisma.order.aggregate({
         where: {
           status: { in: revenueStatuses },
           paidAt: { gte: startOfToday },
         },
         _sum: { total: true },
       }),
-      prisma.order.aggregate({
+      () => prisma.order.aggregate({
         where: {
           status: { in: revenueStatuses },
           paidAt: { gte: startOfMonth },
         },
         _sum: { total: true },
       }),
-      prisma.order.count({
+      () => prisma.order.count({
         where: {
           status: { in: ['pending', 'payment_processing', 'payment_review'] },
         },
       }),
-      prisma.order.count({
+      () => prisma.order.count({
         where: { status: 'needs_manual_delivery' },
       }),
-      prisma.order.count(),
-      prisma.order.count({
+      () => prisma.order.count(),
+      () => prisma.order.count({
         where: { status: 'completed' },
       }),
-      prisma.product.findMany(),
-      prisma.digitalStock.groupBy({
-        by: ['productId'],
-        where: { isSold: false, orderId: null },
-        _count: { productId: true },
-      }),
-      prisma.order.findMany({
+      () => prisma.product.findMany(),
+      readUnsoldStockGroups,
+      () => prisma.order.findMany({
         orderBy: { createdAt: 'desc' },
         take: 5,
       }),
-      Promise.all(
-        last7DayRanges.map(async (range) => {
+      () => statsQueryBatch(
+        last7DayRanges.map((range) => async () => {
           const [orders, revenueAgg] = await Promise.all([
             prisma.order.count({
               where: {
@@ -117,7 +119,7 @@ export async function GET() {
             orders,
             revenue: sumValue(revenueAgg._sum.total),
           }
-        })
+        }), 1
       ),
     ])
 
@@ -151,7 +153,7 @@ export async function GET() {
         last7Days: last7DaysRaw,
         recentOrders: recentOrders.map(normalizeOrderMoney),
       },
-    })
+    }, { headers: { 'Cache-Control': 'private, no-store' } })
   } catch (error) {
     console.error('Error fetching stats:', error)
     return NextResponse.json({ success: false, error: 'เกิดข้อผิดพลาดในการดึงสถิติ' }, { status: 500 })

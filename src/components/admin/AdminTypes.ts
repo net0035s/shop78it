@@ -78,6 +78,7 @@ export interface AdminStats {
   todayRevenue: number
   monthRevenue: number
   pendingOrders: number
+  manualDeliveryOrders: number
   lowStockProducts: Array<AdminProduct & { unsoldCount: number }>
   last7Days: { label: string; orders: number; revenue: number }[]
   recentOrders: AdminOrder[]

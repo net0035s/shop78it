@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-10-13T03:28:49.875Z",
+  "url": "https://shop78it.netlify.app",
+  "deploymentId": "6acda44103db34aa2309ef23",
+  "pagesChecked": 4,
+  "assetsChecked": 19,
+  "allAssetsReachable": true,
+  "adminAssetsChecked": 7,
+  "updatedAdminBundleVerified": true,
+  "orderCounts": {
+    "manualDeliveryOrders": 3,
+    "actionableOrders": 3
+  },
+  "filteredSearchDoesNotHideBadge": true,
+  "uiRegressionsPassed": 7,
+  "commerceTestsPassed": 28,
+  "typecheckPassed": true,
+  "lintPassed": true,
+  "adminAuthenticationPreserved": true,
+  "stripeTestEnabled": true,
+  "realPaymentsEnabled": false,
+  "databaseWrites": 0
+}
