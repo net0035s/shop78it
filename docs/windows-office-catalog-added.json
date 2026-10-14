@@ -1,0 +1,89 @@
+{
+  "checkedAt": "2026-10-14T04:11:18.263Z",
+  "url": "https://shop78it.netlify.app",
+  "sandboxOnly": true,
+  "created": 9,
+  "products": [
+    {
+      "id": "catalog-office-2016-pro-plus",
+      "name": "Key Office 2016 Pro Plus",
+      "price": 129,
+      "deliveryType": "auto",
+      "stock": 0,
+      "stockStatus": "out-of-stock"
+    },
+    {
+      "id": "catalog-office-2019-pro-plus",
+      "name": "Key Office 2019 Pro Plus",
+      "price": 159,
+      "deliveryType": "auto",
+      "stock": 0,
+      "stockStatus": "out-of-stock"
+    },
+    {
+      "id": "catalog-office-2021-pro-plus",
+      "name": "Key Office 2021 Pro Plus",
+      "price": 189,
+      "deliveryType": "auto",
+      "stock": 0,
+      "stockStatus": "out-of-stock"
+    },
+    {
+      "id": "catalog-office-2024-ltsc-pro-plus",
+      "name": "Key Office 2024 LTSC Pro Plus",
+      "price": 259,
+      "deliveryType": "auto",
+      "stock": 0,
+      "stockStatus": "out-of-stock"
+    },
+    {
+      "id": "catalog-office-365-one-year",
+      "name": "Office 365 1 ปี",
+      "price": 129,
+      "deliveryType": "auto",
+      "stock": 0,
+      "stockStatus": "out-of-stock"
+    },
+    {
+      "id": "catalog-windows-10-home",
+      "name": "Key Windows 10 Home",
+      "price": 149,
+      "deliveryType": "auto",
+      "stock": 0,
+      "stockStatus": "out-of-stock"
+    },
+    {
+      "id": "catalog-windows-10-pro",
+      "name": "Key Windows 10 Pro",
+      "price": 149,
+      "deliveryType": "auto",
+      "stock": 0,
+      "stockStatus": "out-of-stock"
+    },
+    {
+      "id": "catalog-windows-11-home",
+      "name": "Key Windows 11 Home",
+      "price": 159,
+      "deliveryType": "auto",
+      "stock": 0,
+      "stockStatus": "out-of-stock"
+    },
+    {
+      "id": "catalog-windows-11-pro",
+      "name": "Key Windows 11 Pro",
+      "price": 159,
+      "deliveryType": "auto",
+      "stock": 0,
+      "stockStatus": "out-of-stock"
+    }
+  ],
+  "existingProductsPreserved": true,
+  "ordersPreserved": true,
+  "stockRecordsPreserved": true,
+  "realPaymentsEnabled": false,
+  "credentialsAdded": 0,
+  "messagesSent": 0,
+  "storefrontProductsVerified": 9,
+  "placeholderImageVerified": true,
+  "storefrontCheckedAt": "2026-10-14T04:11:55.235Z"
+}

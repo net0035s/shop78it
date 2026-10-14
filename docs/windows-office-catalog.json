@@ -1,0 +1,21 @@
+{
+  "preparedOn": "2026-10-14",
+  "target": "shop78it.netlify.app",
+  "deliveryType": "auto",
+  "initialStock": 0,
+  "categories": [
+    { "name": "Windows", "slug": "windows", "icon": "🖥️", "color": "#0078D4", "sortOrder": 1 },
+    { "name": "Microsoft Office", "slug": "microsoft-office", "icon": "📄", "color": "#D83B01", "sortOrder": 2 }
+  ],
+  "products": [
+    { "id": "catalog-windows-10-home", "name": "Key Windows 10 Home", "price": 149, "category": "windows", "stockType": "license-key", "description": "คีย์ Windows 10 Home สำหรับคอมพิวเตอร์ PC\n1 คีย์ใช้งานได้ 1 เครื่อง\nจัดส่งคีย์อัตโนมัติหลังยืนยันการชำระเงิน" },
+    { "id": "catalog-windows-10-pro", "name": "Key Windows 10 Pro", "price": 149, "category": "windows", "stockType": "license-key", "description": "คีย์ Windows 10 Pro สำหรับคอมพิวเตอร์ PC\n1 คีย์ใช้งานได้ 1 เครื่อง\nจัดส่งคีย์อัตโนมัติหลังยืนยันการชำระเงิน" },
+    { "id": "catalog-windows-11-home", "name": "Key Windows 11 Home", "price": 159, "category": "windows", "stockType": "license-key", "description": "คีย์ Windows 11 Home สำหรับคอมพิวเตอร์ PC\n1 คีย์ใช้งานได้ 1 เครื่อง\nจัดส่งคีย์อัตโนมัติหลังยืนยันการชำระเงิน" },
+    { "id": "catalog-windows-11-pro", "name": "Key Windows 11 Pro", "price": 159, "category": "windows", "stockType": "license-key", "description": "คีย์ Windows 11 Pro สำหรับคอมพิวเตอร์ PC\n1 คีย์ใช้งานได้ 1 เครื่อง\nจัดส่งคีย์อัตโนมัติหลังยืนยันการชำระเงิน" },
+    { "id": "catalog-office-2016-pro-plus", "name": "Key Office 2016 Pro Plus", "price": 129, "category": "microsoft-office", "stockType": "license-key", "description": "คีย์ Office 2016 Pro Plus สำหรับคอมพิวเตอร์ PC\n1 คีย์ใช้งานได้ 1 เครื่อง\nจัดส่งคีย์อัตโนมัติหลังยืนยันการชำระเงิน" },
+    { "id": "catalog-office-2019-pro-plus", "name": "Key Office 2019 Pro Plus", "price": 159, "category": "microsoft-office", "stockType": "license-key", "description": "คีย์ Office 2019 Pro Plus สำหรับคอมพิวเตอร์ PC\n1 คีย์ใช้งานได้ 1 เครื่อง\nจัดส่งคีย์อัตโนมัติหลังยืนยันการชำระเงิน" },
+    { "id": "catalog-office-2021-pro-plus", "name": "Key Office 2021 Pro Plus", "price": 189, "category": "microsoft-office", "stockType": "license-key", "description": "คีย์ Office 2021 Pro Plus สำหรับคอมพิวเตอร์ PC\n1 คีย์ใช้งานได้ 1 เครื่อง\nจัดส่งคีย์อัตโนมัติหลังยืนยันการชำระเงิน" },
+    { "id": "catalog-office-2024-ltsc-pro-plus", "name": "Key Office 2024 LTSC Pro Plus", "price": 259, "category": "microsoft-office", "stockType": "license-key", "description": "คีย์ Office 2024 LTSC Pro Plus สำหรับคอมพิวเตอร์ PC\n1 คีย์ใช้งานได้ 1 เครื่อง\nจัดส่งคีย์อัตโนมัติหลังยืนยันการชำระเงิน" },
+    { "id": "catalog-office-365-one-year", "name": "Office 365 1 ปี", "price": 129, "category": "microsoft-office", "stockType": "login-info", "description": "บัญชี Office 365 ระยะเวลา 1 ปี\nรับอีเมลและรหัสผ่านบัญชีจากทางร้าน\nใช้งานบนอุปกรณ์ที่รองรับ Office 365\nจัดส่งข้อมูลบัญชีอัตโนมัติหลังยืนยันการชำระเงิน" }
+  ]
+}
