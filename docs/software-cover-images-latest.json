@@ -1,0 +1,91 @@
+{
+  "checkedAt": "2026-10-14T04:23:52.556Z",
+  "url": "https://shop78it.netlify.app",
+  "sandboxOnly": true,
+  "imagesAdded": 9,
+  "allImagesReachable": true,
+  "storefrontImageReferencesVerified": true,
+  "pagesChecked": 4,
+  "assetsChecked": 19,
+  "allAssetsReachable": true,
+  "pricesStockAndDeliveryPreserved": true,
+  "ordersChanged": 0,
+  "messagesSent": 0,
+  "products": [
+    {
+      "id": "catalog-windows-10-home",
+      "name": "Key Windows 10 Home",
+      "image": "/images/products/software/catalog-windows-10-home.webp",
+      "price": 149,
+      "stock": 0,
+      "deliveryType": "auto"
+    },
+    {
+      "id": "catalog-windows-10-pro",
+      "name": "Key Windows 10 Pro",
+      "image": "/images/products/software/catalog-windows-10-pro.webp",
+      "price": 149,
+      "stock": 0,
+      "deliveryType": "auto"
+    },
+    {
+      "id": "catalog-windows-11-home",
+      "name": "Key Windows 11 Home",
+      "image": "/images/products/software/catalog-windows-11-home.webp",
+      "price": 159,
+      "stock": 0,
+      "deliveryType": "auto"
+    },
+    {
+      "id": "catalog-windows-11-pro",
+      "name": "Key Windows 11 Pro",
+      "image": "/images/products/software/catalog-windows-11-pro.webp",
+      "price": 159,
+      "stock": 0,
+      "deliveryType": "auto"
+    },
+    {
+      "id": "catalog-office-2016-pro-plus",
+      "name": "Key Office 2016 Pro Plus",
+      "image": "/images/products/software/catalog-office-2016-pro-plus.webp",
+      "price": 129,
+      "stock": 0,
+      "deliveryType": "auto"
+    },
+    {
+      "id": "catalog-office-2019-pro-plus",
+      "name": "Key Office 2019 Pro Plus",
+      "image": "/images/products/software/catalog-office-2019-pro-plus.webp",
+      "price": 159,
+      "stock": 0,
+      "deliveryType": "auto"
+    },
+    {
+      "id": "catalog-office-2021-pro-plus",
+      "name": "Key Office 2021 Pro Plus",
+      "image": "/images/products/software/catalog-office-2021-pro-plus.webp",
+      "price": 189,
+      "stock": 0,
+      "deliveryType": "auto"
+    },
+    {
+      "id": "catalog-office-2024-ltsc-pro-plus",
+      "name": "Key Office 2024 LTSC Pro Plus",
+      "image": "/images/products/software/catalog-office-2024-ltsc-pro-plus.webp",
+      "price": 259,
+      "stock": 0,
+      "deliveryType": "auto"
+    },
+    {
+      "id": "catalog-office-365-one-year",
+      "name": "Office 365 1 ปี",
+      "image": "/images/products/software/catalog-office-365-one-year.webp",
+      "price": 129,
+      "stock": 0,
+      "deliveryType": "auto"
+    }
+  ],
+  "browserImagesLoaded": 9,
+  "browserFallbackImages": 0,
+  "browserVerifiedAt": "2026-10-14T04:24:31.751Z"
+}

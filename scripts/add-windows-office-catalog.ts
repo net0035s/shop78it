@@ -23,7 +23,7 @@ async function main(){
    for(const p of catalog.products){
     const existing=await tx.product.findFirst({where:{OR:[{id:p.id},{name:p.name}]}})
     if(existing){assert.equal(existing.id,p.id,'Unexpected existing product; no overwrite');assert.equal(existing.name,p.name);assert.equal(Number(existing.price),p.price);assert.equal(existing.deliveryType,'auto');continue}
-    const data=productData({name:p.name,description:p.description,price:p.price,category:p.category,deliveryType:'auto',image:'/images/products/placeholder.png',tags:p.stockType==='login-info'?'Office 365,บัญชี,1 ปี':'License Key,1 เครื่อง',deliveryInfo:p.stockType==='login-info'?'ส่งอีเมลและรหัสผ่านอัตโนมัติหลังยืนยันการชำระเงิน':'ส่งคีย์อัตโนมัติหลังยืนยันการชำระเงิน'})
+    const data=productData({name:p.name,description:p.description,price:p.price,category:p.category,deliveryType:'auto',image:p.image||'/images/products/placeholder.png',tags:p.stockType==='login-info'?'Office 365,บัญชี,1 ปี':'License Key,1 เครื่อง',deliveryInfo:p.stockType==='login-info'?'ส่งอีเมลและรหัสผ่านอัตโนมัติหลังยืนยันการชำระเงิน':'ส่งคีย์อัตโนมัติหลังยืนยันการชำระเงิน'})
     await tx.product.create({data:{id:p.id,...data,categoryId:categories.get(p.category),stock:0,stockStatus:'out-of-stock'}});created++
    }
   },{isolationLevel:'Serializable',timeout:60000,maxWait:15000})

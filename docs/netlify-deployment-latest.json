@@ -10,11 +10,11 @@
   "messagesEnabled": true,
   "otherProjectsChanged": false,
   "deployed": true,
-  "deploymentId": "6acdd15d2b685acfdefec02e",
-  "finishedAt": "2026-10-13T04:49:35.483Z",
+  "deploymentId": "6acf02748370e8ac7d81d588",
+  "finishedAt": "2026-10-14T04:22:30.238Z",
   "stripeTestEnabled": true,
   "webhookId": "we_1UPmF71BqCzYsUBmT9WNBBC4",
-  "updatedAt": "2026-10-13T06:40:37.314Z",
+  "updatedAt": "2026-10-14T04:22:30.238Z",
   "assetRepairAt": "2026-10-13T02:59:11.144Z",
   "clientAssetsVerified": true,
   "checkoutAdminFixAt": "2026-10-13T03:28:49.873Z",
@@ -24,5 +24,6 @@
   "clientAssetsVerifiedAt": "2026-10-13T04:51:39.477Z",
   "maintenanceVerifiedAt": "2026-10-13T04:51:39.477Z",
   "emailConfiguredAt": "2026-10-13T06:40:37.314Z",
-  "emailEnabled": true
+  "emailEnabled": true,
+  "softwareCoversDeployedAt": "2026-10-14T04:22:30.237Z"
 }
